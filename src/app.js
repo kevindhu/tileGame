@@ -1,0 +1,112 @@
+var express = require("express");
+var app = express();
+var server = require('http').Server(app);
+var Entity = require('./entity');
+var entityConfig = require('./entity/entityConfig');
+
+
+/** INIT SERVER **/
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + '/web/index.html');
+});
+app.use('/', express.static(__dirname + '/web'));
+server.listen(2000); //port number for listening
+console.log('Started Server!');
+
+//TODO: make a server config
+
+
+var SOCKET_LIST = {};
+var PLAYER_LIST = {};
+
+
+/** INIT WEBSOCKETS **/
+var io = require('socket.io')(server, {});
+io.sockets.on('connection', function (socket) {
+    socket.id = Math.random();
+    SOCKET_LIST[socket.id] = socket;
+    console.log("Client # " + socket.id + " has joined the server");
+
+    var player = new Entity.Player(socket.id);
+    PLAYER_LIST[socket.id] = player;
+
+
+    socket.on('disconnect', function () {
+        console.log("Client #" + socket.id + " has left the server");
+        delete SOCKET_LIST[socket.id];
+        delete PLAYER_LIST[socket.id];
+    });
+
+
+    socket.on('keyEvent', function (data) {
+        if (data.id === "left") {
+            player.pressingLeft = data.state;
+        }
+        if (data.id === "right") {
+            player.pressingRight = data.state;
+        }
+        if (data.id === "up") {
+            player.pressingUp = data.state;
+        }
+        if (data.id === "down") {
+            player.pressingDown = data.state;
+        }
+    });
+});
+
+
+/** INIT SERVER LOOP **/
+setInterval(update, 1000 / 25); //25 frames per second
+
+
+var tileWidth = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
+
+var getTiles = function () {
+    var activated = [];
+    for (var index in PLAYER_LIST) {
+        var currPlayer = PLAYER_LIST[index];
+        var xIndex = Math.floor(currPlayer.x / tileWidth);
+        var yIndex = Math.floor(currPlayer.y / tileWidth);
+        activated.push({
+            x: xIndex * tileWidth,
+            y: yIndex * tileWidth,
+            length: tileWidth
+        });
+    }
+    return activated;
+};
+
+var getCoords = function () {
+    var positions = [];
+    for (var index in PLAYER_LIST) {
+        var currPlayer = PLAYER_LIST[index];
+        currPlayer.updatePosition();
+        positions.push({
+            playerName: currPlayer.name,
+            x: currPlayer.x,
+            y: currPlayer.y
+        });
+    }
+    return positions;
+};
+
+
+function update() {
+    var positions = getCoords();
+    var tiles = getTiles();
+
+
+    //send packets
+    for (var index in SOCKET_LIST) {
+        var currSocket = SOCKET_LIST[index];
+        currSocket.emit('updateMap',
+            {
+                'positions': positions,
+                'tiles': tiles
+            }
+        );
+
+    }
+
+}
+
