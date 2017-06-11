@@ -13,12 +13,9 @@ app.use('/', express.static(__dirname + '/web'));
 server.listen(2000); //port number for listening
 console.log('Started Server!');
 
-//TODO: make a server config
-
 
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
-
 
 /** INIT WEBSOCKETS **/
 var io = require('socket.io')(server, {});
@@ -26,6 +23,8 @@ io.sockets.on('connection', function (socket) {
     socket.id = Math.random();
     SOCKET_LIST[socket.id] = socket;
     console.log("Client # " + socket.id + " has joined the server");
+
+    socket.emit("init", initPackage());
 
     var player = new Entity.Player(socket.id);
     PLAYER_LIST[socket.id] = player;
@@ -36,7 +35,6 @@ io.sockets.on('connection', function (socket) {
         delete SOCKET_LIST[socket.id];
         delete PLAYER_LIST[socket.id];
     });
-
 
     socket.on('keyEvent', function (data) {
         if (data.id === "left") {
@@ -53,6 +51,37 @@ io.sockets.on('connection', function (socket) {
         }
     });
 });
+
+
+var initPackage = function () {
+    var ret = {};
+    var playerInfo = {};
+    var tileInfo = {};
+
+    for (var i in PLAYER_LIST) {
+        var currPlayer = PLAYER_LIST[i];
+        playerInfo.push({
+            name: currPlayer.name,
+            x: currPlayer.x,
+            y: currPlayer.y
+        })
+    }
+
+    for (var j in TILE_LIST) {
+        var currTile = TILE_LIST[j];
+        tileInfo.push({
+            name: currTile.name,
+            x: currTile.x,
+            y: currTile.y,
+            owner: currTile.owner,
+            color: currTile.color,
+            health: currTile.health
+        })
+    }
+    ret['playerInfo'] = playerInfo;
+    ret['tileInfo'] = tileInfo;
+    return ret;
+};
 
 
 /** INIT SERVER LOOP **/
