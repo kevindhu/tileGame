@@ -19,6 +19,7 @@ var PLAYER_LIST = {};
 var TILE_ARRAY = [];
 
 var deletePacket = [];
+var addPacket = [];
 
 /** INIT TILES **/
 var tileWidth = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
@@ -39,6 +40,7 @@ io.sockets.on('connection', function (socket) {
 
     var player = new Entity.Player(socket.id);
     PLAYER_LIST[socket.id] = player;
+    addPacket.push(addPlayerInfo(player));
 
     socket.emit("init", initPacket());
 
@@ -50,6 +52,7 @@ io.sockets.on('connection', function (socket) {
     });
 
     socket.on('keyEvent', function (data) {
+        //console.log(player.id + " is pressing " + data.id);
         if (data.id === "left") {
             player.pressingLeft = data.state;
         }
@@ -64,6 +67,15 @@ io.sockets.on('connection', function (socket) {
         }
     });
 });
+
+var addPlayerInfo = function (player) {
+    return {
+        id: player.id,
+        name: player.name,
+        x: player.x,
+        y: player.y
+    };
+};
 
 
 var initPacket = function () {
@@ -121,7 +133,7 @@ var updateCoords = function () {
         var currPlayer = PLAYER_LIST[index];
         currPlayer.updatePosition();
         playersPacket.push({
-            playerId: currPlayer.id,
+            id: currPlayer.id,
             x: currPlayer.x,
             y: currPlayer.y
         });
@@ -138,6 +150,10 @@ function update() {
     //send packets
     for (var index in SOCKET_LIST) {
         var currSocket = SOCKET_LIST[index];
+        currSocket.emit('addEntities',
+            {
+                'playerInfo': addPacket
+            });
         currSocket.emit('deleteEntities',
             {
                 'playerIds': deletePacket
@@ -149,6 +165,7 @@ function update() {
             }
         );
     }
+    addPacket = [];
     deletePacket = [];
 }
 

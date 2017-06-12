@@ -5,6 +5,7 @@ var socket = io();
 socket.on('init', clientInit);
 socket.on('updateEntities', updateEntities);
 socket.on('deleteEntities', deleteEntities);
+socket.on('addEntities', addEntities);
 
 var PLAYER_LIST = {};
 var TILE_LIST = {};
@@ -29,13 +30,13 @@ function clientInit(data) {
     var playerPackage = data.playerInfo;
     for (var i = 0; i < playerPackage.length; i++) {
         var playerInfo = playerPackage[i];
-        PLAYER_LIST[playerInfo.name] = new Player(playerInfo);
+        PLAYER_LIST[playerInfo.id] = new Player(playerInfo);
     }
 
     var tilePackage = data.tileInfo;
     for (var j = 0; j < tilePackage.length; j++) {
         var tileInfo = tilePackage[j];
-        PLAYER_LIST[tileInfo.name] = new Tile(tileInfo);
+        TILE_LIST[tileInfo.name] = new Tile(tileInfo);
     }
 }
 
@@ -52,7 +53,14 @@ function deleteEntities(data) {
     }
 }
 
-
+function addEntities(data) {
+    var packet = data.playerInfo;
+    for (var i = 0; i < packet.length; i++) {
+        var playerInfo = packet[i];
+        PLAYER_LIST[playerInfo.id] = new Player(playerInfo);
+        console.log(PLAYER_LIST);
+    }
+}
 
 var updatePlayers = function (packet) {
     for (var i = 0; i < packet.length; i++) {
@@ -73,7 +81,6 @@ var updateTiles = function (packet) {
 };
 
 
-
 var drawScene = function () {
     drawTiles();
     drawPlayers();
@@ -90,14 +97,13 @@ var drawTiles = function () {
 
 var drawPlayers = function () {
     ctx.fillStyle = "#000000";
-    for (var playerName in PLAYER_LIST) {
-        var player = PLAYER_LIST[playerName];
+    for (var playerId in PLAYER_LIST) {
+        var player = PLAYER_LIST[playerId];
         ctx.fillText(player.playerName, player.x, player.y);
     }
 };
 
 setInterval(drawScene, 1000 / 25);
-
 
 
 document.onkeydown = function (event) {
