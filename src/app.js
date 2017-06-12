@@ -16,6 +16,18 @@ console.log('Started Server!');
 
 var SOCKET_LIST = {};
 var PLAYER_LIST = {};
+var TILE_ARRAY = [];
+
+
+/** INIT TILES **/
+var tileWidth = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
+for (var i = 0; i < Math.sqrt(entityConfig.TILES); i++) {
+    for (var j = 0; j < Math.sqrt(entityConfig.TILES); j++) {
+        tileInfo = Tile.init();
+        TILE_ARRAY[i][j] = new Tile();
+    }
+}
+
 
 /** INIT WEBSOCKETS **/
 var io = require('socket.io')(server, {});
@@ -28,7 +40,6 @@ io.sockets.on('connection', function (socket) {
 
     var player = new Entity.Player(socket.id);
     PLAYER_LIST[socket.id] = player;
-
 
     socket.on('disconnect', function () {
         console.log("Client #" + socket.id + " has left the server");
@@ -67,16 +78,18 @@ var initPackage = function () {
         })
     }
 
-    for (var j in TILE_LIST) {
-        var currTile = TILE_LIST[j];
-        tileInfo.push({
-            name: currTile.name,
-            x: currTile.x,
-            y: currTile.y,
-            owner: currTile.owner,
-            color: currTile.color,
-            health: currTile.health
-        })
+    for (var j = 0; j < TILE_ARRAY.length; j++) {
+        for (k = 0; k < TILE_ARRAY[j].length; k++) {
+            var currTile = TILE_LIST[j][k];
+            tileInfo.push({
+                name: currTile.name,
+                x: currTile.x,
+                y: currTile.y,
+                owner: currTile.owner,
+                color: currTile.color,
+                health: currTile.health
+            })
+        }
     }
     ret['playerInfo'] = playerInfo;
     ret['tileInfo'] = tileInfo;
@@ -88,9 +101,8 @@ var initPackage = function () {
 setInterval(update, 1000 / 25); //25 frames per second
 
 
-var tileWidth = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
-
 var getTiles = function () {
+    //returns activated tile ids
     var activated = [];
     for (var index in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[index];
@@ -128,9 +140,9 @@ function update() {
     //send packets
     for (var index in SOCKET_LIST) {
         var currSocket = SOCKET_LIST[index];
-        currSocket.emit('updateMap',
+        currSocket.emit('updateEntities',
             {
-                'positions': positions,
+                'players': positions,
                 'tiles': tiles
             }
         );

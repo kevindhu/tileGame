@@ -6,17 +6,14 @@ socket.on('init', clientInit);
 socket.on('updateEntities', updateEntities);
 socket.on('deleteEntities', deleteEntities);
 
-
 var PLAYER_LIST = {};
 var TILE_LIST = {};
-
 
 var Player = function (playerInfo) {
     this.name = playerInfo.name;
     this.x = playerInfo.x;
     this.y = playerInfo.y;
 };
-
 var Tile = function (tileInfo) {
     this.id = tileInfo.id;
     this.x = tileInfo.x;
@@ -27,8 +24,7 @@ var Tile = function (tileInfo) {
     this.color = tileInfo.color;
 };
 
-
-var clientInit = function (data) {
+function clientInit(data) {
     var playerInfo = data.playerInfo;
     for (var i = 0; i < playerInfo.length; i++) {
         var player = playerInfo[i];
@@ -40,45 +36,46 @@ var clientInit = function (data) {
         var tile = tileInfo[j];
         TILE_LIST[tile.id] = new Tile(tile);
     }
-};
+}
 
-var updateMap = function () {
-    drawTiles();
-    //TODO: change updatePositions to drawPlayers
-    drawPlayers();
-};
+function updateEntities(data) {
 
+}
 
-var drawTiles = function () {
-    ctx.clearRect(0, 0, 600, 600);
-    ctx.fillStyle = "#FF0000";
-    var packet = data.tiles;
-    for (var i = 0; i < packet.length; i++) {
-        var tileInfo = packet[i];
-        ctx.fillRect(tileInfo.x, tileInfo.y, tileInfo.length, tileInfo.length);
-    }
-};
-
-var drawPlayers = function () {
-    ctx.clearRect(0, 0, 600, 600);
-    ctx.fillStyle = "#FF0000";
-    var packet = data.tiles;
-    for (var i = 0; i < packet.length; i++) {
-        var tileInfo = packet[i];
-        ctx.fillRect(tileInfo.x, tileInfo.y, tileInfo.length, tileInfo.length);
-    }
-};
-
-var updatePositions = function (data) {
+var updatePlayers = function (data) {
     ctx.fillStyle = "#000000";
     var packet = data.positions;
     for (var i = 0; i < packet.length; i++) {
         var playerInfo = packet[i];
-        ctx.fillText(playerInfo.playerName, playerInfo.x, playerInfo.y);
     }
 };
 
-setInterval(updateMap, 1000 / 25);
+
+
+var drawScene = function () {
+    drawTiles();
+    drawPlayers();
+};
+
+var drawTiles = function () {
+    ctx.clearRect(0, 0, 600, 600);
+    for (var tileId in TILE_LIST) {
+        var tile = TILE_LIST[tileId];
+        ctx.fillStyle = tile.color;
+        ctx.fillRect(tile.x, tile.y, tile.length, tile.length);
+    }
+};
+
+var drawPlayers = function () {
+    ctx.fillStyle = "#000000";
+    for (var playerName in PLAYER_LIST) {
+        var player = PLAYER_LIST[playerName];
+        ctx.fillText(player.playerName, player.x, player.y);
+    }
+};
+
+setInterval(drawScene, 1000 / 25);
+
 
 
 document.onkeydown = function (event) {

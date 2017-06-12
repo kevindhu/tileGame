@@ -9,6 +9,7 @@ function Tile(x, y) {
 }
 
 
+
 Tile.prototype.updateOwner = function (newOwner) {
     if (this.health > 0) {
         this.health--;
@@ -20,4 +21,5 @@ Tile.prototype.updateOwner = function (newOwner) {
 };
 
 
-module.exports = Player;
+
+module.exports = Tile;
