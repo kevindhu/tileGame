@@ -123,8 +123,11 @@ var updateTiles = function () {
         var currPlayer = PLAYER_LIST[index];
         var xIndex = Math.floor(currPlayer.x / tileLength);
         var yIndex = Math.floor(currPlayer.y / tileLength);
-        tilesPacket.push({id: TILE_ARRAY[xIndex][yIndex].id});
-        TILE_ARRAY[xIndex][yIndex].color = "#008000";
+        tilesPacket.push({
+            id: TILE_ARRAY[xIndex][yIndex].id,
+            color: currPlayer.color
+        });
+        TILE_ARRAY[xIndex][yIndex].color = currPlayer.color;
     }
     return tilesPacket;
 };

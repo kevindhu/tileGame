@@ -40,6 +40,7 @@ function clientInit(data) {
     }
 }
 
+
 function updateEntities(data) {
     updatePlayers(data.players);
     updateTiles(data.tiles);
@@ -48,8 +49,9 @@ function updateEntities(data) {
 function deleteEntities(data) {
     var packet = data.playerIds;
     for (var i = 0; i < packet.length; i++) {
-        var playerId = packet[i];
-        delete PLAYER_LIST[playerId];
+        var playerInfo = packet[i];
+        console.log(playerInfo.id + " has left the server!");
+        delete PLAYER_LIST[playerInfo.id];
     }
 }
 
@@ -75,7 +77,7 @@ var updateTiles = function (packet) {
     for (var i = 0; i < packet.length; i++) {
         var tileInfo = packet[i];
         var tile = TILE_LIST[tileInfo.id];
-        tile.color = "#008000";
+        tile.color = tileInfo.color;
     }
 };
 
@@ -89,9 +91,6 @@ var drawTiles = function () {
     ctx.clearRect(0, 0, 600, 600);
     for (var id in TILE_LIST) {
         var tile = TILE_LIST[id];
-        if (tile.color !== "#FFFFFF") {
-            console.log(tile);
-        }
         ctx.fillStyle = tile.color;
         ctx.fillRect(tile.x, tile.y, tile.length, tile.length);
     }
