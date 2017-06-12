@@ -6,6 +6,7 @@ function Shard(x, y, id) {
     this.y = y;
     this.value = 0;
     this.owner = null;
+    this.radius = entityConfig.SHARD_WIDTH;
 }
 
 

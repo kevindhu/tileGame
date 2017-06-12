@@ -2,6 +2,7 @@ var express = require("express");
 var app = express();
 var server = require('http').Server(app);
 var Entity = require('./entity');
+var QuadNode = require('./modules/QuadNode');
 const entityConfig = require('./entity/entityConfig');
 const Arithmetic = require('./modules/Arithmetic');
 
@@ -20,13 +21,15 @@ var SOCKET_LIST = {};
 /** ENTITIES STORAGE**/
 var TILE_ARRAY = [];
 var PLAYER_LIST = {};
-var SHARD_LIST = {};
+var SHARD_LIST = {}; //rename to stationary shards list
+var MOVING_SHARD_LIST = {};
 
+var addPlayerPacket = [];
+var addShardPacket = [];
+var deletePlayerPacket = [];
+var deleteShardPacket = [];
 
-var deletePacket = [];
-var addPacket = [];
-
-
+var quadTree = null;
 
 
 /** SERVER/CLIENT INIT METHODS **/
@@ -42,15 +45,34 @@ var initTiles = function () {
 };
 
 var initShards = function () {
-    for (var i = 0; i<entityConfig.SHARDS; i++) {
-        var id = Math.random();
-        SHARD_LIST[id] = new Entity.Shard(
-            Arithmetic.getRandomInt(0,entityConfig.WIDTH),
-            Arithmetic.getRandomInt(0,entityConfig.WIDTH),
-            id
-        );
+        quadTree = new QuadNode({
+            minx: 0,
+            miny: 0,
+            maxx: entityConfig.WIDTH,
+            maxy: entityConfig.WIDTH
+        });
+
+        for (var i = 0; i < entityConfig.SHARDS; i++) {
+            var id = Math.random();
+            var shard = new Entity.Shard(
+                Arithmetic.getRandomInt(0, entityConfig.WIDTH),
+                Arithmetic.getRandomInt(0, entityConfig.WIDTH),
+                id
+            );
+            shard.shardItem = {
+                cell: shard,
+                bound: {
+                    minx: shard.x - shard.radius,
+                    miny: shard.y - shard.radius,
+                    maxx: shard.x + shard.radius,
+                    maxy: shard.y + shard.radius
+                }
+            };
+            quadTree.insert(shard.shardItem);
+            SHARD_LIST[id] = shard;
+        }
     }
-};
+;
 
 var initPacket = function () {
     var ret = {};
@@ -100,7 +122,6 @@ var initPacket = function () {
 };
 
 
-
 /** UPDATE METHODS **/
 
 var addPlayerInfo = function (player) {
@@ -146,29 +167,84 @@ var updateCoords = function () {
     return playersPacket;
 };
 
+
+var checkCollisions = function () {
+    for (var index in PLAYER_LIST) {
+        var currPlayer = PLAYER_LIST[index];
+        var playerBound = {
+            minx: currPlayer.x - entityConfig.SHARD_WIDTH,
+            miny: currPlayer.y - entityConfig.SHARD_WIDTH,
+            maxx: currPlayer.x + entityConfig.SHARD_WIDTH,
+            maxy: currPlayer.y + entityConfig.SHARD_WIDTH
+        };
+
+        quadTree.find(playerBound, function (shard) {
+            if (currPlayer !== shard.owner) {
+                shard.owner = currPlayer;
+                MOVING_SHARD_LIST[shard.id] = shard;
+            }
+        });
+    }
+};
+
+
+var updateShards = function () {
+    var shardsPacket = [];
+    checkCollisions();
+    for (var id in MOVING_SHARD_LIST) {
+        var currShard = MOVING_SHARD_LIST[id];
+        currShard.x = currShard.owner.x + Arithmetic.getRandomInt(-5, 5);
+        currShard.y = currShard.owner.y + Arithmetic.getRandomInt(-5, 5);
+
+        //update quad Tree
+        currShard.shardItem.bound = {
+            minx: currShard.x - currShard.radius,
+            miny: currShard.y - currShard.radius,
+            maxx: currShard.x + currShard.radius,
+            maxy: currShard.y + currShard.radius
+        };
+        quadTree.remove(currShard.shardItem);
+        quadTree.insert(currShard.shardItem);
+
+
+        shardsPacket.push({
+            id: currShard.id,
+            x: currShard.x,
+            y: currShard.y
+        });
+
+    }
+    return shardsPacket;
+};
+
+
 function update() {
     var playerUpdatePacket = updateCoords();
     var tileUpdatePacket = updateTiles();
+    var shardsUpdatePacket = updateShards();
 
     for (var index in SOCKET_LIST) {
         var currSocket = SOCKET_LIST[index];
         currSocket.emit('addEntities',
             {
-                'playerInfo': addPacket
+                'playerInfo': addPlayerPacket,
+                'shardInfo': addShardPacket //not yet used
             });
         currSocket.emit('deleteEntities',
             {
-                'playerInfo': deletePacket
+                'playerInfo': deletePlayerPacket,
+                'shardInfo': deleteShardPacket //not yet used
             });
         currSocket.emit('updateEntities',
             {
                 'players': playerUpdatePacket,
-                'tiles': tileUpdatePacket
+                'tiles': tileUpdatePacket,
+                'shards': shardsUpdatePacket
             }
         );
     }
-    addPacket = [];
-    deletePacket = [];
+    addPlayerPacket = [];
+    deletePlayerPacket = [];
 }
 
 
@@ -188,7 +264,7 @@ io.sockets.on('connection', function (socket) {
 
     var player = new Entity.Player(socket.id);
     PLAYER_LIST[socket.id] = player;
-    addPacket.push(addPlayerInfo(player));
+    addPlayerPacket.push(addPlayerInfo(player));
 
     socket.emit('init', initPacket());
 
@@ -196,7 +272,7 @@ io.sockets.on('connection', function (socket) {
         console.log("Client #" + socket.id + " has left the server");
         delete SOCKET_LIST[socket.id];
         delete PLAYER_LIST[socket.id];
-        deletePacket.push({id: socket.id});
+        deletePlayerPacket.push({id: socket.id});
     });
 
     socket.on('keyEvent', function (data) {

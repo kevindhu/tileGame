@@ -33,7 +33,6 @@ var Shard = function (shardInfo) {
 };
 
 
-
 function clientInit(data) {
     var playerPacket = data.playerPacket;
     for (var i = 0; i < playerPacket.length; i++) {
@@ -54,12 +53,6 @@ function clientInit(data) {
     }
 }
 
-
-function updateEntities(data) {
-    updatePlayers(data.players);
-    updateTiles(data.tiles);
-}
-
 function deleteEntities(data) {
     var packet = data.playerInfo;
     for (var i = 0; i < packet.length; i++) {
@@ -77,6 +70,13 @@ function addEntities(data) {
     }
 }
 
+
+function updateEntities(data) {
+    updatePlayers(data.players);
+    updateTiles(data.tiles);
+    updateShards(data.shards);
+}
+
 var updatePlayers = function (packet) {
     for (var i = 0; i < packet.length; i++) {
         var playerInfo = packet[i];
@@ -86,7 +86,6 @@ var updatePlayers = function (packet) {
     }
 };
 
-
 var updateTiles = function (packet) {
     for (var i = 0; i < packet.length; i++) {
         var tileInfo = packet[i];
@@ -94,6 +93,15 @@ var updateTiles = function (packet) {
         tile.color = tileInfo.color;
         tile.health = tileInfo.health;
         tile.owner = tileInfo.owner;
+    }
+};
+
+var updateShards = function (packet) {
+    for (var i = 0; i < packet.length; i++) {
+        var shardInfo = packet[i];
+        var shard = SHARD_LIST[shardInfo.id];
+        shard.x = shardInfo.x;
+        shard.y = shardInfo.y;
     }
 };
 
@@ -136,7 +144,10 @@ var drawShards = function () {
         ctx.fill();
     }
 };
+
+
 setInterval(drawScene, 1000 / 25);
+
 
 document.onkeydown = function (event) {
     if (event.keyCode === 68 || event.keyCode === 39) { //d
