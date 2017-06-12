@@ -21,21 +21,21 @@ var Tile = function (tileInfo) {
     this.x = tileInfo.x;
     this.y = tileInfo.y;
     this.length = tileInfo.length;
-    this.health = tileInfo.health;
     this.owner = tileInfo.owner;
     this.color = tileInfo.color;
+    this.health = tileInfo.health;
 };
 
 function clientInit(data) {
-    var playerPackage = data.playerInfo;
-    for (var i = 0; i < playerPackage.length; i++) {
-        var playerInfo = playerPackage[i];
+    var playerPacket = data.playerPacket;
+    for (var i = 0; i < playerPacket.length; i++) {
+        var playerInfo = playerPacket[i];
         PLAYER_LIST[playerInfo.id] = new Player(playerInfo);
     }
 
-    var tilePackage = data.tileInfo;
-    for (var j = 0; j < tilePackage.length; j++) {
-        var tileInfo = tilePackage[j];
+    var tilePacket = data.tilePacket;
+    for (var j = 0; j < tilePacket.length; j++) {
+        var tileInfo = tilePacket[j];
         TILE_LIST[tileInfo.id] = new Tile(tileInfo);
     }
 }
@@ -47,7 +47,7 @@ function updateEntities(data) {
 }
 
 function deleteEntities(data) {
-    var packet = data.playerIds;
+    var packet = data.playerInfo;
     for (var i = 0; i < packet.length; i++) {
         var playerInfo = packet[i];
         console.log(playerInfo.id + " has left the server!");

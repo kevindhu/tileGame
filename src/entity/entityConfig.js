@@ -1,6 +1,6 @@
 var WIDTH = 600;
 var HEIGHT = 600;
-var TILES = 16;
+var TILES = 64;
 
 module.exports = {
     WIDTH: WIDTH,

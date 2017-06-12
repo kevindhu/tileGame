@@ -38,12 +38,12 @@ var initTiles = function () {
 
 var initPacket = function () {
     var ret = {};
-    var playerInfo = [];
-    var tileInfo = [];
+    var playerPacket = [];
+    var tilePacket = [];
 
     for (var i in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[i];
-        playerInfo.push({
+        playerPacket.push({
             id: currPlayer.id,
             name: currPlayer.name,
             x: currPlayer.x,
@@ -54,7 +54,7 @@ var initPacket = function () {
     for (var j = 0; j < TILE_ARRAY.length; j++) {
         for (k = 0; k < TILE_ARRAY[j].length; k++) {
             var currTile = TILE_ARRAY[j][k];
-            tileInfo.push({
+            tilePacket.push({
                 id: currTile.id,
                 x: currTile.x,
                 y: currTile.y,
@@ -65,8 +65,8 @@ var initPacket = function () {
             })
         }
     }
-    ret['playerInfo'] = playerInfo;
-    ret['tileInfo'] = tileInfo;
+    ret['playerPacket'] = playerPacket;
+    ret['tilePacket'] = tilePacket;
     return ret;
 };
 
@@ -114,6 +114,9 @@ var updateCoords = function () {
 };
 
 function update() {
+    var playerUpdatePacket = updateCoords();
+    var tileUpdatePacket = updateTiles();
+
     for (var index in SOCKET_LIST) {
         var currSocket = SOCKET_LIST[index];
         currSocket.emit('addEntities',
@@ -122,12 +125,12 @@ function update() {
             });
         currSocket.emit('deleteEntities',
             {
-                'playerIds': deletePacket
+                'playerInfo': deletePacket
             });
         currSocket.emit('updateEntities',
             {
-                'players': updateCoords(),
-                'tiles': updateTiles()
+                'players': playerUpdatePacket,
+                'tiles': tileUpdatePacket
             }
         );
     }
@@ -153,7 +156,7 @@ io.sockets.on('connection', function (socket) {
     PLAYER_LIST[socket.id] = player;
     addPacket.push(addPlayerInfo(player));
 
-    socket.emit("init", initPacket());
+    socket.emit('init', initPacket());
 
     socket.on('disconnect', function () {
         console.log("Client #" + socket.id + " has left the server");
