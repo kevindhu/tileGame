@@ -18,33 +18,35 @@ var SOCKET_LIST = {};
 var PLAYER_LIST = {};
 var TILE_ARRAY = [];
 
+var deletePacket = [];
 
 /** INIT TILES **/
 var tileWidth = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
 for (var i = 0; i < Math.sqrt(entityConfig.TILES); i++) {
+    var row = [];
     for (var j = 0; j < Math.sqrt(entityConfig.TILES); j++) {
-        tileInfo = Tile.init();
-        TILE_ARRAY[i][j] = new Tile();
+        row[j] = new Entity.Tile(tileWidth * i, tileWidth * j);
     }
+    TILE_ARRAY[i] = row;
 }
 
 
-/** INIT WEBSOCKETS **/
 var io = require('socket.io')(server, {});
 io.sockets.on('connection', function (socket) {
     socket.id = Math.random();
     SOCKET_LIST[socket.id] = socket;
     console.log("Client # " + socket.id + " has joined the server");
 
-    socket.emit("init", initPackage());
-
     var player = new Entity.Player(socket.id);
     PLAYER_LIST[socket.id] = player;
+
+    socket.emit("init", initPacket());
 
     socket.on('disconnect', function () {
         console.log("Client #" + socket.id + " has left the server");
         delete SOCKET_LIST[socket.id];
         delete PLAYER_LIST[socket.id];
+        deletePacket.push({id: socket.id});
     });
 
     socket.on('keyEvent', function (data) {
@@ -64,14 +66,15 @@ io.sockets.on('connection', function (socket) {
 });
 
 
-var initPackage = function () {
+var initPacket = function () {
     var ret = {};
-    var playerInfo = {};
-    var tileInfo = {};
+    var playerInfo = [];
+    var tileInfo = [];
 
     for (var i in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[i];
         playerInfo.push({
+            id: currPlayer.id,
             name: currPlayer.name,
             x: currPlayer.x,
             y: currPlayer.y
@@ -80,7 +83,7 @@ var initPackage = function () {
 
     for (var j = 0; j < TILE_ARRAY.length; j++) {
         for (k = 0; k < TILE_ARRAY[j].length; k++) {
-            var currTile = TILE_LIST[j][k];
+            var currTile = TILE_ARRAY[j][k];
             tileInfo.push({
                 name: currTile.name,
                 x: currTile.x,
@@ -98,56 +101,54 @@ var initPackage = function () {
 
 
 /** INIT SERVER LOOP **/
-setInterval(update, 1000 / 25); //25 frames per second
+setInterval(update, 1000 / 25);
 
-
-var getTiles = function () {
+var updateTiles = function () {
     //returns activated tile ids
     var activated = [];
     for (var index in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[index];
         var xIndex = Math.floor(currPlayer.x / tileWidth);
         var yIndex = Math.floor(currPlayer.y / tileWidth);
-        activated.push({
-            x: xIndex * tileWidth,
-            y: yIndex * tileWidth,
-            length: tileWidth
-        });
+        activated.push({tileId: TILE_ARRAY[xIndex][yIndex].id});
     }
     return activated;
 };
 
-var getCoords = function () {
-    var positions = [];
+var updateCoords = function () {
+    var playersPacket = [];
     for (var index in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[index];
         currPlayer.updatePosition();
-        positions.push({
-            playerName: currPlayer.name,
+        playersPacket.push({
+            playerId: currPlayer.id,
             x: currPlayer.x,
             y: currPlayer.y
         });
     }
-    return positions;
+    return playersPacket;
 };
 
 
 function update() {
-    var positions = getCoords();
-    var tiles = getTiles();
+    var playersPacket = updateCoords();
+    var tilesPacket = updateTiles();
 
 
     //send packets
     for (var index in SOCKET_LIST) {
         var currSocket = SOCKET_LIST[index];
+        currSocket.emit('deleteEntities',
+            {
+                'playerIds': deletePacket
+            });
         currSocket.emit('updateEntities',
             {
-                'players': positions,
-                'tiles': tiles
+                'players': playersPacket,
+                'tiles': tilesPacket
             }
         );
-
     }
-
+    deletePacket = [];
 }
 

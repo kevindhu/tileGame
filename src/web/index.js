@@ -10,6 +10,7 @@ var PLAYER_LIST = {};
 var TILE_LIST = {};
 
 var Player = function (playerInfo) {
+    this.id = playerInfo.id;
     this.name = playerInfo.name;
     this.x = playerInfo.x;
     this.y = playerInfo.y;
@@ -25,28 +26,49 @@ var Tile = function (tileInfo) {
 };
 
 function clientInit(data) {
-    var playerInfo = data.playerInfo;
-    for (var i = 0; i < playerInfo.length; i++) {
-        var player = playerInfo[i];
-        PLAYER_LIST[player.name] = new Player(player);
+    var playerPackage = data.playerInfo;
+    for (var i = 0; i < playerPackage.length; i++) {
+        var playerInfo = playerPackage[i];
+        PLAYER_LIST[playerInfo.name] = new Player(playerInfo);
     }
 
-    var tileInfo = data.tileInfo;
-    for (var j = 0; j < tileInfo.length; j++) {
-        var tile = tileInfo[j];
-        TILE_LIST[tile.id] = new Tile(tile);
+    var tilePackage = data.tileInfo;
+    for (var j = 0; j < tilePackage.length; j++) {
+        var tileInfo = tilePackage[j];
+        PLAYER_LIST[tileInfo.name] = new Tile(tileInfo);
     }
 }
 
 function updateEntities(data) {
-
+    updatePlayers(data.players);
+    updateTiles(data.tiles);
 }
 
-var updatePlayers = function (data) {
-    ctx.fillStyle = "#000000";
-    var packet = data.positions;
+function deleteEntities(data) {
+    var packet = data.playerIds;
+    for (var i = 0; i < packet.length; i++) {
+        var playerId = packet[i];
+        delete PLAYER_LIST[playerId];
+    }
+}
+
+
+
+var updatePlayers = function (packet) {
     for (var i = 0; i < packet.length; i++) {
         var playerInfo = packet[i];
+        var player = PLAYER_LIST[playerInfo.id];
+        player.x = playerInfo.x;
+        player.y = playerInfo.y;
+    }
+};
+
+
+var updateTiles = function (packet) {
+    for (var i = 0; i < packet.length; i++) {
+        var tileInfo = packet[i];
+        var tile = TILE_LIST[tileInfo.id];
+        //TODO: update tiles
     }
 };
 

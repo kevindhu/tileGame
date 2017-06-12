@@ -1,6 +1,7 @@
 const entityConfig = require('./entityConfig');
 
 function Tile(x, y) {
+    this.id = Math.random();
     this.x = x;
     this.y = y;
     this.owner = null;

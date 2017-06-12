@@ -3,8 +3,8 @@ const entityConfig = require('./entityConfig');
 
 function Player(id) {
     this.id = id;
-    this.x = entityConfig.WIDTH/2;
-    this.y = entityConfig.WIDTH/2;
+    this.x = entityConfig.WIDTH / 2;
+    this.y = entityConfig.WIDTH / 2;
     this.maxSpeed = 10;
     this.pressingUp = false;
     this.pressingDown = false;
@@ -18,17 +18,29 @@ function Player(id) {
 
 Player.prototype.updatePosition = function () {
     if (this.pressingDown) {
-        this.y += this.maxSpeed;
+        if (!onBoundary(this.y+this.maxSpeed)) {
+            this.y += this.maxSpeed;
+        }
     }
     if (this.pressingUp) {
-        this.y -= this.maxSpeed;
+        if (!onBoundary(this.y-this.maxSpeed)) {
+            this.y -= this.maxSpeed;
+        }
     }
     if (this.pressingLeft) {
-        this.x -= this.maxSpeed;
+        if (!onBoundary(this.x-this.maxSpeed)) {
+            this.x -= this.maxSpeed;
+        }
     }
     if (this.pressingRight) {
-        this.x += this.maxSpeed;
+        if (!onBoundary(this.x+this.maxSpeed)) {
+            this.x += this.maxSpeed;
+        }
     }
+};
+
+var onBoundary = function (coord) {
+    return coord <= 0 || coord >= entityConfig.WIDTH;
 };
 
 module.exports = Player;
