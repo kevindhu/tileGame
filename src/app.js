@@ -2,7 +2,8 @@ var express = require("express");
 var app = express();
 var server = require('http').Server(app);
 var Entity = require('./entity');
-var entityConfig = require('./entity/entityConfig');
+const entityConfig = require('./entity/entityConfig');
+const Arithmetic = require('./modules/Arithmetic');
 
 
 /** INIT PORT CONNECTION **/
@@ -15,8 +16,12 @@ console.log('Started Server!');
 
 
 var SOCKET_LIST = {};
-var PLAYER_LIST = {};
+
+/** ENTITIES STORAGE**/
 var TILE_ARRAY = [];
+var PLAYER_LIST = {};
+var SHARD_LIST = {};
+
 
 var deletePacket = [];
 var addPacket = [];
@@ -36,10 +41,22 @@ var initTiles = function () {
     }
 };
 
+var initShards = function () {
+    for (var i = 0; i<entityConfig.SHARDS; i++) {
+        var id = Math.random();
+        SHARD_LIST[id] = new Entity.Shard(
+            Arithmetic.getRandomInt(0,entityConfig.WIDTH),
+            Arithmetic.getRandomInt(0,entityConfig.WIDTH),
+            id
+        );
+    }
+};
+
 var initPacket = function () {
     var ret = {};
     var playerPacket = [];
     var tilePacket = [];
+    var shardPacket = [];
 
     for (var i in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[i];
@@ -50,6 +67,7 @@ var initPacket = function () {
             y: currPlayer.y
         })
     }
+
 
     for (var j = 0; j < TILE_ARRAY.length; j++) {
         for (k = 0; k < TILE_ARRAY[j].length; k++) {
@@ -65,8 +83,19 @@ var initPacket = function () {
             })
         }
     }
+
+    for (var l in SHARD_LIST) {
+        var currShard = SHARD_LIST[l];
+        shardPacket.push({
+            id: currShard.id,
+            x: currShard.x,
+            y: currShard.y
+        })
+    }
+
     ret['playerPacket'] = playerPacket;
     ret['tilePacket'] = tilePacket;
+    ret['shardPacket'] = shardPacket;
     return ret;
 };
 
@@ -143,9 +172,10 @@ function update() {
 }
 
 
-/** INIT TILES **/
+/** INIT SERVER OBJECTS **/
 var tileLength = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
 initTiles();
+initShards();
 
 
 /** START WEBSOCKET SERVICE **/

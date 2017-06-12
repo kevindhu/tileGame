@@ -9,6 +9,7 @@ socket.on('addEntities', addEntities);
 
 var PLAYER_LIST = {};
 var TILE_LIST = {};
+var SHARD_LIST = {};
 
 var Player = function (playerInfo) {
     this.id = playerInfo.id;
@@ -25,6 +26,13 @@ var Tile = function (tileInfo) {
     this.color = tileInfo.color;
     this.health = tileInfo.health;
 };
+var Shard = function (shardInfo) {
+    this.id = shardInfo.id;
+    this.x = shardInfo.x;
+    this.y = shardInfo.y;
+};
+
+
 
 function clientInit(data) {
     var playerPacket = data.playerPacket;
@@ -37,6 +45,12 @@ function clientInit(data) {
     for (var j = 0; j < tilePacket.length; j++) {
         var tileInfo = tilePacket[j];
         TILE_LIST[tileInfo.id] = new Tile(tileInfo);
+    }
+
+    var shardPacket = data.shardPacket;
+    for (var k = 0; k < shardPacket.length; k++) {
+        var shardInfo = shardPacket[k];
+        SHARD_LIST[shardInfo.id] = new Shard(shardInfo);
     }
 }
 
@@ -87,6 +101,7 @@ var updateTiles = function (packet) {
 var drawScene = function () {
     drawTiles();
     drawPlayers();
+    drawShards();
 };
 
 var drawPlayers = function () {
@@ -103,6 +118,7 @@ var drawTiles = function () {
         var tile = TILE_LIST[id];
         ctx.fillStyle = tile.color;
         ctx.fillRect(tile.x, tile.y, tile.length, tile.length);
+
         ctx.fillStyle = "#000000";
         if (tile.owner !== null && tile.health !== 0) {
             ctx.fillText(tile.owner, tile.x, tile.y + 20);
@@ -111,6 +127,15 @@ var drawTiles = function () {
     }
 };
 
+var drawShards = function () {
+    for (var id in SHARD_LIST) {
+        var shard = SHARD_LIST[id];
+        ctx.fillStyle = "#008000";
+        ctx.beginPath();
+        ctx.arc(shard.x, shard.y, 5, 0, 2 * Math.PI, false);
+        ctx.fill();
+    }
+};
 setInterval(drawScene, 1000 / 25);
 
 document.onkeydown = function (event) {

@@ -1,4 +1,5 @@
 module.exports = {
     Player: require('./Player'),
-    Tile: require('./Tile')
+    Tile: require('./Tile'),
+    Shard: require('./Shard')
 };
