@@ -31,6 +31,7 @@ var deleteShardPacket = [];
 
 var quadTree = null;
 
+const tileLength = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
 
 /** SERVER/CLIENT INIT METHODS **/
 
@@ -179,8 +180,10 @@ var checkCollisions = function () {
         };
 
         quadTree.find(playerBound, function (shard) {
-            if (currPlayer !== shard.owner) {
+            if (currPlayer !== shard.owner && shard.timer === 0) {
+                console.log("player " + currPlayer.name + " has gotten a shard!");
                 shard.owner = currPlayer;
+                shard.timer = 100;
                 MOVING_SHARD_LIST[shard.id] = shard;
             }
         });
@@ -196,6 +199,9 @@ var updateShards = function () {
         currShard.x = currShard.owner.x + Arithmetic.getRandomInt(-5, 5);
         currShard.y = currShard.owner.y + Arithmetic.getRandomInt(-5, 5);
 
+        if (currShard.timer > 0) {
+            currShard.timer -= 1;
+        }
         //update quad Tree
         currShard.shardItem.bound = {
             minx: currShard.x - currShard.radius,
@@ -248,8 +254,21 @@ function update() {
 }
 
 
+function updateSlower() {
+    var shardsUpdatePacket = updateShards();
+
+    for (var index in SOCKET_LIST) {
+        var currSocket = SOCKET_LIST[index];
+        currSocket.emit('updateEntities',
+            {
+                'shards': shardsUpdatePacket
+            }
+        );
+    }
+}
+
+
 /** INIT SERVER OBJECTS **/
-var tileLength = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
 initTiles();
 initShards();
 
@@ -293,4 +312,6 @@ io.sockets.on('connection', function (socket) {
 
 /** START MAIN LOOP **/
 setInterval(update, 1000 / 25);
+//setInterval(updateSlower,1000/5);
+
 
