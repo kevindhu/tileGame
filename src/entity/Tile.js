@@ -7,6 +7,7 @@ function Tile(x, y) {
     this.owner = null;
     this.color = "#FFFFFF";
     this.health = 0;
+    this.length = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
 }
 
 

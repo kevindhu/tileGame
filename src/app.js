@@ -22,11 +22,11 @@ var deletePacket = [];
 var addPacket = [];
 
 /** INIT TILES **/
-var tileWidth = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
+var tileLength = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
 for (var i = 0; i < Math.sqrt(entityConfig.TILES); i++) {
     var row = [];
     for (var j = 0; j < Math.sqrt(entityConfig.TILES); j++) {
-        row[j] = new Entity.Tile(tileWidth * i, tileWidth * j);
+        row[j] = new Entity.Tile(tileLength * i, tileLength * j);
     }
     TILE_ARRAY[i] = row;
 }
@@ -36,7 +36,7 @@ var io = require('socket.io')(server, {});
 io.sockets.on('connection', function (socket) {
     socket.id = Math.random();
     SOCKET_LIST[socket.id] = socket;
-    console.log("Client # " + socket.id + " has joined the server");
+    console.log("Client #" + socket.id + " has joined the server");
 
     var player = new Entity.Player(socket.id);
     PLAYER_LIST[socket.id] = player;
@@ -97,9 +97,10 @@ var initPacket = function () {
         for (k = 0; k < TILE_ARRAY[j].length; k++) {
             var currTile = TILE_ARRAY[j][k];
             tileInfo.push({
-                name: currTile.name,
+                id: currTile.id,
                 x: currTile.x,
                 y: currTile.y,
+                length: currTile.length,
                 owner: currTile.owner,
                 color: currTile.color,
                 health: currTile.health
@@ -117,14 +118,15 @@ setInterval(update, 1000 / 25);
 
 var updateTiles = function () {
     //returns activated tile ids
-    var activated = [];
+    var tilesPacket = [];
     for (var index in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[index];
-        var xIndex = Math.floor(currPlayer.x / tileWidth);
-        var yIndex = Math.floor(currPlayer.y / tileWidth);
-        activated.push({tileId: TILE_ARRAY[xIndex][yIndex].id});
+        var xIndex = Math.floor(currPlayer.x / tileLength);
+        var yIndex = Math.floor(currPlayer.y / tileLength);
+        tilesPacket.push({id: TILE_ARRAY[xIndex][yIndex].id});
+        TILE_ARRAY[xIndex][yIndex].color = "#008000";
     }
-    return activated;
+    return tilesPacket;
 };
 
 var updateCoords = function () {
@@ -143,11 +145,6 @@ var updateCoords = function () {
 
 
 function update() {
-    var playersPacket = updateCoords();
-    var tilesPacket = updateTiles();
-
-
-    //send packets
     for (var index in SOCKET_LIST) {
         var currSocket = SOCKET_LIST[index];
         currSocket.emit('addEntities',
@@ -160,8 +157,8 @@ function update() {
             });
         currSocket.emit('updateEntities',
             {
-                'players': playersPacket,
-                'tiles': tilesPacket
+                'players': updateCoords(),
+                'tiles': updateTiles()
             }
         );
     }

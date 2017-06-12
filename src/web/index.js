@@ -36,7 +36,7 @@ function clientInit(data) {
     var tilePackage = data.tileInfo;
     for (var j = 0; j < tilePackage.length; j++) {
         var tileInfo = tilePackage[j];
-        TILE_LIST[tileInfo.name] = new Tile(tileInfo);
+        TILE_LIST[tileInfo.id] = new Tile(tileInfo);
     }
 }
 
@@ -58,7 +58,6 @@ function addEntities(data) {
     for (var i = 0; i < packet.length; i++) {
         var playerInfo = packet[i];
         PLAYER_LIST[playerInfo.id] = new Player(playerInfo);
-        console.log(PLAYER_LIST);
     }
 }
 
@@ -76,7 +75,7 @@ var updateTiles = function (packet) {
     for (var i = 0; i < packet.length; i++) {
         var tileInfo = packet[i];
         var tile = TILE_LIST[tileInfo.id];
-        //TODO: update tiles
+        tile.color = "#008000";
     }
 };
 
@@ -88,8 +87,11 @@ var drawScene = function () {
 
 var drawTiles = function () {
     ctx.clearRect(0, 0, 600, 600);
-    for (var tileId in TILE_LIST) {
-        var tile = TILE_LIST[tileId];
+    for (var id in TILE_LIST) {
+        var tile = TILE_LIST[id];
+        if (tile.color !== "#FFFFFF") {
+            console.log(tile);
+        }
         ctx.fillStyle = tile.color;
         ctx.fillRect(tile.x, tile.y, tile.length, tile.length);
     }
@@ -99,7 +101,7 @@ var drawPlayers = function () {
     ctx.fillStyle = "#000000";
     for (var playerId in PLAYER_LIST) {
         var player = PLAYER_LIST[playerId];
-        ctx.fillText(player.playerName, player.x, player.y);
+        ctx.fillText(player.name, player.x, player.y);
     }
 };
 
