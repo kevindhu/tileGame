@@ -5,7 +5,7 @@ var Entity = require('./entity');
 var entityConfig = require('./entity/entityConfig');
 
 
-/** INIT SERVER **/
+/** INIT PORT CONNECTION **/
 app.get('/', function (req, res) {
     res.sendFile(__dirname + '/web/index.html');
 });
@@ -21,62 +21,20 @@ var TILE_ARRAY = [];
 var deletePacket = [];
 var addPacket = [];
 
-/** INIT TILES **/
-var tileLength = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
-for (var i = 0; i < Math.sqrt(entityConfig.TILES); i++) {
-    var row = [];
-    for (var j = 0; j < Math.sqrt(entityConfig.TILES); j++) {
-        row[j] = new Entity.Tile(tileLength * i, tileLength * j);
+
+
+
+/** SERVER/CLIENT INIT METHODS **/
+
+var initTiles = function () {
+    for (var i = 0; i < Math.sqrt(entityConfig.TILES); i++) {
+        var row = [];
+        for (var j = 0; j < Math.sqrt(entityConfig.TILES); j++) {
+            row[j] = new Entity.Tile(tileLength * i, tileLength * j);
+        }
+        TILE_ARRAY[i] = row;
     }
-    TILE_ARRAY[i] = row;
-}
-
-
-var io = require('socket.io')(server, {});
-io.sockets.on('connection', function (socket) {
-    socket.id = Math.random();
-    SOCKET_LIST[socket.id] = socket;
-    console.log("Client #" + socket.id + " has joined the server");
-
-    var player = new Entity.Player(socket.id);
-    PLAYER_LIST[socket.id] = player;
-    addPacket.push(addPlayerInfo(player));
-
-    socket.emit("init", initPacket());
-
-    socket.on('disconnect', function () {
-        console.log("Client #" + socket.id + " has left the server");
-        delete SOCKET_LIST[socket.id];
-        delete PLAYER_LIST[socket.id];
-        deletePacket.push({id: socket.id});
-    });
-
-    socket.on('keyEvent', function (data) {
-        //console.log(player.id + " is pressing " + data.id);
-        if (data.id === "left") {
-            player.pressingLeft = data.state;
-        }
-        if (data.id === "right") {
-            player.pressingRight = data.state;
-        }
-        if (data.id === "up") {
-            player.pressingUp = data.state;
-        }
-        if (data.id === "down") {
-            player.pressingDown = data.state;
-        }
-    });
-});
-
-var addPlayerInfo = function (player) {
-    return {
-        id: player.id,
-        name: player.name,
-        x: player.x,
-        y: player.y
-    };
 };
-
 
 var initPacket = function () {
     var ret = {};
@@ -113,8 +71,17 @@ var initPacket = function () {
 };
 
 
-/** INIT SERVER LOOP **/
-setInterval(update, 1000 / 25);
+
+/** UPDATE METHODS **/
+
+var addPlayerInfo = function (player) {
+    return {
+        id: player.id,
+        name: player.name,
+        x: player.x,
+        y: player.y
+    };
+};
 
 var updateTiles = function () {
     //returns activated tile ids
@@ -146,7 +113,6 @@ var updateCoords = function () {
     return playersPacket;
 };
 
-
 function update() {
     for (var index in SOCKET_LIST) {
         var currSocket = SOCKET_LIST[index];
@@ -168,4 +134,50 @@ function update() {
     addPacket = [];
     deletePacket = [];
 }
+
+
+/** INIT TILES **/
+var tileLength = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
+initTiles();
+
+
+/** START WEBSOCKET SERVICE **/
+
+var io = require('socket.io')(server, {});
+io.sockets.on('connection', function (socket) {
+    socket.id = Math.random();
+    SOCKET_LIST[socket.id] = socket;
+    console.log("Client #" + socket.id + " has joined the server");
+
+    var player = new Entity.Player(socket.id);
+    PLAYER_LIST[socket.id] = player;
+    addPacket.push(addPlayerInfo(player));
+
+    socket.emit("init", initPacket());
+
+    socket.on('disconnect', function () {
+        console.log("Client #" + socket.id + " has left the server");
+        delete SOCKET_LIST[socket.id];
+        delete PLAYER_LIST[socket.id];
+        deletePacket.push({id: socket.id});
+    });
+
+    socket.on('keyEvent', function (data) {
+        if (data.id === "left") {
+            player.pressingLeft = data.state;
+        }
+        if (data.id === "right") {
+            player.pressingRight = data.state;
+        }
+        if (data.id === "up") {
+            player.pressingUp = data.state;
+        }
+        if (data.id === "down") {
+            player.pressingDown = data.state;
+        }
+    });
+});
+
+/** START MAIN LOOP **/
+setInterval(update, 1000 / 25);
 

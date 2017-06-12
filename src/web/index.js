@@ -87,6 +87,14 @@ var drawScene = function () {
     drawPlayers();
 };
 
+var drawPlayers = function () {
+    ctx.fillStyle = "#000000";
+    for (var playerId in PLAYER_LIST) {
+        var player = PLAYER_LIST[playerId];
+        ctx.fillText(player.name, player.x, player.y);
+    }
+};
+
 var drawTiles = function () {
     ctx.clearRect(0, 0, 600, 600);
     for (var id in TILE_LIST) {
@@ -96,16 +104,7 @@ var drawTiles = function () {
     }
 };
 
-var drawPlayers = function () {
-    ctx.fillStyle = "#000000";
-    for (var playerId in PLAYER_LIST) {
-        var player = PLAYER_LIST[playerId];
-        ctx.fillText(player.name, player.x, player.y);
-    }
-};
-
 setInterval(drawScene, 1000 / 25);
-
 
 document.onkeydown = function (event) {
     if (event.keyCode === 68 || event.keyCode === 39) { //d
