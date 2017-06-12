@@ -78,6 +78,8 @@ var updateTiles = function (packet) {
         var tileInfo = packet[i];
         var tile = TILE_LIST[tileInfo.id];
         tile.color = tileInfo.color;
+        tile.health = tileInfo.health;
+        tile.owner = tileInfo.owner;
     }
 };
 
@@ -101,6 +103,11 @@ var drawTiles = function () {
         var tile = TILE_LIST[id];
         ctx.fillStyle = tile.color;
         ctx.fillRect(tile.x, tile.y, tile.length, tile.length);
+        ctx.fillStyle = "#000000";
+        if (tile.owner !== null && tile.health !== 0) {
+            ctx.fillText(tile.owner, tile.x, tile.y + 20);
+            ctx.fillText(tile.health, tile.x, tile.y + 40);
+        }
     }
 };
 

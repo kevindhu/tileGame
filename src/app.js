@@ -90,11 +90,15 @@ var updateTiles = function () {
         var currPlayer = PLAYER_LIST[index];
         var xIndex = Math.floor(currPlayer.x / tileLength);
         var yIndex = Math.floor(currPlayer.y / tileLength);
+        var tile = TILE_ARRAY[xIndex][yIndex];
+        tile.updateOwner(currPlayer);
+
         tilesPacket.push({
-            id: TILE_ARRAY[xIndex][yIndex].id,
-            color: currPlayer.color
+            id: tile.id,
+            owner: tile.owner,
+            health: tile.health,
+            color: tile.color
         });
-        TILE_ARRAY[xIndex][yIndex].color = currPlayer.color;
     }
     return tilesPacket;
 };

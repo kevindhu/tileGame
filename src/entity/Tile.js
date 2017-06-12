@@ -14,12 +14,13 @@ function Tile(x, y) {
 
 
 Tile.prototype.updateOwner = function (newOwner) {
-    if (this.health > 0) {
+    if (this.health > 0 && newOwner.name !== this.owner) {
         this.health--;
     }
     else {
-        this.owner = newOwner;
+        this.owner = newOwner.name;
         this.health++;
+        this.color = newOwner.color;
     }
 };
 
