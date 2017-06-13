@@ -7,6 +7,7 @@ function Headquarter(owner, x, y) {
     this.y = y;
     this.name = owner.name;
     this.supply = 0;
+    this.radius = 10;
 }
 
 Headquarter.prototype.receiveShard = function () {

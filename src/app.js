@@ -30,12 +30,14 @@ var MOVING_SHARD_LIST = {};
 var addPlayerPacket = [];
 var addShardPacket = [];
 var addHQPacket = [];
+var HQUpdatePacket = [];
 
 var deletePlayerPacket = [];
 var deleteShardPacket = [];
 var deleteHQPacket = [];
 
-var quadTree = null;
+var shardTree = null;
+var HQTree = null;
 
 const tileLength = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
 
@@ -52,7 +54,7 @@ var initTiles = function () {
 };
 
 var initShards = function () {
-    quadTree = new QuadNode({
+    shardTree = new QuadNode({
         minx: 0,
         miny: 0,
         maxx: entityConfig.WIDTH,
@@ -63,6 +65,15 @@ var initShards = function () {
         createNewShard();
     }
 };
+
+var initHQs = function () {
+    HQTree = new QuadNode({
+        minx: 0,
+        miny: 0,
+        maxx: entityConfig.WIDTH,
+        maxy: entityConfig.WIDTH
+    });
+}
 
 var initPacket = function () {
     var ret = {};
@@ -144,7 +155,7 @@ var checkCollisions = function () {
             maxy: currPlayer.y + entityConfig.SHARD_WIDTH
         };
 
-        quadTree.find(playerBound, function (shard) {
+        shardTree.find(playerBound, function (shard) {
             if (currPlayer !== shard.owner && shard.timer === 0) {
                 if (shard.owner !== null) {
                     //could be optimized
@@ -157,6 +168,30 @@ var checkCollisions = function () {
                 MOVING_SHARD_LIST[shard.id] = shard;
             }
         });
+
+        HQTree.find(playerBound, function (HQ) {
+                if (currPlayer === HQ.owner) {
+                    for (var i = 0; i < currPlayer.shards.length; i++) {
+                        var shard = currPlayer.shards[i];
+                        var index = currPlayer.shards.indexOf(shard);
+                        currPlayer.shards.splice(index, 1);
+
+                        delete MOVING_SHARD_LIST[shard.id];
+                        delete SHARD_LIST[shard.id];
+                        HQ.supply++;
+                        HQUpdatePacket.push(
+                            {
+                                id: HQ.id,
+                                supply: HQ.supply
+                            }
+                        );
+                        deleteShardPacket.push({id: shard.id});
+                    }
+                }
+            }
+        );
+
+
     }
 };
 var addShards = function () {
@@ -217,14 +252,14 @@ var updateShards = function () {
             currShard.timer -= 1;
         }
         //update quad Tree
-        currShard.shardItem.bound = {
+        currShard.quadItem.bound = {
             minx: currShard.x - currShard.radius,
             miny: currShard.y - currShard.radius,
             maxx: currShard.x + currShard.radius,
             maxy: currShard.y + currShard.radius
         };
-        quadTree.remove(currShard.shardItem);
-        quadTree.insert(currShard.shardItem);
+        shardTree.remove(currShard.quadItem);
+        shardTree.insert(currShard.quadItem);
 
 
         shardsPacket.push({
@@ -236,18 +271,12 @@ var updateShards = function () {
     }
     return shardsPacket;
 };
-var updateHQ = function () {
-    var HQPacket = [];
-    //TODO: HQPacket update
-    return HQPacket;
-};
+
 
 function update() {
-    //console.log("sending packets");
     var playerUpdatePacket = updateCoords();
     var tileUpdatePacket = updateTiles();
     var shardsUpdatePacket = updateShards();
-    var HQUpdatePacket = updateHQ();
 
     for (var index in SOCKET_LIST) {
         var currSocket = SOCKET_LIST[index];
@@ -280,6 +309,8 @@ function update() {
     deletePlayerPacket = [];
 
     addHQPacket = [];
+    deleteHQPacket = [];
+    HQUpdatePacket = [];
 
 
 }
@@ -288,6 +319,7 @@ function update() {
 /** INIT SERVER OBJECTS **/
 initTiles();
 initShards();
+initHQs();
 
 
 /** START WEBSOCKET SERVICE **/
@@ -306,10 +338,13 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('disconnect', function () {
         console.log("Client #" + socket.id + " has left the server");
-        delete SOCKET_LIST[socket.id];
         dropShards(PLAYER_LIST[socket.id]);
-        delete PLAYER_LIST[socket.id];
         deletePlayerPacket.push({id: socket.id});
+        deleteHQPacket.push({id: socket.id});
+
+        delete PLAYER_LIST[socket.id];
+        delete SOCKET_LIST[socket.id];
+        delete HQ_LIST[socket.id];
     });
 
     socket.on('keyEvent', function (data) {
@@ -345,7 +380,7 @@ function createNewShard() {
         Arithmetic.getRandomInt(0, entityConfig.WIDTH),
         id
     );
-    shard.shardItem = {
+    shard.quadItem = {
         cell: shard,
         bound: {
             minx: shard.x - shard.radius,
@@ -354,7 +389,7 @@ function createNewShard() {
             maxy: shard.y + shard.radius
         }
     };
-    quadTree.insert(shard.shardItem);
+    shardTree.insert(shard.quadItem);
     SHARD_LIST[id] = shard;
     return shard;
 }
@@ -381,6 +416,19 @@ function dropShards(player) {
 function placeHeadquarters(player) {
     if (player.headquarter === null) {
         var headquarter = new Entity.Headquarter(player, player.x, player.y);
+
+        headquarter.quadItem = {
+            cell: headquarter,
+            bound: {
+                minx: headquarter.x - headquarter.radius,
+                miny: headquarter.y - headquarter.radius,
+                maxx: headquarter.x + headquarter.radius,
+                maxy: headquarter.y + headquarter.radius
+            }
+        };
+        HQTree.insert(headquarter.quadItem);
+
+
         player.headquarter = headquarter;
         HQ_LIST[headquarter.id] = headquarter;
         addHQPacket.push({

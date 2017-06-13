@@ -33,9 +33,11 @@ var Shard = function (shardInfo) {
     this.y = shardInfo.y;
 };
 var Headquarter = function (HQInfo) {
+    this.supply = HQInfo.supply;
     this.id = HQInfo.id;
     this.x = HQInfo.x;
     this.y = HQInfo.y;
+    this.name = HQInfo.owner;
 };
 
 
@@ -70,6 +72,18 @@ function deleteEntities(data) {
         var playerInfo = packet[i];
         console.log(playerInfo.id + " has left the server!");
         delete PLAYER_LIST[playerInfo.id];
+    }
+
+    var shardPacket = data.shardInfo;
+    for (var i = 0; i < shardPacket.length; i++) {
+        var shardInfo = shardPacket[i];
+        delete SHARD_LIST[shardInfo.id];
+    }
+
+    var HQPacket = data.HQInfo;
+    for (var l = 0; l < HQPacket.length; l++) {
+        var HQInfo = HQPacket[l];
+        delete HQ_LIST[HQInfo.id];
     }
 }
 
@@ -212,6 +226,11 @@ var drawHQs = function () {
         ctx.beginPath();
         ctx.arc(HQ.x, HQ.y, 10, 0, 2 * Math.PI, false);
         ctx.fill();
+        ctx.fillStyle = "#000000";
+        if (HQ.owner !== null) {
+            ctx.fillText(HQ.name, HQ.x, HQ.y + 20);
+            ctx.fillText(HQ.supply, HQ.x, HQ.y + 40);
+        }
     }
 };
 
