@@ -46,34 +46,17 @@ var initTiles = function () {
 };
 
 var initShards = function () {
-        quadTree = new QuadNode({
-            minx: 0,
-            miny: 0,
-            maxx: entityConfig.WIDTH,
-            maxy: entityConfig.WIDTH
-        });
+    quadTree = new QuadNode({
+        minx: 0,
+        miny: 0,
+        maxx: entityConfig.WIDTH,
+        maxy: entityConfig.WIDTH
+    });
 
-        for (var i = 0; i < entityConfig.SHARDS; i++) {
-            var id = Math.random();
-            var shard = new Entity.Shard(
-                Arithmetic.getRandomInt(0, entityConfig.WIDTH),
-                Arithmetic.getRandomInt(0, entityConfig.WIDTH),
-                id
-            );
-            shard.shardItem = {
-                cell: shard,
-                bound: {
-                    minx: shard.x - shard.radius,
-                    miny: shard.y - shard.radius,
-                    maxx: shard.x + shard.radius,
-                    maxy: shard.y + shard.radius
-                }
-            };
-            quadTree.insert(shard.shardItem);
-            SHARD_LIST[id] = shard;
-        }
+    for (var i = 0; i < entityConfig.SHARDS; i++) {
+        createNewShard();
     }
-;
+};
 
 var initPacket = function () {
     var ret = {};
@@ -134,6 +117,46 @@ var addPlayerInfo = function (player) {
     };
 };
 
+var checkCollisions = function () {
+    for (var index in PLAYER_LIST) {
+        var currPlayer = PLAYER_LIST[index];
+        var playerBound = {
+            minx: currPlayer.x - entityConfig.SHARD_WIDTH,
+            miny: currPlayer.y - entityConfig.SHARD_WIDTH,
+            maxx: currPlayer.x + entityConfig.SHARD_WIDTH,
+            maxy: currPlayer.y + entityConfig.SHARD_WIDTH
+        };
+
+        quadTree.find(playerBound, function (shard) {
+            if (currPlayer !== shard.owner && shard.timer === 0) {
+                if (shard.owner !== null) {
+                    //could be optimized
+                    var index = shard.owner.shards.indexOf(shard);
+                    shard.owner.shards.splice(index, 1);
+                }
+                currPlayer.shards.push(shard);
+                shard.owner = currPlayer;
+                shard.timer = 100;
+                MOVING_SHARD_LIST[shard.id] = shard;
+            }
+        });
+    }
+};
+
+var addShards = function () {
+    if (Object.size(SHARD_LIST) < entityConfig.SHARDS+2) {
+        //console.log("shard added!");
+        var shard = createNewShard();
+        addShardPacket.push({
+            id: shard.id,
+            x: shard.x,
+            y: shard.y
+        });
+    }
+};
+
+
+
 var updateTiles = function () {
     //returns activated tile ids
     var tilesPacket = [];
@@ -168,35 +191,11 @@ var updateCoords = function () {
     return playersPacket;
 };
 
-var checkCollisions = function () {
-    for (var index in PLAYER_LIST) {
-        var currPlayer = PLAYER_LIST[index];
-        var playerBound = {
-            minx: currPlayer.x - entityConfig.SHARD_WIDTH,
-            miny: currPlayer.y - entityConfig.SHARD_WIDTH,
-            maxx: currPlayer.x + entityConfig.SHARD_WIDTH,
-            maxy: currPlayer.y + entityConfig.SHARD_WIDTH
-        };
-
-        quadTree.find(playerBound, function (shard) {
-            if (currPlayer !== shard.owner && shard.timer === 0) {
-                if (shard.owner !== null) {
-                    //could be optimized
-                    var index = shard.owner.shards.indexOf(shard);
-                    shard.owner.shards.splice(index, 1);
-                }
-                currPlayer.shards.push(shard);
-                shard.owner = currPlayer;
-                shard.timer = 100;
-                MOVING_SHARD_LIST[shard.id] = shard;
-            }
-        });
-    }
-};
-
 var updateShards = function () {
-    var shardsPacket = [];
+    addShards();
     checkCollisions();
+
+    var shardsPacket = [];
     for (var id in MOVING_SHARD_LIST) {
         var currShard = MOVING_SHARD_LIST[id];
         currShard.x = currShard.owner.x + Arithmetic.getRandomInt(-5, 5);
@@ -236,7 +235,7 @@ function update() {
         currSocket.emit('addEntities',
             {
                 'playerInfo': addPlayerPacket,
-                'shardInfo': addShardPacket //not yet used
+                'shardInfo': addShardPacket
             });
         currSocket.emit('deleteEntities',
             {
@@ -303,8 +302,28 @@ io.sockets.on('connection', function (socket) {
 setInterval(update, 1000 / 25);
 
 
-
 /** MISC METHODS **/
+
+function createNewShard() {
+    var id = Math.random();
+    var shard = new Entity.Shard(
+        Arithmetic.getRandomInt(0, entityConfig.WIDTH),
+        Arithmetic.getRandomInt(0, entityConfig.WIDTH),
+        id
+    );
+    shard.shardItem = {
+        cell: shard,
+        bound: {
+            minx: shard.x - shard.radius,
+            miny: shard.y - shard.radius,
+            maxx: shard.x + shard.radius,
+            maxy: shard.y + shard.radius
+        }
+    };
+    quadTree.insert(shard.shardItem);
+    SHARD_LIST[id] = shard;
+    return shard;
+}
 
 function dropShards(player) {
     for (var i = 0; i < player.shards.length; i++) {
@@ -314,3 +333,11 @@ function dropShards(player) {
         delete MOVING_SHARD_LIST[shard.id];
     }
 }
+
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};

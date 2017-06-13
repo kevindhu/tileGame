@@ -63,10 +63,16 @@ function deleteEntities(data) {
 }
 
 function addEntities(data) {
-    var packet = data.playerInfo;
-    for (var i = 0; i < packet.length; i++) {
-        var playerInfo = packet[i];
+    var playerPacket = data.playerInfo;
+    for (var i = 0; i < playerPacket.length; i++) {
+        var playerInfo = playerPacket[i];
         PLAYER_LIST[playerInfo.id] = new Player(playerInfo);
+    }
+
+    var shardPacket = data.shardInfo;
+    for (var i = 0; i < shardPacket.length; i++) {
+        var shardInfo = shardPacket[i];
+        SHARD_LIST[shardInfo.id] = new Shard(shardInfo);
     }
 }
 
