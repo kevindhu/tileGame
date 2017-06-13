@@ -1,7 +1,7 @@
 const entityConfig = require('./entityConfig');
 
 function Headquarter(owner, x, y) {
-    this.id = id;
+    this.id = owner.id;
     this.owner = owner;
     this.x = x;
     this.y = y;
@@ -13,4 +13,4 @@ Headquarter.prototype.receiveShard = function () {
     this.supply ++;
 };
 
-module.export = Headquarter;
+module.exports = Headquarter;

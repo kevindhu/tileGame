@@ -85,6 +85,12 @@ function addEntities(data) {
         var shardInfo = shardPacket[i];
         SHARD_LIST[shardInfo.id] = new Shard(shardInfo);
     }
+
+    var HQPacket = data.HQInfo;
+    for (var i = 0; i < HQPacket.length; i++) {
+        var HQInfo = HQPacket[i];
+        HQ_LIST[HQInfo.id] = new Headquarter(HQInfo);
+    }
 }
 
 

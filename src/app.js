@@ -109,7 +109,7 @@ var initPacket = function () {
         var currHQ = HQ_LIST[l];
         HQPacket.push({
             id: currHQ.id,
-            owner: currHQ.owner,
+            owner: currHQ.owner.name,
             x: currHQ.x,
             y: currHQ.y,
             supply: currHQ.supply
@@ -134,7 +134,6 @@ var addPlayerInfo = function (player) {
         y: player.y
     };
 };
-
 var checkCollisions = function () {
     for (var index in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[index];
@@ -160,7 +159,6 @@ var checkCollisions = function () {
         });
     }
 };
-
 var addShards = function () {
     if (Object.size(SHARD_LIST) < entityConfig.SHARDS + 2) {
         //console.log("shard added!");
@@ -172,7 +170,6 @@ var addShards = function () {
         });
     }
 };
-
 
 var updateTiles = function () {
     //returns activated tile ids
@@ -193,7 +190,6 @@ var updateTiles = function () {
     }
     return tilesPacket;
 };
-
 var updateCoords = function () {
     var playersPacket = [];
     for (var index in PLAYER_LIST) {
@@ -207,7 +203,6 @@ var updateCoords = function () {
     }
     return playersPacket;
 };
-
 var updateShards = function () {
     addShards();
     checkCollisions();
@@ -241,7 +236,6 @@ var updateShards = function () {
     }
     return shardsPacket;
 };
-
 var updateHQ = function () {
     var HQPacket = [];
     //TODO: HQPacket update
@@ -249,6 +243,7 @@ var updateHQ = function () {
 };
 
 function update() {
+    //console.log("sending packets");
     var playerUpdatePacket = updateCoords();
     var tileUpdatePacket = updateTiles();
     var shardsUpdatePacket = updateShards();
@@ -277,11 +272,14 @@ function update() {
             }
         );
     }
+    //console.log("DONE sending packets");
     addShardPacket = [];
     deleteShardPacket = [];
 
     addPlayerPacket = [];
     deletePlayerPacket = [];
+
+    addHQPacket = [];
 
 
 }
@@ -384,13 +382,14 @@ function placeHeadquarters(player) {
     if (player.headquarter === null) {
         var headquarter = new Entity.Headquarter(player, player.x, player.y);
         player.headquarter = headquarter;
-        HQ_LIST[id] = headquarter;
+        HQ_LIST[headquarter.id] = headquarter;
         addHQPacket.push({
             id: headquarter.id,
-            owner: headquarter.owner,
+            owner: headquarter.owner.name,
             x: headquarter.x,
             y: headquarter.y,
             supply: headquarter.supply
         });
+        console.log('added HQ');
     }
 }
