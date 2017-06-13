@@ -168,7 +168,6 @@ var updateCoords = function () {
     return playersPacket;
 };
 
-
 var checkCollisions = function () {
     for (var index in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[index];
@@ -181,7 +180,12 @@ var checkCollisions = function () {
 
         quadTree.find(playerBound, function (shard) {
             if (currPlayer !== shard.owner && shard.timer === 0) {
-                console.log("player " + currPlayer.name + " has gotten a shard!");
+                if (shard.owner !== null) {
+                    //could be optimized
+                    var index = shard.owner.shards.indexOf(shard);
+                    shard.owner.shards.splice(index, 1);
+                }
+                currPlayer.shards.push(shard);
                 shard.owner = currPlayer;
                 shard.timer = 100;
                 MOVING_SHARD_LIST[shard.id] = shard;
@@ -189,7 +193,6 @@ var checkCollisions = function () {
         });
     }
 };
-
 
 var updateShards = function () {
     var shardsPacket = [];
@@ -223,7 +226,6 @@ var updateShards = function () {
     return shardsPacket;
 };
 
-
 function update() {
     var playerUpdatePacket = updateCoords();
     var tileUpdatePacket = updateTiles();
@@ -254,20 +256,6 @@ function update() {
 }
 
 
-function updateSlower() {
-    var shardsUpdatePacket = updateShards();
-
-    for (var index in SOCKET_LIST) {
-        var currSocket = SOCKET_LIST[index];
-        currSocket.emit('updateEntities',
-            {
-                'shards': shardsUpdatePacket
-            }
-        );
-    }
-}
-
-
 /** INIT SERVER OBJECTS **/
 initTiles();
 initShards();
@@ -290,6 +278,7 @@ io.sockets.on('connection', function (socket) {
     socket.on('disconnect', function () {
         console.log("Client #" + socket.id + " has left the server");
         delete SOCKET_LIST[socket.id];
+        dropShards(PLAYER_LIST[socket.id]);
         delete PLAYER_LIST[socket.id];
         deletePlayerPacket.push({id: socket.id});
     });
@@ -312,6 +301,16 @@ io.sockets.on('connection', function (socket) {
 
 /** START MAIN LOOP **/
 setInterval(update, 1000 / 25);
-//setInterval(updateSlower,1000/5);
 
 
+
+/** MISC METHODS **/
+
+function dropShards(player) {
+    for (var i = 0; i < player.shards.length; i++) {
+        var shard = player.shards[i];
+        shard.owner = null;
+        shard.timer = 0;
+        delete MOVING_SHARD_LIST[shard.id];
+    }
+}
