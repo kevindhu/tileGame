@@ -10,6 +10,7 @@ socket.on('addEntities', addEntities);
 var PLAYER_LIST = {};
 var TILE_LIST = {};
 var SHARD_LIST = {};
+var HQ_LIST = {};
 
 var Player = function (playerInfo) {
     this.id = playerInfo.id;
@@ -31,6 +32,11 @@ var Shard = function (shardInfo) {
     this.x = shardInfo.x;
     this.y = shardInfo.y;
 };
+var Headquarter = function (HQInfo) {
+    this.id = HQInfo.id;
+    this.x = HQInfo.x;
+    this.y = HQInfo.y;
+};
 
 
 function clientInit(data) {
@@ -50,6 +56,11 @@ function clientInit(data) {
     for (var k = 0; k < shardPacket.length; k++) {
         var shardInfo = shardPacket[k];
         SHARD_LIST[shardInfo.id] = new Shard(shardInfo);
+    }
+    var HQPacket = data.HQPacket;
+    for (var l = 0; l < HQPacket.length; l++) {
+        var HQInfo = HQPacket[l];
+        HQ_LIST[HQInfo.id] = new Headquarter(HQInfo);
     }
 }
 
@@ -78,9 +89,37 @@ function addEntities(data) {
 
 
 function updateEntities(data) {
+    //updateEntity(data.players, PLAYER_LIST);
+    //updateEntity(data.tiles, TILE_LIST);
+    //updateEntity(data.shards, SHARD_LIST);
+    //updateEntity(data.HQs, HQ_LIST);
     updatePlayers(data.players);
     updateTiles(data.tiles);
     updateShards(data.shards);
+    updateHQs(data.HQs);
+}
+
+function updateEntity(packet,list) {
+    for (var i = 0; i < packet.length; i++) {
+        var entityInfo = packet[i];
+        var entity = list[entityInfo.id];
+        if (entity.constructor.name === Player) {
+            entity.x = entityInfo.x;
+            entity.y = entityInfo.y;
+        }
+        if (entity.constructor.name === Tile) {
+            entity.color = entityInfo.color;
+            entity.health = entityInfo.health;
+            entity.owner = entityInfo.owner;
+        }
+        if (entity.constructor.name === Shard) {
+            entity.x = entityInfo.x;
+            entity.y = entityInfo.y;
+        }
+        if (entity.constructor.name === Headquarter) {
+            entity.health = entityInfo.health;
+        }
+    }
 }
 
 var updatePlayers = function (packet) {
@@ -111,11 +150,20 @@ var updateShards = function (packet) {
     }
 };
 
+var updateHQs = function (packet) {
+    for (var i = 0; i < packet.length; i++) {
+        var HQInfo = packet[i];
+        var HQ = HQ_LIST[HQInfo.id];
+        HQ.supply = HQInfo.supply;
+    }
+};
+
 
 var drawScene = function () {
     drawTiles();
     drawPlayers();
     drawShards();
+    drawHQs();
 };
 
 var drawPlayers = function () {
@@ -151,6 +199,15 @@ var drawShards = function () {
     }
 };
 
+var drawHQs = function () {
+    for (var id in HQ_LIST) {
+        var HQ = HQ_LIST[id];
+        ctx.fillStyle = "#003290";
+        ctx.beginPath();
+        ctx.arc(HQ.x, HQ.y, 10, 0, 2 * Math.PI, false);
+        ctx.fill();
+    }
+};
 
 setInterval(drawScene, 1000 / 25);
 
@@ -167,6 +224,9 @@ document.onkeydown = function (event) {
     }
     if (event.keyCode === 87 || event.keyCode === 38) { //w
         socket.emit('keyEvent', {id: 'up', state: true});
+    }
+    if (event.keyCode === 32) {
+        socket.emit('keyEvent', {id: 'space', state:true});
     }
 };
 

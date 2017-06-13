@@ -21,13 +21,19 @@ var SOCKET_LIST = {};
 /** ENTITIES STORAGE**/
 var TILE_ARRAY = [];
 var PLAYER_LIST = {};
-var SHARD_LIST = {}; //rename to stationary shards list
+
+var HQ_LIST = {};
+var SHARD_LIST = {};
 var MOVING_SHARD_LIST = {};
+
 
 var addPlayerPacket = [];
 var addShardPacket = [];
+var addHQPacket = [];
+
 var deletePlayerPacket = [];
 var deleteShardPacket = [];
+var deleteHQPacket = [];
 
 var quadTree = null;
 
@@ -63,6 +69,7 @@ var initPacket = function () {
     var playerPacket = [];
     var tilePacket = [];
     var shardPacket = [];
+    var HQPacket = [];
 
     for (var i in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[i];
@@ -73,7 +80,6 @@ var initPacket = function () {
             y: currPlayer.y
         })
     }
-
 
     for (var j = 0; j < TILE_ARRAY.length; j++) {
         for (k = 0; k < TILE_ARRAY[j].length; k++) {
@@ -90,8 +96,8 @@ var initPacket = function () {
         }
     }
 
-    for (var l in SHARD_LIST) {
-        var currShard = SHARD_LIST[l];
+    for (var k in SHARD_LIST) {
+        var currShard = SHARD_LIST[k];
         shardPacket.push({
             id: currShard.id,
             x: currShard.x,
@@ -99,9 +105,21 @@ var initPacket = function () {
         })
     }
 
+    for (var l in HQ_LIST) {
+        var currHQ = HQ_LIST[l];
+        HQPacket.push({
+            id: currHQ.id,
+            owner: currHQ.owner,
+            x: currHQ.x,
+            y: currHQ.y,
+            supply: currHQ.supply
+        })
+    }
+
     ret['playerPacket'] = playerPacket;
     ret['tilePacket'] = tilePacket;
     ret['shardPacket'] = shardPacket;
+    ret['HQPacket'] = HQPacket;
     return ret;
 };
 
@@ -144,7 +162,7 @@ var checkCollisions = function () {
 };
 
 var addShards = function () {
-    if (Object.size(SHARD_LIST) < entityConfig.SHARDS+2) {
+    if (Object.size(SHARD_LIST) < entityConfig.SHARDS + 2) {
         //console.log("shard added!");
         var shard = createNewShard();
         addShardPacket.push({
@@ -154,7 +172,6 @@ var addShards = function () {
         });
     }
 };
-
 
 
 var updateTiles = function () {
@@ -225,33 +242,48 @@ var updateShards = function () {
     return shardsPacket;
 };
 
+var updateHQ = function () {
+    var HQPacket = [];
+    //TODO: HQPacket update
+    return HQPacket;
+};
+
 function update() {
     var playerUpdatePacket = updateCoords();
     var tileUpdatePacket = updateTiles();
     var shardsUpdatePacket = updateShards();
+    var HQUpdatePacket = updateHQ();
 
     for (var index in SOCKET_LIST) {
         var currSocket = SOCKET_LIST[index];
         currSocket.emit('addEntities',
             {
                 'playerInfo': addPlayerPacket,
-                'shardInfo': addShardPacket
+                'shardInfo': addShardPacket,
+                'HQInfo': addHQPacket
             });
         currSocket.emit('deleteEntities',
             {
                 'playerInfo': deletePlayerPacket,
-                'shardInfo': deleteShardPacket //not yet used
+                'shardInfo': deleteShardPacket, //not yet used
+                'HQInfo': deleteHQPacket //not yet used
             });
         currSocket.emit('updateEntities',
             {
                 'players': playerUpdatePacket,
                 'tiles': tileUpdatePacket,
-                'shards': shardsUpdatePacket
+                'shards': shardsUpdatePacket,
+                'HQs': HQUpdatePacket //update health
             }
         );
     }
+    addShardPacket = [];
+    deleteShardPacket = [];
+
     addPlayerPacket = [];
     deletePlayerPacket = [];
+
+
 }
 
 
@@ -295,6 +327,10 @@ io.sockets.on('connection', function (socket) {
         if (data.id === "down") {
             player.pressingDown = data.state;
         }
+
+        if (data.id === "space") {
+            placeHeadquarters(player);
+        }
     });
 });
 
@@ -325,6 +361,16 @@ function createNewShard() {
     return shard;
 }
 
+Object.size = function (obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+
+/** Player Events **/
+
 function dropShards(player) {
     for (var i = 0; i < player.shards.length; i++) {
         var shard = player.shards[i];
@@ -334,10 +380,17 @@ function dropShards(player) {
     }
 }
 
-Object.size = function(obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
+function placeHeadquarters(player) {
+    if (player.headquarter === null) {
+        var headquarter = new Entity.Headquarter(player, player.x, player.y);
+        player.headquarter = headquarter;
+        HQ_LIST[id] = headquarter;
+        addHQPacket.push({
+            id: headquarter.id,
+            owner: headquarter.owner,
+            x: headquarter.x,
+            y: headquarter.y,
+            supply: headquarter.supply
+        });
     }
-    return size;
-};
+}
