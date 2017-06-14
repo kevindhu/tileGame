@@ -113,8 +113,7 @@ function addEntities(data) {
     for (var i = 0; i < UIPacket.length; i++) {
         var UIInfo = UIPacket[i];
         if (selfId = UIInfo.id) {
-            alert("FUNCTION!");
-            myFunction();
+            openUI();
         }
     }
 }
@@ -283,7 +282,7 @@ function defineMessage() {
         )
     }
     textInput.value = "";
-    //myFunction();
+    closeUI();
 }
 
 

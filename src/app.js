@@ -25,6 +25,7 @@ var PLAYER_LIST = {};
 var HQ_LIST = {};
 var SHARD_LIST = {};
 var MOVING_SHARD_LIST = {};
+var HQ_SHARD_LIST = {};
 
 
 var addPlayerPacket = [];
@@ -189,9 +190,6 @@ var checkCollisions = function () {
                         currPlayer.shards.splice(index, 1);
                         shardTree.remove(shard.quadItem);
 
-                        delete MOVING_SHARD_LIST[shard.id];
-                        delete SHARD_LIST[shard.id];
-
                         HQ.supply++;
                         HQUpdatePacket.push(
                             {
@@ -199,7 +197,15 @@ var checkCollisions = function () {
                                 supply: HQ.supply
                             }
                         );
-                        deleteShardPacket.push({id: shard.id});
+
+                        shard.HQ = HQ;
+                        HQ_SHARD_LIST[shard.id] = shard;
+
+
+                        //deleteShardPacket.push({id: shard.id});
+
+                        delete MOVING_SHARD_LIST[shard.id];
+                        delete SHARD_LIST[shard.id];
                     }
                 }
             }
@@ -288,6 +294,17 @@ var updateShards = function () {
         });
 
     }
+
+    for (var id in HQ_SHARD_LIST) {
+        var currShard = HQ_SHARD_LIST[id];
+        currShard.rotate();
+        shardsPacket.push({
+            name: currShard.name,
+            id: currShard.id,
+            x: currShard.x,
+            y: currShard.y
+        });
+    }
     return shardsPacket;
 };
 
@@ -308,8 +325,8 @@ function update() {
         currSocket.emit('deleteEntities',
             {
                 'playerInfo': deletePlayerPacket,
-                'shardInfo': deleteShardPacket, //not yet used
-                'HQInfo': deleteHQPacket //not yet used
+                'shardInfo': deleteShardPacket,
+                'HQInfo': deleteHQPacket
             });
         currSocket.emit('updateEntities',
             {
