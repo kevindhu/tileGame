@@ -1,0 +1,28 @@
+.sel-box{
+    position:relative;
+}
+a{
+    text-decoration:none;
+}
+#select{
+    display:block;
+    width:235px;
+    height:20px;
+    border:1px solid #999;
+    padding:5px;
+}
+.toc-odd{
+    position:absolute;
+    top:32px;
+    background:#f1f1f1;
+    width:250px;
+    display:none;
+}
+.toc-odd li{
+    padding:5px 10px;
+    border-bottom:1px solid #999;
+}
+button {
+    border: 2px outset #aaa;
+    border-radius: 4px;
+}

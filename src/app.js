@@ -77,7 +77,7 @@ var initHQs = function () {
 
 /** CLIENT ENTITY INIT METHODS **/
 
-var initPacket = function () {
+var initPacket = function (id) {
     var ret = {};
     var playerPacket = [];
     var tilePacket = [];
@@ -133,6 +133,7 @@ var initPacket = function () {
     ret['tilePacket'] = tilePacket;
     ret['shardPacket'] = shardPacket;
     ret['HQPacket'] = HQPacket;
+    ret['selfId'] = id;
     return ret;
 };
 
@@ -342,7 +343,7 @@ io.sockets.on('connection', function (socket) {
     PLAYER_LIST[socket.id] = player;
     addPlayerPacket.push(addPlayerInfo(player));
 
-    socket.emit('init', initPacket());
+    socket.emit('init', initPacket(socket.id));
 
     socket.on('disconnect', function () {
         console.log("Client #" + socket.id + " has left the server");

@@ -7,6 +7,7 @@ socket.on('updateEntities', updateEntities);
 socket.on('deleteEntities', deleteEntities);
 socket.on('addEntities', addEntities);
 
+var selfId = null;
 var PLAYER_LIST = {};
 var TILE_LIST = {};
 var SHARD_LIST = {};
@@ -64,6 +65,7 @@ function clientInit(data) {
         var HQInfo = HQPacket[l];
         HQ_LIST[HQInfo.id] = new Headquarter(HQInfo);
     }
+    selfId = data.selfId;
 }
 
 function deleteEntities(data) {
@@ -148,6 +150,9 @@ var updateHQs = function (packet) {
         var HQInfo = packet[i];
         var HQ = HQ_LIST[HQInfo.id];
         HQ.supply = HQInfo.supply;
+        if (HQ.id === selfId) {
+            myFunction();
+        }
     }
 };
 
@@ -195,9 +200,13 @@ var drawShards = function () {
 var drawHQs = function () {
     for (var id in HQ_LIST) {
         var HQ = HQ_LIST[id];
+        var radius = 10;
+        if (HQ.supply > 10) {
+            radius = 20;
+        }
         ctx.fillStyle = "#003290";
         ctx.beginPath();
-        ctx.arc(HQ.x, HQ.y, 10, 0, 2 * Math.PI, false);
+        ctx.arc(HQ.x, HQ.y, radius, 0, 2 * Math.PI, false);
         ctx.fill();
         ctx.fillStyle = "#000000";
         if (HQ.owner !== null) {
