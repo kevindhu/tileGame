@@ -109,37 +109,10 @@ function addEntities(data) {
 
 
 function updateEntities(data) {
-    //updateEntity(data.players, PLAYER_LIST);
-    //updateEntity(data.tiles, TILE_LIST);
-    //updateEntity(data.shards, SHARD_LIST);
-    //updateEntity(data.HQs, HQ_LIST);
     updatePlayers(data.players);
     updateTiles(data.tiles);
     updateShards(data.shards);
     updateHQs(data.HQs);
-}
-
-function updateEntity(packet,list) {
-    for (var i = 0; i < packet.length; i++) {
-        var entityInfo = packet[i];
-        var entity = list[entityInfo.id];
-        if (entity.constructor.name === Player) {
-            entity.x = entityInfo.x;
-            entity.y = entityInfo.y;
-        }
-        if (entity.constructor.name === Tile) {
-            entity.color = entityInfo.color;
-            entity.health = entityInfo.health;
-            entity.owner = entityInfo.owner;
-        }
-        if (entity.constructor.name === Shard) {
-            entity.x = entityInfo.x;
-            entity.y = entityInfo.y;
-        }
-        if (entity.constructor.name === Headquarter) {
-            entity.health = entityInfo.health;
-        }
-    }
 }
 
 var updatePlayers = function (packet) {
@@ -203,8 +176,8 @@ var drawTiles = function () {
 
         ctx.fillStyle = "#000000";
         if (tile.owner !== null && tile.health !== 0) {
-            ctx.fillText(tile.owner, tile.x, tile.y + 20);
-            ctx.fillText(tile.health, tile.x, tile.y + 40);
+            //ctx.fillText(tile.owner, tile.x, tile.y + 20);
+            //ctx.fillText(tile.health, tile.x, tile.y + 40);
         }
     }
 };

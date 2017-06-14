@@ -41,7 +41,7 @@ var HQTree = null;
 
 const tileLength = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
 
-/** SERVER/CLIENT INIT METHODS **/
+/** SERVER ENTITY INIT METHODS **/
 
 var initTiles = function () {
     for (var i = 0; i < Math.sqrt(entityConfig.TILES); i++) {
@@ -74,6 +74,8 @@ var initHQs = function () {
         maxy: entityConfig.WIDTH
     });
 }
+
+/** CLIENT ENTITY INIT METHODS **/
 
 var initPacket = function () {
     var ret = {};
@@ -145,6 +147,7 @@ var addPlayerInfo = function (player) {
         y: player.y
     };
 };
+
 var checkCollisions = function () {
     for (var index in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[index];
@@ -175,9 +178,11 @@ var checkCollisions = function () {
                         var shard = currPlayer.shards[i];
                         var index = currPlayer.shards.indexOf(shard);
                         currPlayer.shards.splice(index, 1);
+                        shardTree.remove(shard.quadItem);
 
                         delete MOVING_SHARD_LIST[shard.id];
                         delete SHARD_LIST[shard.id];
+
                         HQ.supply++;
                         HQUpdatePacket.push(
                             {
@@ -194,6 +199,7 @@ var checkCollisions = function () {
 
     }
 };
+
 var addShards = function () {
     if (Object.size(SHARD_LIST) < entityConfig.SHARDS + 2) {
         //console.log("shard added!");
@@ -205,6 +211,7 @@ var addShards = function () {
         });
     }
 };
+
 
 var updateTiles = function () {
     //returns activated tile ids
@@ -225,6 +232,7 @@ var updateTiles = function () {
     }
     return tilesPacket;
 };
+
 var updateCoords = function () {
     var playersPacket = [];
     for (var index in PLAYER_LIST) {
@@ -238,6 +246,7 @@ var updateCoords = function () {
     }
     return playersPacket;
 };
+
 var updateShards = function () {
     addShards();
     checkCollisions();
@@ -271,7 +280,6 @@ var updateShards = function () {
     }
     return shardsPacket;
 };
-
 
 function update() {
     var playerUpdatePacket = updateCoords();
@@ -338,9 +346,13 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('disconnect', function () {
         console.log("Client #" + socket.id + " has left the server");
+
         dropShards(PLAYER_LIST[socket.id]);
         deletePlayerPacket.push({id: socket.id});
         deleteHQPacket.push({id: socket.id});
+        if (player.headquarter !== null) {
+            HQTree.remove(HQ_LIST[socket.id].quadItem);
+        }
 
         delete PLAYER_LIST[socket.id];
         delete SOCKET_LIST[socket.id];
@@ -431,6 +443,7 @@ function placeHeadquarters(player) {
 
         player.headquarter = headquarter;
         HQ_LIST[headquarter.id] = headquarter;
+        console.log(headquarter.id + " headquarter has been added!");
         addHQPacket.push({
             id: headquarter.id,
             owner: headquarter.owner.name,
@@ -438,6 +451,5 @@ function placeHeadquarters(player) {
             y: headquarter.y,
             supply: headquarter.supply
         });
-        console.log('added HQ');
     }
 }
