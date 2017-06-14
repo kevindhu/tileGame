@@ -1,6 +1,7 @@
 const entityConfig = require('./entityConfig');
 
 function Shard(x, y, id) {
+    this.name = null;
     this.id = id;
     this.x = x;
     this.y = y;

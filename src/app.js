@@ -30,6 +30,8 @@ var MOVING_SHARD_LIST = {};
 var addPlayerPacket = [];
 var addShardPacket = [];
 var addHQPacket = [];
+var addUIPacket = [];
+
 var HQUpdatePacket = [];
 
 var deletePlayerPacket = [];
@@ -112,6 +114,7 @@ var initPacket = function (id) {
     for (var k in SHARD_LIST) {
         var currShard = SHARD_LIST[k];
         shardPacket.push({
+            name: currShard.name,
             id: currShard.id,
             x: currShard.x,
             y: currShard.y
@@ -160,16 +163,21 @@ var checkCollisions = function () {
         };
 
         shardTree.find(playerBound, function (shard) {
-            if (currPlayer !== shard.owner && shard.timer === 0) {
+            if (currPlayer !== shard.owner && shard.timer === 0 && currPlayer.emptyShard === null) {
                 if (shard.owner !== null) {
                     //could be optimized
                     var index = shard.owner.shards.indexOf(shard);
                     shard.owner.shards.splice(index, 1);
                 }
-                currPlayer.shards.push(shard);
                 shard.owner = currPlayer;
+                currPlayer.emptyShard = shard;
                 shard.timer = 100;
                 MOVING_SHARD_LIST[shard.id] = shard;
+
+                addUIPacket.push({
+                    id: currPlayer.id
+                });
+
             }
         });
 
@@ -273,6 +281,7 @@ var updateShards = function () {
 
 
         shardsPacket.push({
+            name: currShard.name,
             id: currShard.id,
             x: currShard.x,
             y: currShard.y
@@ -293,7 +302,8 @@ function update() {
             {
                 'playerInfo': addPlayerPacket,
                 'shardInfo': addShardPacket,
-                'HQInfo': addHQPacket
+                'HQInfo': addHQPacket,
+                'UIInfo': addUIPacket
             });
         currSocket.emit('deleteEntities',
             {
@@ -320,6 +330,8 @@ function update() {
     addHQPacket = [];
     deleteHQPacket = [];
     HQUpdatePacket = [];
+
+    addUIPacket = [];
 
 
 }
@@ -378,6 +390,15 @@ io.sockets.on('connection', function (socket) {
             placeHeadquarters(player);
         }
     });
+    socket.on('textInput', function(data) {
+        var player = PLAYER_LIST[data.id];
+
+        if (player.emptyShard !== null) {
+            player.emptyShard.name = data.word;
+            player.shards.push(player.emptyShard);
+            player.emptyShard = null;
+        }
+    })
 });
 
 /** START MAIN LOOP **/
@@ -418,11 +439,19 @@ Object.size = function (obj) {
 /** Player Events **/
 
 function dropShards(player) {
-    for (var i = 0; i < player.shards.length; i++) {
-        var shard = player.shards[i];
+    var dropShard = function(shard) {
         shard.owner = null;
         shard.timer = 0;
         delete MOVING_SHARD_LIST[shard.id];
+    };
+
+    for (var i = 0; i < player.shards.length; i++) {
+        var shard = player.shards[i];
+        dropShard(shard);
+    }
+
+    if (player.emptyShard !== null) {
+        dropShard(player.emptyShard);
     }
 }
 

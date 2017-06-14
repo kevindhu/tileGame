@@ -17,6 +17,7 @@ function Player(id) {
     var randomName = randomWord();
     this.name = randomName;
 
+    this.emptyShard = null;
     this.shards = [];
     this.headquarter = null;
 }

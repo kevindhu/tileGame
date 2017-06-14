@@ -32,6 +32,7 @@ var Shard = function (shardInfo) {
     this.id = shardInfo.id;
     this.x = shardInfo.x;
     this.y = shardInfo.y;
+    this.name = name;
 };
 var Headquarter = function (HQInfo) {
     this.supply = HQInfo.supply;
@@ -107,6 +108,15 @@ function addEntities(data) {
         var HQInfo = HQPacket[i];
         HQ_LIST[HQInfo.id] = new Headquarter(HQInfo);
     }
+
+    var UIPacket = data.UIInfo;
+    for (var i = 0; i < UIPacket.length; i++) {
+        var UIInfo = UIPacket[i];
+        if (selfId = UIInfo.id) {
+            alert("FUNCTION!");
+            myFunction();
+        }
+    }
 }
 
 
@@ -142,6 +152,7 @@ var updateShards = function (packet) {
         var shard = SHARD_LIST[shardInfo.id];
         shard.x = shardInfo.x;
         shard.y = shardInfo.y;
+        shard.name = shardInfo.name;
     }
 };
 
@@ -165,6 +176,7 @@ var drawScene = function () {
 };
 
 var drawPlayers = function () {
+    ctx.font = "20px Arial";
     ctx.fillStyle = "#000000";
     for (var playerId in PLAYER_LIST) {
         var player = PLAYER_LIST[playerId];
@@ -191,9 +203,15 @@ var drawShards = function () {
     for (var id in SHARD_LIST) {
         var shard = SHARD_LIST[id];
         ctx.fillStyle = "#008000";
+        if (shard.name !== null) {
+            ctx.font = "30px Arial";
+            ctx.fillText(shard.name, shard.x, shard.y);
+        }
+
         ctx.beginPath();
         ctx.arc(shard.x, shard.y, 5, 0, 2 * Math.PI, false);
         ctx.fill();
+
     }
 };
 
@@ -233,7 +251,7 @@ document.onkeydown = function (event) {
         socket.emit('keyEvent', {id: 'up', state: true});
     }
     if (event.keyCode === 32) {
-        socket.emit('keyEvent', {id: 'space', state:true});
+        socket.emit('keyEvent', {id: 'space', state: true});
     }
 };
 
@@ -251,6 +269,22 @@ document.onkeyup = function (event) {
         socket.emit('keyEvent', {id: 'up', state: false});
     }
 };
+
+
+var textInput = document.getElementById("textInput");
+function defineMessage() {
+    var text = textInput.value;
+    if (text !== null) {
+        socket.emit('textInput',
+            {
+                id: selfId,
+                word: text
+            }
+        )
+    }
+    textInput.value = "";
+    //myFunction();
+}
 
 
 
