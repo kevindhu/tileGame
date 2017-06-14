@@ -76,7 +76,7 @@ var initHQs = function () {
         maxx: entityConfig.WIDTH,
         maxy: entityConfig.WIDTH
     });
-}
+};
 
 /** CLIENT ENTITY INIT METHODS **/
 
@@ -97,9 +97,9 @@ var initPacket = function (id) {
         })
     }
 
-    for (var j = 0; j < TILE_ARRAY.length; j++) {
-        for (k = 0; k < TILE_ARRAY[j].length; k++) {
-            var currTile = TILE_ARRAY[j][k];
+    for (var i = 0; i < TILE_ARRAY.length; i++) {
+        for (var j = 0; j < TILE_ARRAY[i].length; i++) {
+            var currTile = TILE_ARRAY[i][j];
             tilePacket.push({
                 id: currTile.id,
                 x: currTile.x,
@@ -110,8 +110,8 @@ var initPacket = function (id) {
         }
     }
 
-    for (var k in SHARD_LIST) {
-        var currShard = SHARD_LIST[k];
+    for (var i in SHARD_LIST) {
+        var currShard = SHARD_LIST[i];
         shardPacket.push({
             name: currShard.name,
             id: currShard.id,
@@ -120,8 +120,8 @@ var initPacket = function (id) {
         })
     }
 
-    for (var k in HQ_SHARD_LIST) {
-        var currShard = HQ_SHARD_LIST[k];
+    for (var i in HQ_SHARD_LIST) {
+        var currShard = HQ_SHARD_LIST[i];
         shardPacket.push({
             name: currShard.name,
             id: currShard.id,
@@ -130,8 +130,8 @@ var initPacket = function (id) {
         })
     }
 
-    for (var l in HQ_LIST) {
-        var currHQ = HQ_LIST[l];
+    for (var i in HQ_LIST) {
+        var currHQ = HQ_LIST[i];
         HQPacket.push({
             id: currHQ.id,
             owner: currHQ.owner.name,
@@ -274,8 +274,10 @@ var updateShards = function () {
     checkCollisions();
 
     var shardsPacket = [];
+    var currShard = null;
+
     for (var id in MOVING_SHARD_LIST) {
-        var currShard = MOVING_SHARD_LIST[id];
+        currShard = MOVING_SHARD_LIST[id];
         currShard.x = currShard.owner.x + Arithmetic.getRandomInt(-5, 5);
         currShard.y = currShard.owner.y + Arithmetic.getRandomInt(-5, 5);
 
@@ -303,7 +305,7 @@ var updateShards = function () {
     }
 
     for (var id in HQ_SHARD_LIST) {
-        var currShard = HQ_SHARD_LIST[id];
+        currShard = HQ_SHARD_LIST[id];
         currShard.rotate();
         shardsPacket.push({
             name: currShard.name,
