@@ -1,6 +1,6 @@
 var WIDTH = 1000;
 var HEIGHT = 1000;
-var TILES = 64;
+var TILES = 900;
 var SHARDS = 20;
 var SHARD_WIDTH = 10;
 

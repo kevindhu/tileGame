@@ -8,10 +8,7 @@ function Headquarter(owner, x, y) {
     this.name = owner.name;
     this.supply = 0;
     this.radius = 10;
+    this.shards = [];
 }
-
-Headquarter.prototype.receiveShard = function () {
-    this.supply ++;
-};
 
 module.exports = Headquarter;

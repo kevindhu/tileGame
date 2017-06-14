@@ -10,7 +10,6 @@ function Shard(x, y, id) {
     this.radius = entityConfig.SHARD_WIDTH;
     this.timer = 0;
 
-
     this.HQ = null;
     this.theta = 0;
 }

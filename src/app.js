@@ -122,6 +122,16 @@ var initPacket = function (id) {
         })
     }
 
+    for (var k in HQ_SHARD_LIST) {
+        var currShard = HQ_SHARD_LIST[k];
+        shardPacket.push({
+            name: currShard.name,
+            id: currShard.id,
+            x: currShard.x,
+            y: currShard.y
+        })
+    }
+
     for (var l in HQ_LIST) {
         var currHQ = HQ_LIST[l];
         HQPacket.push({
@@ -197,15 +207,14 @@ var checkCollisions = function () {
                                 supply: HQ.supply
                             }
                         );
-
+                        HQ.shards.push(shard);
                         shard.HQ = HQ;
                         HQ_SHARD_LIST[shard.id] = shard;
 
-
                         //deleteShardPacket.push({id: shard.id});
 
-                        delete MOVING_SHARD_LIST[shard.id];
                         delete SHARD_LIST[shard.id];
+                        delete MOVING_SHARD_LIST[shard.id];
                     }
                 }
             }
@@ -226,7 +235,6 @@ var addShards = function () {
         });
     }
 };
-
 
 var updateTiles = function () {
     //returns activated tile ids
@@ -382,6 +390,11 @@ io.sockets.on('connection', function (socket) {
         deleteHQPacket.push({id: socket.id});
         if (player.headquarter !== null) {
             HQTree.remove(HQ_LIST[socket.id].quadItem);
+            for (var i = 0; i<player.headquarter.shards.length; i++) {
+                var shard = player.headquarter.shards[i];
+                deleteShardPacket.push({id: shard.id});
+                delete HQ_SHARD_LIST[shard.id];
+            }
         }
 
         delete PLAYER_LIST[socket.id];
