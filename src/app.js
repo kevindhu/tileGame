@@ -105,10 +105,8 @@ var initPacket = function (id) {
                 x: currTile.x,
                 y: currTile.y,
                 length: currTile.length,
-                owner: currTile.owner,
-                color: currTile.color,
-                health: currTile.health
-            })
+                color: currTile.color
+            });
         }
     }
 
@@ -143,11 +141,12 @@ var initPacket = function (id) {
         })
     }
 
-    ret['playerPacket'] = playerPacket;
     ret['tilePacket'] = tilePacket;
+    ret['playerPacket'] = playerPacket;
     ret['shardPacket'] = shardPacket;
     ret['HQPacket'] = HQPacket;
     ret['selfId'] = id;
+
     return ret;
 };
 
@@ -345,7 +344,6 @@ function update() {
             }
         );
     }
-    //console.log("DONE sending packets");
     addShardPacket = [];
     deleteShardPacket = [];
 
@@ -382,25 +380,6 @@ io.sockets.on('connection', function (socket) {
 
     socket.emit('init', initPacket(socket.id));
 
-    socket.on('disconnect', function () {
-        console.log("Client #" + socket.id + " has left the server");
-
-        dropShards(PLAYER_LIST[socket.id]);
-        deletePlayerPacket.push({id: socket.id});
-        deleteHQPacket.push({id: socket.id});
-        if (player.headquarter !== null) {
-            HQTree.remove(HQ_LIST[socket.id].quadItem);
-            for (var i = 0; i<player.headquarter.shards.length; i++) {
-                var shard = player.headquarter.shards[i];
-                deleteShardPacket.push({id: shard.id});
-                delete HQ_SHARD_LIST[shard.id];
-            }
-        }
-
-        delete PLAYER_LIST[socket.id];
-        delete SOCKET_LIST[socket.id];
-        delete HQ_LIST[socket.id];
-    });
 
     socket.on('keyEvent', function (data) {
         if (data.id === "left") {
@@ -420,7 +399,8 @@ io.sockets.on('connection', function (socket) {
             placeHeadquarters(player);
         }
     });
-    socket.on('textInput', function(data) {
+
+    socket.on('textInput', function (data) {
         var player = PLAYER_LIST[data.id];
 
         if (player.emptyShard !== null) {
@@ -429,6 +409,26 @@ io.sockets.on('connection', function (socket) {
             player.emptyShard = null;
         }
     })
+
+    socket.on('disconnect', function () {
+        console.log("Client #" + socket.id + " has left the server");
+
+        dropShards(PLAYER_LIST[socket.id]);
+        deletePlayerPacket.push({id: socket.id});
+        deleteHQPacket.push({id: socket.id});
+        if (player.headquarter !== null) {
+            HQTree.remove(HQ_LIST[socket.id].quadItem);
+            for (var i = 0; i < player.headquarter.shards.length; i++) {
+                var shard = player.headquarter.shards[i];
+                deleteShardPacket.push({id: shard.id});
+                delete HQ_SHARD_LIST[shard.id];
+            }
+        }
+
+        delete PLAYER_LIST[socket.id];
+        delete SOCKET_LIST[socket.id];
+        delete HQ_LIST[socket.id];
+    });
 });
 
 /** START MAIN LOOP **/
@@ -469,7 +469,7 @@ Object.size = function (obj) {
 /** Player Events **/
 
 function dropShards(player) {
-    var dropShard = function(shard) {
+    var dropShard = function (shard) {
         shard.owner = null;
         shard.timer = 0;
         delete MOVING_SHARD_LIST[shard.id];

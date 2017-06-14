@@ -24,9 +24,7 @@ var Tile = function (tileInfo) {
     this.x = tileInfo.x;
     this.y = tileInfo.y;
     this.length = tileInfo.length;
-    this.owner = tileInfo.owner;
     this.color = tileInfo.color;
-    this.health = tileInfo.health;
 };
 var Shard = function (shardInfo) {
     this.id = shardInfo.id;
@@ -44,6 +42,7 @@ var Headquarter = function (HQInfo) {
 
 
 function clientInit(data) {
+    console.log("INIT");
     var playerPacket = data.playerPacket;
     for (var i = 0; i < playerPacket.length; i++) {
         var playerInfo = playerPacket[i];
@@ -140,8 +139,6 @@ var updateTiles = function (packet) {
         var tileInfo = packet[i];
         var tile = TILE_LIST[tileInfo.id];
         tile.color = tileInfo.color;
-        tile.health = tileInfo.health;
-        tile.owner = tileInfo.owner;
     }
 };
 
@@ -161,7 +158,8 @@ var updateHQs = function (packet) {
         var HQ = HQ_LIST[HQInfo.id];
         HQ.supply = HQInfo.supply;
         if (HQ.id === selfId) {
-            myFunction();
+            //TODO: add it to the list of shards in HQ
+            //myFunction();
         }
     }
 };
@@ -189,12 +187,7 @@ var drawTiles = function () {
         var tile = TILE_LIST[id];
         ctx.fillStyle = tile.color;
         ctx.fillRect(tile.x, tile.y, tile.length, tile.length);
-
         ctx.fillStyle = "#000000";
-        if (tile.owner !== null && tile.health !== 0) {
-            //ctx.fillText(tile.owner, tile.x, tile.y + 20);
-            //ctx.fillText(tile.health, tile.x, tile.y + 40);
-        }
     }
 };
 
