@@ -14,7 +14,7 @@ var TILE_ARRAY = [];
 var PLAYER_LIST = {};
 
 var HQ_LIST = {};
-var SHARD_LIST = {};
+var STATIC_SHARD_LIST = {};
 var MOVING_SHARD_LIST = {};
 var HQ_SHARD_LIST = {};
 
@@ -101,8 +101,18 @@ var initPacket = function (id) {
         }
     }
 
-    for (var i in SHARD_LIST) {
-        var currShard = SHARD_LIST[i];
+    for (var i in STATIC_SHARD_LIST) {
+        var currShard = STATIC_SHARD_LIST[i];
+        shardPacket.push({
+            name: currShard.name,
+            id: currShard.id,
+            x: currShard.x,
+            y: currShard.y
+        })
+    }
+
+    for (var i in MOVING_SHARD_LIST) {
+        var currShard = MOVING_SHARD_LIST[i];
         shardPacket.push({
             name: currShard.name,
             id: currShard.id,
@@ -176,6 +186,8 @@ var checkCollision = function (player) {
                 action: "name shard"
             });
 
+            delete STATIC_SHARD_LIST[shard.id];
+
         }
     });
 
@@ -198,7 +210,6 @@ var checkCollision = function (player) {
                         }
                     );
 
-                    delete SHARD_LIST[shard.id];
                     delete MOVING_SHARD_LIST[shard.id];
                 }
                 if (player.pressingSpace) {
@@ -223,7 +234,7 @@ var checkCollisions = function () {
 };
 
 var addShards = function () {
-    if (Object.size(SHARD_LIST) < entityConfig.SHARDS + 2) {
+    if (Object.size(STATIC_SHARD_LIST) < entityConfig.SHARDS + 2) {
         //console.log("shard added!");
         var shard = createNewShard();
         addShardPacket.push({
@@ -489,7 +500,7 @@ function createNewShard() {
         }
     };
     shardTree.insert(shard.quadItem);
-    SHARD_LIST[id] = shard;
+    STATIC_SHARD_LIST[id] = shard;
     return shard;
 }
 

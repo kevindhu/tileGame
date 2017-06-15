@@ -1,0 +1,8 @@
+- taking first shard from HQ removes the last item!
+
+
+- drawing creates bug when trying to re-add the shard to the HQ
+when it is really being buggy
+
+
+- catch 22: update first or instantiate first?
