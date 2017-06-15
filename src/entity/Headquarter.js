@@ -20,6 +20,13 @@ Headquarter.prototype.addShard = function (shard) {
     this.shards.push(shard.id);
 };
 
+Headquarter.prototype.removeShard = function (shard) {
+    this.supply --;
+    shard.HQ = null;
+    var index = this.shards.indexOf(shard);
+    this.shards.splice(index, 1);
+};
+
 
 
 module.exports = Headquarter;

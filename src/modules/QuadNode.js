@@ -51,6 +51,9 @@ QuadNode.prototype.insert = function (item) {
 };
 
 QuadNode.prototype.remove = function (item) {
+    if (item._quadNode === null) {
+        return;
+    }
     if (item._quadNode !== this)
         return item._quadNode.remove(item);
     this.items.splice(this.items.indexOf(item), 1);

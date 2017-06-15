@@ -179,6 +179,7 @@ var checkCollision = function (player) {
         }
     });
 
+    //HQ collision
     HQTree.find(playerBound, function (HQ) {
             if (player === HQ.owner) {
                 for (var i = 0; i < player.shards.length; i++) {
@@ -254,7 +255,7 @@ var updateTiles = function () {
     return tilesPacket;
 };
 
-var updateCoords = function () {
+var updatePlayers = function () {
     var playersPacket = [];
     for (var index in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[index];
@@ -300,7 +301,6 @@ var updateShards = function () {
             x: currShard.x,
             y: currShard.y
         });
-
     }
 
     for (var id in HQ_SHARD_LIST) {
@@ -317,12 +317,21 @@ var updateShards = function () {
 };
 
 function update() {
-    var playerUpdatePacket = updateCoords();
+    var playerUpdatePacket = updatePlayers();
     var tileUpdatePacket = updateTiles();
     var shardsUpdatePacket = updateShards();
 
     for (var index in SOCKET_LIST) {
         var currSocket = SOCKET_LIST[index];
+
+        currSocket.emit('updateEntities',
+            {
+                'playerInfo': playerUpdatePacket,
+                'tileInfo': tileUpdatePacket,
+                'shardInfo': shardsUpdatePacket,
+                'HQInfo': HQUpdatePacket
+            }
+        );
         currSocket.emit('addEntities',
             {
                 'playerInfo': addPlayerPacket,
@@ -336,14 +345,6 @@ function update() {
                 'shardInfo': deleteShardPacket,
                 'HQInfo': deleteHQPacket
             });
-        currSocket.emit('updateEntities',
-            {
-                'players': playerUpdatePacket,
-                'tiles': tileUpdatePacket,
-                'shards': shardsUpdatePacket,
-                'HQs': HQUpdatePacket //update health
-            }
-        );
     }
     addShardPacket = [];
     deleteShardPacket = [];
@@ -418,7 +419,31 @@ io.sockets.on('connection', function (socket) {
             player.shards.push(player.emptyShard);
             player.emptyShard = null;
         }
-    })
+    });
+
+    socket.on('removeShardHQ', function (data) {
+        var shard = HQ_SHARD_LIST[data.id];
+        var HQ = shard.HQ;
+
+        HQ.removeShard(shard);
+        player.addShard(shard);
+
+        HQUpdatePacket.push(
+            {
+                id: HQ.id,
+                supply: HQ.supply,
+                shards: HQ.shards
+            }
+        );
+
+        addUIPacket.push({
+            id: player.id,
+            action: "open hq"
+        });
+
+        MOVING_SHARD_LIST[shard.id] = shard;
+        delete HQ_SHARD_LIST[shard.id];
+    });
 
     socket.on('disconnect', function () {
         console.log("Client #" + socket.id + " has left the server");

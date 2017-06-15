@@ -67,6 +67,11 @@ Player.prototype.addEmptyShard = function(shard) {
     shard.timer = 100;
 };
 
+Player.prototype.addShard = function(shard) {
+    shard.owner = this;
+    this.shards.push(shard);
+};
+
 Player.prototype.removeShard = function (shard) {
     var index = this.shards.indexOf(shard);
     this.shards.splice(index, 1);

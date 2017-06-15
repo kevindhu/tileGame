@@ -67,6 +67,8 @@ function clientInit(data) {
         HQ_LIST[HQInfo.id] = new Headquarter(HQInfo);
     }
     selfId = data.selfId;
+
+    console.log(SHARD_LIST);
 }
 
 function deleteEntities(data) {
@@ -80,6 +82,7 @@ function deleteEntities(data) {
     var shardPacket = data.shardInfo;
     for (var i = 0; i < shardPacket.length; i++) {
         var shardInfo = shardPacket[i];
+        console.log("deleted shard:"  + shardInfo.id);
         delete SHARD_LIST[shardInfo.id];
     }
 
@@ -112,7 +115,7 @@ function addEntities(data) {
     var UIPacket = data.UIInfo;
     for (var i = 0; i < UIPacket.length; i++) {
         var UIInfo = UIPacket[i];
-        if (selfId = UIInfo.id) {
+        if (selfId === UIInfo.id) {
             openUI(UIInfo.action);
         }
     }
@@ -120,10 +123,10 @@ function addEntities(data) {
 
 
 function updateEntities(data) {
-    updatePlayers(data.players);
-    updateTiles(data.tiles);
-    updateShards(data.shards);
-    updateHQs(data.HQs);
+    updatePlayers(data.playerInfo);
+    updateTiles(data.tileInfo);
+    updateShards(data.shardInfo);
+    updateHQs(data.HQInfo);
 }
 
 var updatePlayers = function (packet) {
@@ -144,8 +147,10 @@ var updateTiles = function (packet) {
 };
 
 var updateShards = function (packet) {
+    console.log(packet);
     for (var i = 0; i < packet.length; i++) {
         var shardInfo = packet[i];
+        console.log("SHARD ID: " + shardInfo.id);
         var shard = SHARD_LIST[shardInfo.id];
         shard.x = shardInfo.x;
         shard.y = shardInfo.y;
@@ -159,10 +164,7 @@ var updateHQs = function (packet) {
         var HQ = HQ_LIST[HQInfo.id];
         HQ.supply = HQInfo.supply;
         HQ.shards = HQInfo.shards;
-        if (HQ.id === selfId) {
-            //TODO: add it to the list of shards in HQ
-            //myFunction();
-        }
+        console.log(HQ.shards);
     }
 };
 
@@ -284,7 +286,8 @@ function defineMessage() {
     closeUI("name shard");
 }
 
-function addShardstoList(list) {
+function addShardsToList(list) {
+    console.log("SHARDS #: " + HQ_LIST[selfId].shards.length);
     for (var i = 0; i < HQ_LIST[selfId].shards.length; i++) {
         var entry = document.createElement('li');
         var shard = SHARD_LIST[HQ_LIST[selfId].shards[i]];
@@ -292,7 +295,7 @@ function addShardstoList(list) {
 
         (function (_id) {
             entry.addEventListener("click", function () {
-                console.log(_id);
+                socket.emit("removeShardHQ", {id: _id});
             });
         })(entry.id);
 
