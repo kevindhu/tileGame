@@ -10,6 +10,7 @@ function Player(id) {
     this.pressingDown = false;
     this.pressingLeft = false;
     this.pressingRight = false;
+    this.pressingSpace = false;
 
     var randomColor = getRandomColor();
     this.color = randomColor;
@@ -58,6 +59,17 @@ Player.prototype.updatePosition = function () {
 
 var onBoundary = function (coord) {
     return coord <= 0 || coord >= entityConfig.WIDTH;
+};
+
+Player.prototype.addEmptyShard = function(shard) {
+    shard.owner = this;
+    this.emptyShard = shard;
+    shard.timer = 100;
+};
+
+Player.prototype.removeShard = function (shard) {
+    var index = this.shards.indexOf(shard);
+    this.shards.splice(index, 1);
 };
 
 module.exports = Player;

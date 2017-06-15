@@ -7,15 +7,6 @@ const entityConfig = require('./entity/entityConfig');
 const Arithmetic = require('./modules/Arithmetic');
 
 
-/** INIT PORT CONNECTION **/
-app.get('/', function (req, res) {
-    res.sendFile(__dirname + '/web/index.html');
-});
-app.use('/', express.static(__dirname + '/web'));
-server.listen(2000); //port number for listening
-console.log('Started Server!');
-
-
 var SOCKET_LIST = {};
 
 /** ENTITIES STORAGE**/
@@ -98,7 +89,7 @@ var initPacket = function (id) {
     }
 
     for (var i = 0; i < TILE_ARRAY.length; i++) {
-        for (var j = 0; j < TILE_ARRAY[i].length; i++) {
+        for (var j = 0; j < TILE_ARRAY[i].length; j++) {
             var currTile = TILE_ARRAY[i][j];
             tilePacket.push({
                 id: currTile.id,
@@ -137,7 +128,8 @@ var initPacket = function (id) {
             owner: currHQ.owner.name,
             x: currHQ.x,
             y: currHQ.y,
-            supply: currHQ.supply
+            supply: currHQ.supply,
+            shards: currHQ.shards
         })
     }
 
@@ -162,64 +154,70 @@ var addPlayerInfo = function (player) {
     };
 };
 
+var checkCollision = function (player) {
+    var playerBound = {
+        minx: player.x - entityConfig.SHARD_WIDTH,
+        miny: player.y - entityConfig.SHARD_WIDTH,
+        maxx: player.x + entityConfig.SHARD_WIDTH,
+        maxy: player.y + entityConfig.SHARD_WIDTH
+    };
+    //shard collision
+    shardTree.find(playerBound, function (shard) {
+        if (player !== shard.owner && shard.timer === 0 && player.emptyShard === null) {
+            if (shard.owner !== null) {
+                shard.owner.removeShard(shard);
+            }
+
+            player.addEmptyShard(shard);
+            MOVING_SHARD_LIST[shard.id] = shard;
+
+            addUIPacket.push({
+                id: player.id,
+                action: "name shard"
+            });
+
+        }
+    });
+
+    HQTree.find(playerBound, function (HQ) {
+            if (player === HQ.owner) {
+                for (var i = 0; i < player.shards.length; i++) {
+                    var shard = player.shards[i];
+                    player.removeShard(shard);
+                    shardTree.remove(shard.quadItem);
+
+                    HQ.addShard(shard);
+                    HQ_SHARD_LIST[shard.id] = shard;
+
+                    HQUpdatePacket.push(
+                        {
+                            id: HQ.id,
+                            supply: HQ.supply,
+                            shards: HQ.shards
+                        }
+                    );
+
+                    delete SHARD_LIST[shard.id];
+                    delete MOVING_SHARD_LIST[shard.id];
+                }
+                if (player.pressingSpace) {
+                    addUIPacket.push(
+                        {
+                            id: player.id,
+                            action: "open hq"
+                        }
+                    );
+
+                }
+            }
+        }
+    );
+};
+
 var checkCollisions = function () {
     for (var index in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[index];
-        var playerBound = {
-            minx: currPlayer.x - entityConfig.SHARD_WIDTH,
-            miny: currPlayer.y - entityConfig.SHARD_WIDTH,
-            maxx: currPlayer.x + entityConfig.SHARD_WIDTH,
-            maxy: currPlayer.y + entityConfig.SHARD_WIDTH
-        };
-
-        shardTree.find(playerBound, function (shard) {
-            if (currPlayer !== shard.owner && shard.timer === 0 && currPlayer.emptyShard === null) {
-                if (shard.owner !== null) {
-                    //could be optimized
-                    var index = shard.owner.shards.indexOf(shard);
-                    shard.owner.shards.splice(index, 1);
-                }
-                shard.owner = currPlayer;
-                currPlayer.emptyShard = shard;
-                shard.timer = 100;
-                MOVING_SHARD_LIST[shard.id] = shard;
-
-                addUIPacket.push({
-                    id: currPlayer.id
-                });
-
-            }
-        });
-
-        HQTree.find(playerBound, function (HQ) {
-                if (currPlayer === HQ.owner) {
-                    for (var i = 0; i < currPlayer.shards.length; i++) {
-                        var shard = currPlayer.shards[i];
-                        var index = currPlayer.shards.indexOf(shard);
-                        currPlayer.shards.splice(index, 1);
-                        shardTree.remove(shard.quadItem);
-
-                        HQ.supply++;
-                        HQUpdatePacket.push(
-                            {
-                                id: HQ.id,
-                                supply: HQ.supply
-                            }
-                        );
-                        HQ.shards.push(shard);
-                        shard.HQ = HQ;
-                        HQ_SHARD_LIST[shard.id] = shard;
-
-                        //deleteShardPacket.push({id: shard.id});
-
-                        delete SHARD_LIST[shard.id];
-                        delete MOVING_SHARD_LIST[shard.id];
-                    }
-                }
-            }
-        );
-
-
+        checkCollision(currPlayer);
     }
 };
 
@@ -230,7 +228,8 @@ var addShards = function () {
         addShardPacket.push({
             id: shard.id,
             x: shard.x,
-            y: shard.y
+            y: shard.y,
+            name: null
         });
     }
 };
@@ -362,6 +361,14 @@ function update() {
 }
 
 
+/** INIT PORT CONNECTION **/
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + '/web/index.html');
+});
+app.use('/', express.static(__dirname + '/web'));
+server.listen(2000); //port number for listening
+console.log('Started Server!');
+
 /** INIT SERVER OBJECTS **/
 initTiles();
 initShards();
@@ -398,6 +405,7 @@ io.sockets.on('connection', function (socket) {
         }
 
         if (data.id === "space") {
+            player.pressingSpace = data.state;
             placeHeadquarters(player);
         }
     });
@@ -502,16 +510,19 @@ function placeHeadquarters(player) {
         };
         HQTree.insert(headquarter.quadItem);
 
-
         player.headquarter = headquarter;
         HQ_LIST[headquarter.id] = headquarter;
-        console.log(headquarter.id + " headquarter has been added!");
         addHQPacket.push({
             id: headquarter.id,
             owner: headquarter.owner.name,
             x: headquarter.x,
             y: headquarter.y,
-            supply: headquarter.supply
+            supply: headquarter.supply,
+            shards: headquarter.shards
         });
+
+        console.log("adding HQ for " + headquarter.id);
+
+        player.pressingSpace = false;
     }
 }

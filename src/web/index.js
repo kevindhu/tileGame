@@ -30,7 +30,7 @@ var Shard = function (shardInfo) {
     this.id = shardInfo.id;
     this.x = shardInfo.x;
     this.y = shardInfo.y;
-    this.name = name;
+    this.name = shardInfo.name;
 };
 var Headquarter = function (HQInfo) {
     this.supply = HQInfo.supply;
@@ -38,11 +38,11 @@ var Headquarter = function (HQInfo) {
     this.x = HQInfo.x;
     this.y = HQInfo.y;
     this.name = HQInfo.owner;
+    this.shards = HQInfo.shards;
 };
 
 
 function clientInit(data) {
-    console.log("INIT");
     var playerPacket = data.playerPacket;
     for (var i = 0; i < playerPacket.length; i++) {
         var playerInfo = playerPacket[i];
@@ -63,6 +63,7 @@ function clientInit(data) {
     var HQPacket = data.HQPacket;
     for (var l = 0; l < HQPacket.length; l++) {
         var HQInfo = HQPacket[l];
+        console.log("HQINFO: " + HQInfo);
         HQ_LIST[HQInfo.id] = new Headquarter(HQInfo);
     }
     selfId = data.selfId;
@@ -112,7 +113,7 @@ function addEntities(data) {
     for (var i = 0; i < UIPacket.length; i++) {
         var UIInfo = UIPacket[i];
         if (selfId = UIInfo.id) {
-            openUI();
+            openUI(UIInfo.action);
         }
     }
 }
@@ -157,6 +158,7 @@ var updateHQs = function (packet) {
         var HQInfo = packet[i];
         var HQ = HQ_LIST[HQInfo.id];
         HQ.supply = HQInfo.supply;
+        HQ.shards = HQInfo.shards;
         if (HQ.id === selfId) {
             //TODO: add it to the list of shards in HQ
             //myFunction();
@@ -260,10 +262,14 @@ document.onkeyup = function (event) {
     if (event.keyCode === 87 || event.keyCode === 38) { //w
         socket.emit('keyEvent', {id: 'up', state: false});
     }
+    if (event.keyCode === 32) {
+        socket.emit('keyEvent', {id: 'space', state: false});
+    }
 };
 
 
 var textInput = document.getElementById("textInput");
+
 function defineMessage() {
     var text = textInput.value;
     if (text !== null) {
@@ -275,7 +281,25 @@ function defineMessage() {
         )
     }
     textInput.value = "";
-    closeUI();
+    closeUI("name shard");
+}
+
+function addShardstoList(list) {
+    for (var i = 0; i < HQ_LIST[selfId].shards.length; i++) {
+        var entry = document.createElement('li');
+        var shard = SHARD_LIST[HQ_LIST[selfId].shards[i]];
+        entry.id = shard.id;
+
+        (function (_id) {
+            entry.addEventListener("click", function () {
+                console.log(_id);
+            });
+        })(entry.id);
+
+
+        entry.appendChild(document.createTextNode(shard.name));
+        list.appendChild(entry);
+    }
 }
 
 

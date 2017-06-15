@@ -7,7 +7,7 @@
 
 
 
-    <ul id="sel-option" class='toc-odd level-1'>
+    <ul id="shard_namer" class='toc-odd level-1'>
         <li>
             <a>Name the shard: </a>
             <input type="text" id="textInput" size="30" />
@@ -15,6 +15,13 @@
         </li>
     </ul>
 
+    <ul id="HQ_info" class='toc-odd level-1'>
+        <li>
+            <a>HQ INFO: </a>
+            <ol id="shards_list"></ol>
+            <input type="button" value="Close" onclick="closeUI('open hq');" />
+        </li>
+    </ul>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>

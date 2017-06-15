@@ -1,12 +1,28 @@
-function openUI() {
-    var x = document.getElementById('sel-option');
-    x.style.display = 'block';
+function openUI(action) {
+    var shardNamer = document.getElementById('shard_namer');
+    var HQInfo = document.getElementById('HQ_info');
 
+    if (action === "name shard") {
+        shardNamer.style.display = 'block';
+    }
+    if (action === "open hq") {
+        HQInfo.style.display = 'block';
+        var list = document.getElementById('shards_list');
+        list.innerHTML = "";
+        addShardstoList(list);
+    }
 }
 
-function closeUI() {
-    var x = document.getElementById('sel-option');
-    x.style.display = 'none';
+function closeUI(action) {
+    var shardNamer = document.getElementById('shard_namer');
+    var HQInfo = document.getElementById('HQ_info');
+
+    if (action === "name shard") {
+        shardNamer.style.display = 'none';
+    }
+    if (action === "open hq") {
+        HQInfo.style.display = 'none';
+    }
 }
 
 
