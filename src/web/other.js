@@ -5,7 +5,7 @@ function openUI(action) {
     if (action === "name shard") {
         shardNamer.style.display = 'block';
     }
-    if (action === "open hq") {
+    if (action === "hq info") {
         HQInfo.style.display = 'block';
         var list = document.getElementById('shards_list');
         list.innerHTML = "";
@@ -18,9 +18,11 @@ function closeUI(action) {
     var HQInfo = document.getElementById('HQ_info');
 
     if (action === "name shard") {
+        var textInput = document.getElementById("textInput");
+        textInput.value = "";
         shardNamer.style.display = 'none';
     }
-    if (action === "open hq") {
+    if (action === "hq info") {
         HQInfo.style.display = 'none';
     }
 }

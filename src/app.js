@@ -23,11 +23,13 @@ var addShardPacket = [];
 var addHQPacket = [];
 var addUIPacket = [];
 
+
 var HQUpdatePacket = [];
 
 var deletePlayerPacket = [];
 var deleteShardPacket = [];
 var deleteHQPacket = [];
+var deleteUIPacket = [];
 
 var shardTree = null;
 var HQTree = null;
@@ -55,7 +57,7 @@ var initShards = function () {
     });
 
     for (var i = 0; i < entityConfig.SHARDS; i++) {
-        createNewShard();
+        createEmptyShard();
     }
 };
 
@@ -154,14 +156,6 @@ var initPacket = function (id) {
 
 /** UPDATE METHODS **/
 
-var addPlayerInfo = function (player) {
-    return {
-        id: player.id,
-        name: player.name,
-        x: player.x,
-        y: player.y
-    };
-};
 
 var checkCollision = function (player) {
     var playerBound = {
@@ -174,19 +168,29 @@ var checkCollision = function (player) {
     shardTree.find(playerBound, function (shard) {
         if (player !== shard.owner && shard.timer === 0
             && player.emptyShard === null) {
-            if (shard.owner !== null) {
+            if (shard.owner === null) {
+                removeStaticShard(shard,"LOCAL");
+            } else {
+                if (shard.name === null) {
+                    deleteUIPacket.push({
+                        id: shard.owner.id,
+                        action: "name shard"
+                    });
+                }
                 shard.owner.removeShard(shard);
             }
+            if (shard.name === null) {
+                deleteUIPacket.push({
+                    id: player.id,
+                    action: "hq info"
+                });
 
-            player.addEmptyShard(shard);
-            PLAYER_SHARD_LIST[shard.id] = shard;
-
-            addUIPacket.push({
-                id: player.id,
-                action: "name shard"
-            });
-
-            delete STATIC_SHARD_LIST[shard.id];
+                addUIPacket.push({
+                    id: player.id,
+                    action: "name shard"
+                });
+            }
+            addPlayerShard(player,shard);
 
         }
     });
@@ -196,27 +200,14 @@ var checkCollision = function (player) {
             if (player === HQ.owner) {
                 for (var i = 0; i < player.shards.length; i++) {
                     var shard = PLAYER_SHARD_LIST[player.shards[i]];
-                    player.removeShard(shard);
-                    shardTree.remove(shard.quadItem);
-
-                    HQ.addShard(shard);
-                    HQ_SHARD_LIST[shard.id] = shard;
-
-                    HQUpdatePacket.push(
-                        {
-                            id: HQ.id,
-                            supply: HQ.supply,
-                            shards: HQ.shards
-                        }
-                    );
-
-                    delete PLAYER_SHARD_LIST[shard.id];
+                    removePlayerShard(player,shard,"LOCAL");
+                    addHQShard(HQ,shard);
                 }
                 if (player.pressingSpace) {
                     addUIPacket.push(
                         {
                             id: player.id,
-                            action: "open hq"
+                            action: "hq info"
                         }
                     );
 
@@ -233,20 +224,13 @@ var checkCollisions = function () {
     }
 };
 
-var addShards = function () {
+var spawnShards = function () {
     if (Object.size(STATIC_SHARD_LIST) < entityConfig.SHARDS) {
-        var shard = createNewShard();
-        addShardPacket.push({
-            id: shard.id,
-            x: shard.x,
-            y: shard.y,
-            name: null
-        });
+        createEmptyShard();
     }
 };
 
 var updateTiles = function () {
-    //returns activated tile ids
     var tilesPacket = [];
     for (var index in PLAYER_LIST) {
         var currPlayer = PLAYER_LIST[index];
@@ -280,7 +264,7 @@ var updatePlayers = function () {
 };
 
 var updateShards = function () {
-    addShards();
+    spawnShards();
     checkCollisions();
 
     var shardsPacket = [];
@@ -355,7 +339,8 @@ function update() {
             {
                 'playerInfo': deletePlayerPacket,
                 'shardInfo': deleteShardPacket,
-                'HQInfo': deleteHQPacket
+                'HQInfo': deleteHQPacket,
+                'UIInfo': deleteUIPacket
             });
     }
     addShardPacket = [];
@@ -364,12 +349,12 @@ function update() {
     addPlayerPacket = [];
     deletePlayerPacket = [];
 
+    HQUpdatePacket = [];
     addHQPacket = [];
     deleteHQPacket = [];
-    HQUpdatePacket = [];
 
     addUIPacket = [];
-
+    deleteUIPacket = [];
 
 }
 
@@ -396,12 +381,17 @@ io.sockets.on('connection', function (socket) {
     SOCKET_LIST[socket.id] = socket;
     console.log("Client #" + socket.id + " has joined the server");
 
+
     var player = new Entity.Player(socket.id);
     PLAYER_LIST[socket.id] = player;
-    addPlayerPacket.push(addPlayerInfo(player));
+    addPlayerPacket.push({
+        id: player.id,
+        name: player.name,
+        x: player.x,
+        y: player.y
+    });
 
     socket.emit('init', initPacket(socket.id));
-
 
     socket.on('keyEvent', function (data) {
         if (data.id === "left") {
@@ -419,7 +409,7 @@ io.sockets.on('connection', function (socket) {
 
         if (data.id === "space") {
             player.pressingSpace = data.state;
-            placeHeadquarters(player);
+            createHeadquarters(player);
         }
     });
 
@@ -432,8 +422,8 @@ io.sockets.on('connection', function (socket) {
         var shard = HQ_SHARD_LIST[data.id];
         var HQ = shard.HQ;
 
-        HQ.removeShard(shard);
-        player.addShard(shard);
+        removeHQShard(HQ, shard, "LOCAL");
+        addPlayerShard(player,shard);
 
         HQUpdatePacket.push(
             {
@@ -445,31 +435,14 @@ io.sockets.on('connection', function (socket) {
 
         addUIPacket.push({
             id: player.id,
-            action: "open hq"
+            action: "hq info"
         });
-
-        PLAYER_SHARD_LIST[shard.id] = shard;
-        delete HQ_SHARD_LIST[shard.id];
     });
 
     socket.on('disconnect', function () {
         console.log("Client #" + socket.id + " has left the server");
-
-        dropShards(PLAYER_LIST[socket.id]);
-        deletePlayerPacket.push({id: socket.id});
-        deleteHQPacket.push({id: socket.id});
-        if (player.headquarter !== null) {
-            HQTree.remove(HQ_LIST[socket.id].quadItem);
-            for (var i = 0; i < player.headquarter.shards.length; i++) {
-                var shard = player.headquarter.shards[i];
-                deleteShardPacket.push({id: shard.id});
-                delete HQ_SHARD_LIST[shard.id];
-            }
-        }
-
-        delete PLAYER_LIST[socket.id];
+        removePlayer(player);
         delete SOCKET_LIST[socket.id];
-        delete HQ_LIST[socket.id];
     });
 });
 
@@ -477,9 +450,29 @@ io.sockets.on('connection', function (socket) {
 setInterval(update, 1000 / 25);
 
 
-/** MISC METHODS **/
 
-function createNewShard() {
+/** SERVER ADD EVENTS **/
+function addPlayerShard(player,shard) {
+    player.addShard(shard);
+    PLAYER_SHARD_LIST[shard.id] = shard;
+}
+
+function addHQShard(HQ,shard) {
+    HQ.addShard(shard);
+    HQ_SHARD_LIST[shard.id] = shard;
+
+    HQUpdatePacket.push(
+        {
+            id: HQ.id,
+            supply: HQ.supply,
+            shards: HQ.shards
+        }
+    );
+}
+
+/** SERVER CREATION EVENTS **/
+
+function createEmptyShard() {
     var id = Math.random();
     var shard = new Entity.Shard(
         Arithmetic.getRandomInt(0, entityConfig.WIDTH),
@@ -497,40 +490,21 @@ function createNewShard() {
     };
     shardTree.insert(shard.quadItem);
     STATIC_SHARD_LIST[id] = shard;
+
+    addShardPacket.push({
+        id: shard.id,
+        x: shard.x,
+        y: shard.y,
+        name: null
+    });
+
     return shard;
 }
 
-Object.size = function (obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
-};
-
-/** Player Events **/
-
-function dropShards(player) {
-    var dropShard = function (shard) {
-        player.removeShard(shard);
-        delete PLAYER_SHARD_LIST[shard.id];
-    };
-
-    for (var i = 0; i < player.shards.length; i++) {
-        var shard = PLAYER_SHARD_LIST[player.shards[i]];
-        dropShard(shard);
-    }
-
-    //remove emptyShard
-    if (player.emptyShard !== null) {
-        dropShard(player.emptyShard);
-    }
-}
-
-function placeHeadquarters(player) {
+function createHeadquarters(player) {
     if (player.headquarter === null) {
         var headquarter = new Entity.Headquarter(player, player.x, player.y);
-
+        HQ_LIST[headquarter.id] = headquarter;
         headquarter.quadItem = {
             cell: headquarter,
             bound: {
@@ -541,9 +515,7 @@ function placeHeadquarters(player) {
             }
         };
         HQTree.insert(headquarter.quadItem);
-
         player.headquarter = headquarter;
-        HQ_LIST[headquarter.id] = headquarter;
         addHQPacket.push({
             id: headquarter.id,
             owner: headquarter.owner.name,
@@ -553,7 +525,77 @@ function placeHeadquarters(player) {
             shards: headquarter.shards
         });
 
-
         player.pressingSpace = false;
     }
 }
+
+/** SERVER REMOVE EVENTS **/
+
+function removePlayer(player) {
+    for (var i = 0; i < player.shards.length; i++) {
+        var shard = PLAYER_SHARD_LIST[HQ.shards[i]];
+        removePlayerShard(player, shard, "GLOBAL");
+    }
+    if (player.headquarter !== null) {
+        removeHQ(player.headquarter);
+    }
+    delete PLAYER_LIST[player.id];
+}
+
+function removeHQ(HQ) {
+    HQTree.remove(HQ.quadItem);
+    for (var i = 0; i < HQ.shards.length; i++) {
+        var shard = HQ_SHARD_LIST[HQ.shards[i]];
+        removeHQShard(HQ, shard, "GLOBAL");
+    }
+    deleteHQPacket.push({id: socket.id});
+}
+
+function removeStaticShard(shard,status) {
+    delete STATIC_SHARD_LIST[shard.id];
+    if (status === "GLOBAL") {
+        deleteShardPacket.push({id: shard.id});
+    }
+}
+
+function removePlayerShard(player, shard, status) {
+    player.removeShard(shard);
+    shardTree.remove(shard.quadItem);
+    delete PLAYER_SHARD_LIST[shard.id];
+
+    if (status === "GLOBAL") {
+        deleteShardPacket.push({id: shard.id});
+    }
+}
+
+function removeHQShard(HQ, shard, status) {
+    HQ.removeShard(shard);
+    delete HQ_SHARD_LIST[shard.id];
+
+    if (status === "GLOBAL") {
+        deleteShardPacket.push({id: shard.id});
+    }
+    else {
+        HQUpdatePacket.push(
+            {
+                id: HQ.id,
+                supply: HQ.supply,
+                shards: HQ.shards
+            }
+        );
+    }
+}
+
+
+
+
+/** MISC METHODS **/
+
+Object.size = function (obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
+

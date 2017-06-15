@@ -1,0 +1,10 @@
+Deletion -
+
+GLOBAL - never seen again in server, issue a deletion packet
+LOCAL - deletion only for that list, object still exists in the server
+
+
+
+Creation -
+
+always GLOBAL - always will issue an add Packet

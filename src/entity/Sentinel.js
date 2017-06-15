@@ -12,6 +12,4 @@ function Sentinel(owner, x, y) {
 }
 
 
-
-
 module.exports = Sentinel;

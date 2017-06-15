@@ -27,7 +27,7 @@ function Player(id) {
 function getRandomColor() {
     var letters = '0123456789ABCDEF';
     var color = '#';
-    for (var i = 0; i < 6; i++ ) {
+    for (var i = 0; i < 6; i++) {
         color += letters[Math.floor(Math.random() * 16)];
     }
     return color;
@@ -36,22 +36,22 @@ function getRandomColor() {
 
 Player.prototype.updatePosition = function () {
     if (this.pressingDown) {
-        if (!onBoundary(this.y+this.maxSpeed)) {
+        if (!onBoundary(this.y + this.maxSpeed)) {
             this.y += this.maxSpeed;
         }
     }
     if (this.pressingUp) {
-        if (!onBoundary(this.y-this.maxSpeed)) {
+        if (!onBoundary(this.y - this.maxSpeed)) {
             this.y -= this.maxSpeed;
         }
     }
     if (this.pressingLeft) {
-        if (!onBoundary(this.x-this.maxSpeed)) {
+        if (!onBoundary(this.x - this.maxSpeed)) {
             this.x -= this.maxSpeed;
         }
     }
     if (this.pressingRight) {
-        if (!onBoundary(this.x+this.maxSpeed)) {
+        if (!onBoundary(this.x + this.maxSpeed)) {
             this.x += this.maxSpeed;
         }
     }
@@ -61,22 +61,28 @@ var onBoundary = function (coord) {
     return coord <= 0 || coord >= entityConfig.WIDTH;
 };
 
-Player.prototype.addEmptyShard = function(shard) {
-    shard.owner = this;
-    this.emptyShard = shard;
-    shard.timer = 100;
-};
 
-Player.prototype.addShard = function(shard) {
+Player.prototype.addShard = function (shard) {
+    if (shard.name === null) {
+        this.emptyShard = shard;
+    }
+    else {
+        this.shards.push(shard.id);
+    }
+    shard.timer = 100;
     shard.owner = this;
-    this.shards.push(shard.id);
 };
 
 Player.prototype.removeShard = function (shard) {
+    if (shard === this.emptyShard) {
+        this.emptyShard = null;
+    }
+    else {
+        var index = this.shards.indexOf(shard.id);
+        this.shards.splice(index, 1);
+    }
     shard.owner = null;
     shard.timer = 0;
-    var index = this.shards.indexOf(shard.id);
-    this.shards.splice(index, 1);
 };
 
 Player.prototype.transformEmptyShard = function (name) {

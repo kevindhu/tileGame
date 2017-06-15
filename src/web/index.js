@@ -87,6 +87,16 @@ function deleteEntities(data) {
         var HQInfo = HQPacket[l];
         delete HQ_LIST[HQInfo.id];
     }
+
+    var UIPacket = data.UIInfo;
+    for (var i = 0; i < UIPacket.length; i++) {
+        var UIInfo = UIPacket[i];
+        if (selfId === UIInfo.id) {
+            closeUI(UIInfo.action);
+        }
+    }
+
+
 }
 
 function addEntities(data) {
@@ -263,10 +273,9 @@ document.onkeyup = function (event) {
 };
 
 
-var textInput = document.getElementById("textInput");
 
 function defineMessage() {
-    var text = textInput.value;
+    var text = document.getElementById("textInput").value;
     if (text !== null) {
         socket.emit('textInput',
             {
@@ -275,12 +284,10 @@ function defineMessage() {
             }
         )
     }
-    textInput.value = "";
     closeUI("name shard");
 }
 
 function addShardsToList(list) {
-    console.log(HQ_LIST[selfId].shards);
     for (var i = 0; i < HQ_LIST[selfId].shards.length; i++) {
         var entry = document.createElement('li');
         var shard = SHARD_LIST[HQ_LIST[selfId].shards[i]];
