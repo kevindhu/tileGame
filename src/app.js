@@ -12,10 +12,9 @@ var SOCKET_LIST = {};
 /** ENTITIES STORAGE**/
 var TILE_ARRAY = [];
 var PLAYER_LIST = {};
-
 var HQ_LIST = {};
 var STATIC_SHARD_LIST = {};
-var MOVING_SHARD_LIST = {};
+var PLAYER_SHARD_LIST = {};
 var HQ_SHARD_LIST = {};
 
 
@@ -111,8 +110,8 @@ var initPacket = function (id) {
         })
     }
 
-    for (var i in MOVING_SHARD_LIST) {
-        var currShard = MOVING_SHARD_LIST[i];
+    for (var i in PLAYER_SHARD_LIST) {
+        var currShard = PLAYER_SHARD_LIST[i];
         shardPacket.push({
             name: currShard.name,
             id: currShard.id,
@@ -173,13 +172,14 @@ var checkCollision = function (player) {
     };
     //shard collision
     shardTree.find(playerBound, function (shard) {
-        if (player !== shard.owner && shard.timer === 0 && player.emptyShard === null) {
+        if (player !== shard.owner && shard.timer === 0
+            && player.emptyShard === null) {
             if (shard.owner !== null) {
                 shard.owner.removeShard(shard);
             }
 
             player.addEmptyShard(shard);
-            MOVING_SHARD_LIST[shard.id] = shard;
+            PLAYER_SHARD_LIST[shard.id] = shard;
 
             addUIPacket.push({
                 id: player.id,
@@ -195,7 +195,7 @@ var checkCollision = function (player) {
     HQTree.find(playerBound, function (HQ) {
             if (player === HQ.owner) {
                 for (var i = 0; i < player.shards.length; i++) {
-                    var shard = player.shards[i];
+                    var shard = PLAYER_SHARD_LIST[player.shards[i]];
                     player.removeShard(shard);
                     shardTree.remove(shard.quadItem);
 
@@ -210,7 +210,7 @@ var checkCollision = function (player) {
                         }
                     );
 
-                    delete MOVING_SHARD_LIST[shard.id];
+                    delete PLAYER_SHARD_LIST[shard.id];
                 }
                 if (player.pressingSpace) {
                     addUIPacket.push(
@@ -234,8 +234,7 @@ var checkCollisions = function () {
 };
 
 var addShards = function () {
-    if (Object.size(STATIC_SHARD_LIST) < entityConfig.SHARDS + 2) {
-        //console.log("shard added!");
+    if (Object.size(STATIC_SHARD_LIST) < entityConfig.SHARDS) {
         var shard = createNewShard();
         addShardPacket.push({
             id: shard.id,
@@ -287,8 +286,8 @@ var updateShards = function () {
     var shardsPacket = [];
     var currShard = null;
 
-    for (var id in MOVING_SHARD_LIST) {
-        currShard = MOVING_SHARD_LIST[id];
+    for (var id in PLAYER_SHARD_LIST) {
+        currShard = PLAYER_SHARD_LIST[id];
         currShard.x = currShard.owner.x + Arithmetic.getRandomInt(-5, 5);
         currShard.y = currShard.owner.y + Arithmetic.getRandomInt(-5, 5);
 
@@ -335,14 +334,15 @@ function update() {
     for (var index in SOCKET_LIST) {
         var currSocket = SOCKET_LIST[index];
 
+
         currSocket.emit('updateEntities',
             {
                 'playerInfo': playerUpdatePacket,
                 'tileInfo': tileUpdatePacket,
                 'shardInfo': shardsUpdatePacket,
                 'HQInfo': HQUpdatePacket
-            }
-        );
+            });
+
         currSocket.emit('addEntities',
             {
                 'playerInfo': addPlayerPacket,
@@ -350,6 +350,7 @@ function update() {
                 'HQInfo': addHQPacket,
                 'UIInfo': addUIPacket
             });
+
         currSocket.emit('deleteEntities',
             {
                 'playerInfo': deletePlayerPacket,
@@ -424,12 +425,7 @@ io.sockets.on('connection', function (socket) {
 
     socket.on('textInput', function (data) {
         var player = PLAYER_LIST[data.id];
-
-        if (player.emptyShard !== null) {
-            player.emptyShard.name = data.word;
-            player.shards.push(player.emptyShard);
-            player.emptyShard = null;
-        }
+        player.transformEmptyShard(data.word);
     });
 
     socket.on('removeShardHQ', function (data) {
@@ -452,7 +448,7 @@ io.sockets.on('connection', function (socket) {
             action: "open hq"
         });
 
-        MOVING_SHARD_LIST[shard.id] = shard;
+        PLAYER_SHARD_LIST[shard.id] = shard;
         delete HQ_SHARD_LIST[shard.id];
     });
 
@@ -516,16 +512,16 @@ Object.size = function (obj) {
 
 function dropShards(player) {
     var dropShard = function (shard) {
-        shard.owner = null;
-        shard.timer = 0;
-        delete MOVING_SHARD_LIST[shard.id];
+        player.removeShard(shard);
+        delete PLAYER_SHARD_LIST[shard.id];
     };
 
     for (var i = 0; i < player.shards.length; i++) {
-        var shard = player.shards[i];
+        var shard = PLAYER_SHARD_LIST[player.shards[i]];
         dropShard(shard);
     }
 
+    //remove emptyShard
     if (player.emptyShard !== null) {
         dropShard(player.emptyShard);
     }
@@ -557,7 +553,6 @@ function placeHeadquarters(player) {
             shards: headquarter.shards
         });
 
-        console.log("adding HQ for " + headquarter.id);
 
         player.pressingSpace = false;
     }

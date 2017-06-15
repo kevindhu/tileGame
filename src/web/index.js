@@ -63,12 +63,9 @@ function clientInit(data) {
     var HQPacket = data.HQPacket;
     for (var l = 0; l < HQPacket.length; l++) {
         var HQInfo = HQPacket[l];
-        console.log("HQINFO: " + HQInfo);
         HQ_LIST[HQInfo.id] = new Headquarter(HQInfo);
     }
     selfId = data.selfId;
-
-    console.log(SHARD_LIST);
 }
 
 function deleteEntities(data) {
@@ -82,7 +79,6 @@ function deleteEntities(data) {
     var shardPacket = data.shardInfo;
     for (var i = 0; i < shardPacket.length; i++) {
         var shardInfo = shardPacket[i];
-        console.log("deleted shard:"  + shardInfo.id);
         delete SHARD_LIST[shardInfo.id];
     }
 
@@ -147,10 +143,8 @@ var updateTiles = function (packet) {
 };
 
 var updateShards = function (packet) {
-    console.log(packet);
     for (var i = 0; i < packet.length; i++) {
         var shardInfo = packet[i];
-        console.log("SHARD ID: " + shardInfo.id);
         var shard = SHARD_LIST[shardInfo.id];
         shard.x = shardInfo.x;
         shard.y = shardInfo.y;
@@ -164,7 +158,6 @@ var updateHQs = function (packet) {
         var HQ = HQ_LIST[HQInfo.id];
         HQ.supply = HQInfo.supply;
         HQ.shards = HQInfo.shards;
-        console.log(HQ.shards);
     }
 };
 
@@ -287,7 +280,7 @@ function defineMessage() {
 }
 
 function addShardsToList(list) {
-    console.log("SHARDS #: " + HQ_LIST[selfId].shards.length);
+    console.log(HQ_LIST[selfId].shards);
     for (var i = 0; i < HQ_LIST[selfId].shards.length; i++) {
         var entry = document.createElement('li');
         var shard = SHARD_LIST[HQ_LIST[selfId].shards[i]];

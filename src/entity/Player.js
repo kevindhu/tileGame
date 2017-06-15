@@ -69,12 +69,22 @@ Player.prototype.addEmptyShard = function(shard) {
 
 Player.prototype.addShard = function(shard) {
     shard.owner = this;
-    this.shards.push(shard);
+    this.shards.push(shard.id);
 };
 
 Player.prototype.removeShard = function (shard) {
-    var index = this.shards.indexOf(shard);
+    shard.owner = null;
+    shard.timer = 0;
+    var index = this.shards.indexOf(shard.id);
     this.shards.splice(index, 1);
+};
+
+Player.prototype.transformEmptyShard = function (name) {
+    if (this.emptyShard !== null) {
+        this.emptyShard.name = name;
+        this.addShard(this.emptyShard);
+        this.emptyShard = null;
+    }
 };
 
 module.exports = Player;

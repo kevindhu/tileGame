@@ -6,7 +6,6 @@ function openUI(action) {
         shardNamer.style.display = 'block';
     }
     if (action === "open hq") {
-        console.log("OPEN HQ UI");
         HQInfo.style.display = 'block';
         var list = document.getElementById('shards_list');
         list.innerHTML = "";
