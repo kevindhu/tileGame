@@ -1,7 +1,7 @@
 const entityConfig = require('./entityConfig');
 
 function Sentinel(owner, x, y) {
-    this.id = owner.id;
+    this.id = Math.random();
     this.owner = owner;
     this.x = x;
     this.y = y;

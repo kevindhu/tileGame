@@ -12,6 +12,7 @@ var PLAYER_LIST = {};
 var TILE_LIST = {};
 var SHARD_LIST = {};
 var HQ_LIST = {};
+var SENTINEL_PACKET = {};
 
 var Player = function (playerInfo) {
     this.id = playerInfo.id;
@@ -40,6 +41,9 @@ var Headquarter = function (HQInfo) {
     this.name = HQInfo.owner;
     this.shards = HQInfo.shards;
 };
+var Sentinel = function (sentinelInfo) {
+
+}
 
 
 function clientInit(data) {
@@ -237,42 +241,43 @@ setInterval(drawScene, 1000 / 25);
 
 
 document.onkeydown = function (event) {
-    if (event.keyCode === 68 || event.keyCode === 39) { //d
-        socket.emit('keyEvent', {id: 'right', state: true});
-    }
-    if (event.keyCode === 83 || event.keyCode === 40) { //s
-        socket.emit('keyEvent', {id: 'down', state: true});
-    }
-    if (event.keyCode === 65 || event.keyCode === 37) { //a
-        socket.emit('keyEvent', {id: 'left', state: true});
-    }
-    if (event.keyCode === 87 || event.keyCode === 38) { //w
-        socket.emit('keyEvent', {id: 'up', state: true});
-    }
-    if (event.keyCode === 32) {
-        socket.emit('keyEvent', {id: 'space', state: true});
+    var id = returnId(event.keyCode);
+    if (id !== null) {
+        socket.emit('keyEvent', {id: id, state: true});
     }
 };
 
 document.onkeyup = function (event) {
-    if (event.keyCode === 68 || event.keyCode === 39) { //d
-        socket.emit('keyEvent', {id: 'right', state: false});
-    }
-    if (event.keyCode === 83 || event.keyCode === 40) { //s
-        socket.emit('keyEvent', {id: 'down', state: false});
-    }
-    if (event.keyCode === 65 || event.keyCode === 37) { //a
-        socket.emit('keyEvent', {id: 'left', state: false});
-    }
-    if (event.keyCode === 87 || event.keyCode === 38) { //w
-        socket.emit('keyEvent', {id: 'up', state: false});
-    }
-    if (event.keyCode === 32) {
-        socket.emit('keyEvent', {id: 'space', state: false});
+    var id = returnId(event.keyCode);
+    if (id !== null) {
+        socket.emit('keyEvent', {id: id, state: false});
     }
 };
 
-
+var returnId = function (keyCode) {
+    var id = null;
+    switch (keyCode) {
+        case 39:
+            id = 'right';
+            break;
+        case 40:
+            id = 'down';
+            break;
+        case 37:
+            id = 'left';
+            break;
+        case 38:
+            id = 'up';
+            break;
+        case 32:
+            id = 'space';
+            break;
+        case 65:
+            id = 'A';
+            break;
+    }
+    return id;
+};
 
 function defineMessage() {
     var text = document.getElementById("textInput").value;

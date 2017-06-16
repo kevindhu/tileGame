@@ -11,6 +11,7 @@ function Player(id) {
     this.pressingLeft = false;
     this.pressingRight = false;
     this.pressingSpace = false;
+    this.pressingA = false;
 
     var randomColor = getRandomColor();
     this.color = randomColor;
