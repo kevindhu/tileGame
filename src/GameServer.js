@@ -31,16 +31,35 @@ function GameServer() {
 
     this.shardTree = null;
     this.HQTree = null;
+    this.tileTree = null;
 
     this.tileLength = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
 }
 
 /** SERVER ENTITY INIT METHODS **/
 GameServer.prototype.initTiles = function () {
+    this.tileTree = new QuadNode({
+        minx: 0,
+        miny: 0,
+        maxx: entityConfig.WIDTH,
+        maxy: entityConfig.WIDTH
+    });
     for (var i = 0; i < Math.sqrt(entityConfig.TILES); i++) {
         var row = [];
         for (var j = 0; j < Math.sqrt(entityConfig.TILES); j++) {
-            row[j] = new Entity.Tile(this.tileLength * i, this.tileLength * j);
+            var tile = new Entity.Tile(this.tileLength * i, this.tileLength * j);
+            row[j] = tile;
+
+            tile.quadItem = {
+                cell: tile,
+                bound: {
+                    minx: tile.x,
+                    miny: tile.y,
+                    maxx: tile.x + this.tileLength,
+                    maxy: tile.y + this.tileLength
+                }
+            };
+            this.tileTree.insert(tile.quadItem);
         }
         this.TILE_ARRAY[i] = row;
     }
@@ -177,6 +196,25 @@ GameServer.prototype.spawnShards = function () {
     }
 };
 
+GameServer.prototype.getPlayerTile = function (player) {
+    var playerBound = {
+        minx: player.x - entityConfig.SHARD_WIDTH,
+        miny: player.y - entityConfig.SHARD_WIDTH,
+        maxx: player.x + entityConfig.SHARD_WIDTH,
+        maxy: player.y + entityConfig.SHARD_WIDTH
+    };
+    var ret;
+
+    this.tileTree.find(playerBound, function (tile) {
+        //console.log("player is stepping on tile " + tile.id);
+        ret = tile;
+    });
+
+    return ret;
+
+};
+
+
 GameServer.prototype.checkCollision = function (player) {
     var playerBound = {
         minx: player.x - entityConfig.SHARD_WIDTH,
@@ -184,6 +222,7 @@ GameServer.prototype.checkCollision = function (player) {
         maxx: player.x + entityConfig.SHARD_WIDTH,
         maxy: player.y + entityConfig.SHARD_WIDTH
     };
+
     //shard collision
     this.shardTree.find(playerBound, function (shard) {
         if (player !== shard.owner && shard.timer === 0
@@ -234,6 +273,7 @@ GameServer.prototype.checkCollision = function (player) {
             }
         }.bind(this)
     );
+
 };
 
 GameServer.prototype.checkCollisions = function () {
@@ -552,18 +592,24 @@ GameServer.prototype.createHeadquarters = function (player) {
 };
 
 GameServer.prototype.createSentinel = function (player) {
-    var sentinel = new Entity.Sentinel(player, player.x, player.y);
-    this.SENTINEL_LIST[sentinel.id] = sentinel;
-    this.addSentinelPacket.push(
-        {
-            id: sentinel.id,
-            owner: sentinel.owner.name,
-            x: sentinel.x,
-            y: sentinel.y,
-            supply: sentinel.supply,
-            shards: sentinel.shards
-        }
-    );
+    var tile = this.getPlayerTile(player);
+    console.log(tile);
+    if (tile !== null && tile.sentinel === null) {
+        console.log("ADDING SENTINEL");
+        var sentinel = new Entity.Sentinel(player, player.x, player.y);
+        this.SENTINEL_LIST[sentinel.id] = sentinel;
+        this.addSentinelPacket.push(
+            {
+                id: sentinel.id,
+                owner: sentinel.owner.name,
+                x: sentinel.x,
+                y: sentinel.y,
+                supply: sentinel.supply,
+                shards: sentinel.shards
+            }
+        );
+        tile.sentinel = sentinel;
+    }
 };
 
 /** SERVER REMOVE EVENTS **/
