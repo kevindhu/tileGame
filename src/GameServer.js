@@ -53,10 +53,10 @@ GameServer.prototype.initTiles = function () {
             tile.quadItem = {
                 cell: tile,
                 bound: {
-                    minx: tile.x,
-                    miny: tile.y,
-                    maxx: tile.x + this.tileLength,
-                    maxy: tile.y + this.tileLength
+                    minx: tile.x + this.tileLength / 4,
+                    miny: tile.y + this.tileLength / 4,
+                    maxx: tile.x + this.tileLength * 3 / 4,
+                    maxy: tile.y + this.tileLength * 3 / 4
                 }
             };
             this.tileTree.insert(tile.quadItem);
@@ -203,7 +203,7 @@ GameServer.prototype.getPlayerTile = function (player) {
         maxx: player.x + entityConfig.SHARD_WIDTH,
         maxy: player.y + entityConfig.SHARD_WIDTH
     };
-    var ret;
+    var ret = null;
 
     this.tileTree.find(playerBound, function (tile) {
         //console.log("player is stepping on tile " + tile.id);
@@ -453,27 +453,28 @@ GameServer.prototype.start = function () {
         socket.emit('init', this.createClientInitPacket(socket.id));
 
         socket.on('keyEvent', function (data) {
-            if (data.id === "left") {
-                player.pressingLeft = data.state;
+            switch (data.id) {
+                case "left":
+                    player.pressingLeft = data.state;
+                    break;
+                case "right":
+                    player.pressingRight = data.state;
+                    break;
+                case "up":
+                    player.pressingUp = data.state;
+                    break;
+                case "down":
+                    player.pressingDown = data.state;
+                    break;
+                case "space":
+                    player.pressingSpace = data.state;
+                    this.createHeadquarters(player);
+                    break;
+                case "A":
+                    player.pressingA = data.state;
+                    this.createSentinel(player);
+                    break;
             }
-            if (data.id === "right") {
-                player.pressingRight = data.state;
-            }
-            if (data.id === "up") {
-                player.pressingUp = data.state;
-            }
-            if (data.id === "down") {
-                player.pressingDown = data.state;
-            }
-            if (data.id === "space") {
-                player.pressingSpace = data.state;
-                this.createHeadquarters(player);
-            }
-            if (data.id === "A") {
-                player.pressingA = data.state;
-                this.createSentinel(player);
-            }
-
         }.bind(this));
 
         socket.on('textInput', function (data) {
@@ -593,9 +594,7 @@ GameServer.prototype.createHeadquarters = function (player) {
 
 GameServer.prototype.createSentinel = function (player) {
     var tile = this.getPlayerTile(player);
-    console.log(tile);
     if (tile !== null && tile.sentinel === null) {
-        console.log("ADDING SENTINEL");
         var sentinel = new Entity.Sentinel(player, player.x, player.y);
         this.SENTINEL_LIST[sentinel.id] = sentinel;
         this.addSentinelPacket.push(

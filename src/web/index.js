@@ -92,24 +92,17 @@ function addEntities(data) {
 }
 
 function deleteEntities(data) {
-    var packet = data.playerInfo;
-    for (var i = 0; i < packet.length; i++) {
-        var playerInfo = packet[i];
-        console.log(playerInfo.id + " has left the server!");
-        delete PLAYER_LIST[playerInfo.id];
-    }
+    var deleteEntity = function (packet, list) {
+        for (var i = 0; i < packet.length; i++) {
+            var info = packet[i];
+            delete list[info.id];
+        }
+    };
 
-    var shardPacket = data.shardInfo;
-    for (var i = 0; i < shardPacket.length; i++) {
-        var shardInfo = shardPacket[i];
-        delete SHARD_LIST[shardInfo.id];
-    }
+    deleteEntity(data.playerInfo, PLAYER_LIST);
+    deleteEntity(data.shardInfo, SHARD_LIST);
+    deleteEntity(data.HQInfo, HQ_LIST);
 
-    var HQPacket = data.HQInfo;
-    for (var l = 0; l < HQPacket.length; l++) {
-        var HQInfo = HQPacket[l];
-        delete HQ_LIST[HQInfo.id];
-    }
 
     var UIPacket = data.UIInfo;
     for (var i = 0; i < UIPacket.length; i++) {
