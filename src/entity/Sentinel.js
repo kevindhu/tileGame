@@ -9,6 +9,7 @@ function Sentinel(owner, x, y) {
     this.supply = 0;
     this.radius = 10;
     this.shards = [];
+    this.color = owner.color;
 }
 
 

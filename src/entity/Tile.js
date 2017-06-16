@@ -25,6 +25,10 @@ Tile.prototype.updateOwner = function (newOwner) {
     }
 };
 
-
+Tile.prototype.setSentinel = function (sentinel) {
+    this.sentinel = sentinel;
+    this.color = sentinel.color;
+    this.owner = sentinel.owner;
+};
 
 module.exports = Tile;

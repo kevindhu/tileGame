@@ -3,3 +3,12 @@ when it is really being buggy
 
 
 - catch 22: update first or instantiate first?
+
+
+
+
+
+RESOLVED:
+
+if hasBinary issue -
+    probably pushing objects to be emitted, not integers or strings

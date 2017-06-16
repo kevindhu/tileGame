@@ -242,7 +242,6 @@ var drawScene = function () {
 
 setInterval(drawScene, 1000 / 25);
 
-
 document.onkeydown = function (event) {
     var id = returnId(event.keyCode);
     if (id !== null) {
