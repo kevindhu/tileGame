@@ -69,7 +69,7 @@ GameServer.prototype.initHQs = function () {
 };
 
 /** CLIENT ENTITY INIT METHODS **/
-GameServer.prototype.initPacket = function (id) {
+GameServer.prototype.createClientInitPacket = function (id) {
     var i,
         ret = {},
         playerPacket = [],
@@ -160,11 +160,11 @@ GameServer.prototype.initPacket = function (id) {
         })
     }
 
-    ret['tilePacket'] = tilePacket;
-    ret['playerPacket'] = playerPacket;
-    ret['shardPacket'] = shardPacket;
-    ret['HQPacket'] = HQPacket;
-    ret['sentinelPacket'] = sentinelPacket;
+    ret['tileInfo'] = tilePacket;
+    ret['playerInfo'] = playerPacket;
+    ret['shardInfo'] = shardPacket;
+    ret['HQInfo'] = HQPacket;
+    ret['sentinelInfo'] = sentinelPacket;
     ret['selfId'] = id;
 
     return ret;
@@ -370,7 +370,7 @@ GameServer.prototype.update = function () {
     this.deleteUIPacket = [];
     this.deleteSentinelPacket = [];
 
-    this.HQUpdatePacket = [];
+    this.updateHQPacket = [];
 
 };
 
@@ -410,7 +410,7 @@ GameServer.prototype.start = function () {
             y: player.y
         });
 
-        socket.emit('init', this.initPacket(socket.id));
+        socket.emit('init', this.createClientInitPacket(socket.id));
 
         socket.on('keyEvent', function (data) {
             if (data.id === "left") {
@@ -448,7 +448,7 @@ GameServer.prototype.start = function () {
             this.removeHQShard(HQ, shard, "LOCAL");
             this.addPlayerShard(player, shard);
 
-            this.HQUpdatePacket.push(
+            this.updateHQPacket.push(
                 {
                     id: HQ.id,
                     supply: HQ.supply,
@@ -572,12 +572,15 @@ GameServer.prototype.removePlayer = function (player) {
         var shard = this.PLAYER_SHARD_LIST[player.shards[i]];
         this.removePlayerShard(player, shard, "GLOBAL");
     }
+    if (player.emptyShard !== null) {
+        this.removePlayerShard(player, player.emptyShard, "GLOBAL");
+    }
     if (player.headquarter !== null) {
         this.removeHQ(player.headquarter);
     }
+    this.deletePlayerPacket.push({id: player.id});
     delete this.PLAYER_LIST[player.id];
 };
-
 
 GameServer.prototype.removeHQ = function (HQ) {
     this.HQTree.remove(HQ.quadItem);
@@ -585,29 +588,29 @@ GameServer.prototype.removeHQ = function (HQ) {
         var shard = this.HQ_SHARD_LIST[HQ.shards[i]];
         this.removeHQShard(HQ, shard, "GLOBAL");
     }
-    this.deleteHQPacket.push({id: socket.id});
+    this.deleteHQPacket.push({id: HQ.id});
+    delete this.HQ_LIST[HQ.id];
 };
 
 GameServer.prototype.removeStaticShard = function (shard, status) {
-    delete this.STATIC_SHARD_LIST[shard.id];
     if (status === "GLOBAL") {
         this.deleteShardPacket.push({id: shard.id});
     }
+    delete this.STATIC_SHARD_LIST[shard.id];
 };
 
 GameServer.prototype.removePlayerShard = function (player, shard, status) {
     player.removeShard(shard);
     this.shardTree.remove(shard.quadItem);
-    delete this.PLAYER_SHARD_LIST[shard.id];
 
     if (status === "GLOBAL") {
         this.deleteShardPacket.push({id: shard.id});
     }
+    delete this.PLAYER_SHARD_LIST[shard.id];
 };
 
 GameServer.prototype.removeHQShard = function (HQ, shard, status) {
     HQ.removeShard(shard);
-    delete this.HQ_SHARD_LIST[shard.id];
 
     if (status === "GLOBAL") {
         this.deleteShardPacket.push({id: shard.id});
@@ -621,6 +624,7 @@ GameServer.prototype.removeHQShard = function (HQ, shard, status) {
             }
         );
     }
+    delete this.HQ_SHARD_LIST[shard.id];
 };
 
 
