@@ -7,6 +7,8 @@ socket.on('updateEntities', updateEntities);
 socket.on('deleteEntities', deleteEntities);
 socket.on('addEntities', addEntities);
 
+var SERVER_WIDTH = 400;
+
 var selfId = null;
 var PLAYER_LIST = {};
 var TILE_LIST = {};
@@ -159,6 +161,7 @@ function updateEntities(data) {
 }
 
 var drawScene = function () {
+
     var drawPlayers = function () {
         ctx.font = "20px Arial";
         ctx.fillStyle = "#000000";
@@ -233,11 +236,29 @@ var drawScene = function () {
         }
     };
 
+    var translateScene = function () {
+        var clamp = function (value, min, max){
+            if(value < min) {
+                return min;
+            }
+            else if(value > max) {
+                return max;
+            }
+            return value;
+        }
+
+        var player = PLAYER_LIST[selfId];
+
+        ctx.translate( canvas.width/2 - player.x, canvas.width/2 - player.y);    
+    };
+
     drawTiles();
     drawPlayers();
     drawShards();
     drawHQs();
     drawSentinels();
+    ctx.setTransform(1,0,0,1,0,0);
+    translateScene();
 };
 
 setInterval(drawScene, 1000 / 25);

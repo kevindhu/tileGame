@@ -59,7 +59,7 @@ Player.prototype.updatePosition = function () {
 };
 
 var onBoundary = function (coord) {
-    return coord <= 0 || coord >= entityConfig.WIDTH;
+    return coord <= 0 + entityConfig.WIDTH/4 || coord >= entityConfig.WIDTH - entityConfig.WIDTH/4;
 };
 
 
