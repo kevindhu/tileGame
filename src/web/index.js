@@ -15,6 +15,7 @@ var TILE_LIST = {};
 var SHARD_LIST = {};
 var HQ_LIST = {};
 var SENTINEL_LIST = {};
+var ARROW = null;
 
 var Player = function (playerInfo) {
     this.id = playerInfo.id;
@@ -51,6 +52,20 @@ var Sentinel = function (sentinelInfo) {
     this.name = sentinelInfo.owner;
     this.shards = sentinelInfo.shards;
 };
+var Arrow = function (x,y) {
+    this.preX = x;
+    this.preY = y;
+    this.postX = null;
+    this.postY = null;
+    this.deltaX = function() {
+        return this.postX - this.preX;
+    }
+
+    this.deltaY = function() {
+        return this.postY - this.preY;
+    }
+};
+
 
 
 
@@ -237,6 +252,7 @@ var drawScene = function () {
     };
 
     var translateScene = function () {
+        ctx.setTransform(1,0,0,1,0,0);
         var clamp = function (value, min, max){
             if(value < min) {
                 return min;
@@ -252,16 +268,39 @@ var drawScene = function () {
         ctx.translate( canvas.width/2 - player.x, canvas.width/2 - player.y);    
     };
 
+    var drawArrow = function () {
+        if (ARROW && ARROW.postX) {
+            var player = PLAYER_LIST[selfId];
+            ctx.beginPath();
+            ctx.moveTo(player.x, player.y);
+            ctx.lineTo(player.x+ARROW.deltaX(), player.y + ARROW.deltaY());
+            ctx.stroke();
+        }
+    };
+
     drawTiles();
     drawPlayers();
     drawShards();
     drawHQs();
     drawSentinels();
-    ctx.setTransform(1,0,0,1,0,0);
+    drawArrow();
     translateScene();
 };
 
-setInterval(drawScene, 1000 / 25);
+
+
+var clientLoop = function () {
+    drawScene();
+    ctx.beginPath();
+    ctx.moveTo(20,20);
+    ctx.lineTo(20,100);
+    ctx.lineTo(70,100);
+    ctx.stroke();
+
+}
+
+
+setInterval(clientLoop, 1000 / 25);
 
 document.onkeydown = function (event) {
     var id = returnId(event.keyCode);
@@ -276,6 +315,37 @@ document.onkeyup = function (event) {
         socket.emit('keyEvent', {id: id, state: false});
     }
 };
+
+canvas.addEventListener("mousedown", function (event) {
+
+    var rect = canvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+    ARROW = new Arrow(x, y);
+});
+
+
+canvas.addEventListener("mouseup", function (event) {
+    var rect = canvas.getBoundingClientRect();
+    var x = event.clientX - rect.left;
+    var y = event.clientY - rect.top;
+    socket.emit("arrowVector", {
+        x: -ARROW.deltaX(),
+        y: -ARROW.deltaY()
+    });
+    ARROW = null;
+});
+
+
+canvas.addEventListener("mousemove", function (event) {
+    if (ARROW){
+        var rect = canvas.getBoundingClientRect();
+        var x = event.clientX - rect.left;
+        var y = event.clientY - rect.top;
+        ARROW.postX = x;
+        ARROW.postY = y;
+    }
+});
 
 var returnId = function (keyCode) {
     var id = null;

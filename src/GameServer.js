@@ -9,6 +9,7 @@ function GameServer() {
     this.HQ_LIST = {};
     this.SENTINEL_LIST = {};
     this.STATIC_SHARD_LIST = {};
+    this.SHOOTING_SHARD_LIST = {};
     this.PLAYER_SHARD_LIST = {};
     this.HQ_SHARD_LIST = {};
 
@@ -343,13 +344,32 @@ GameServer.prototype.updateShards = function () {
         this.shardTree.remove(currShard.quadItem);
         this.shardTree.insert(currShard.quadItem);
 
-
         this.updateShardsPacket.push({
             name: currShard.name,
             id: currShard.id,
             x: currShard.x,
             y: currShard.y
         });
+    }
+
+    for (id in this.SHOOTING_SHARD_LIST) {
+        currShard = this.SHOOTING_SHARD_LIST[id];
+        if (currShard.xVel !== 0) { 
+	        currShard.updatePosition();
+
+	        this.updateShardsPacket.push({
+	            name: currShard.name,
+	            id: currShard.id,
+	            x: currShard.x,
+	            y: currShard.y
+	        });
+    	}
+    	else {
+    		console.log("STATIC SHARD");	
+    		this.removeShootingShard(currShard, "LOCAL");
+    		this.addStaticShard(currShard);
+    	}
+
     }
 
     for (id in this.HQ_SHARD_LIST) {
@@ -483,8 +503,17 @@ GameServer.prototype.start = function () {
         }.bind(this));
 
         socket.on('textInput', function (data) {
-            var player = this.PLAYER_LIST[data.id];
             player.transformEmptyShard(data.word);
+        }.bind(this));
+
+        socket.on("arrowVector", function (data) {
+        	if (player.getRandomShard()) {
+        		console.log(player.getRandomShard());
+	        	var shard = this.PLAYER_SHARD_LIST[player.getRandomShard()];
+	        	this.removePlayerShard(player,shard, "LOCAL");
+	        	shard.addVelocity(data.x,data.y);
+	        	this.addShootingShard(shard);
+	        }
         }.bind(this));
 
         socket.on('removeShardHQ', function (data) {
@@ -521,9 +550,25 @@ GameServer.prototype.start = function () {
 };
 
 /** SERVER ADD EVENTS **/
+GameServer.prototype.addStaticShard = function (shard) {
+    this.STATIC_SHARD_LIST[shard.id] = shard;
+
+    shard.quadItem.bound = {
+            minx: shard.x - shard.radius,
+            miny: shard.y - shard.radius,
+            maxx: shard.x + shard.radius,
+            maxy: shard.y + shard.radius
+        };
+    this.shardTree.insert(shard.quadItem);
+};
+
 GameServer.prototype.addPlayerShard = function (player, shard) {
     player.addShard(shard);
     this.PLAYER_SHARD_LIST[shard.id] = shard;
+};
+
+GameServer.prototype.addShootingShard = function (shard) {
+    this.SHOOTING_SHARD_LIST[shard.id] = shard;
 };
 
 GameServer.prototype.addHQShard = function (HQ, shard) {
@@ -639,6 +684,7 @@ GameServer.prototype.removePlayer = function (player) {
     delete this.PLAYER_LIST[player.id];
 };
 
+
 GameServer.prototype.removeHQ = function (HQ) {
     this.HQTree.remove(HQ.quadItem);
     for (var i = 0; i < HQ.shards.length; i++) {
@@ -654,6 +700,13 @@ GameServer.prototype.removeStaticShard = function (shard, status) {
         this.deleteShardPacket.push({id: shard.id});
     }
     delete this.STATIC_SHARD_LIST[shard.id];
+};
+
+GameServer.prototype.removeShootingShard = function (shard, status) {
+	if (status === "GLOBAL") {
+    	this.deleteShardPacket.push({id: shard.id});
+    }
+    delete this.SHOOTING_SHARD_LIST[shard.id];
 };
 
 GameServer.prototype.removePlayerShard = function (player, shard, status) {

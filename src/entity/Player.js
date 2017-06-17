@@ -1,5 +1,6 @@
 const randomWord = require('random-word');
 const entityConfig = require('./entityConfig');
+const Arithmetic = require('../modules/Arithmetic');
 
 function Player(id) {
     this.id = id;
@@ -59,7 +60,13 @@ Player.prototype.updatePosition = function () {
 };
 
 var onBoundary = function (coord) {
-    return coord <= 0 + entityConfig.WIDTH/4 || coord >= entityConfig.WIDTH - entityConfig.WIDTH/4;
+    return coord <= 0 + entityConfig.WIDTH/8 || coord >= entityConfig.WIDTH - entityConfig.WIDTH/8;
+};
+
+
+Player.prototype.getRandomShard = function () {
+    var randomIndex = Arithmetic.getRandomInt(0,this.shards.length-1);
+    return this.shards[randomIndex];
 };
 
 

@@ -1,7 +1,7 @@
-var WIDTH = 1000;
-var HEIGHT = 1000;
+var WIDTH = 2000;
+var HEIGHT = 2000;
 var TILES = 16;
-var SHARDS = 40;
+var SHARDS = 80;
 var SHARD_WIDTH = 10;
 
 module.exports = {

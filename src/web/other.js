@@ -1,3 +1,12 @@
+var canvas = document.getElementById("bigCanvas");
+var ctx = canvas.getContext("2d");
+
+ctx.beginPath();
+ctx.moveTo(canvas.width/2, canvas.width/2);
+ctx.lineTo(canvas.width/2+124, canvas.width/2 + 124);
+ctx.stroke();
+
+
 function openUI(action) {
     var shardNamer = document.getElementById('shard_namer');
     var HQInfo = document.getElementById('HQ_info');
