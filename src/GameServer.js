@@ -4,16 +4,16 @@ const entityConfig = require('./entity/entityConfig');
 const Arithmetic = require('./modules/Arithmetic');
 
 function GameServer() {
+	this.TILE_ARRAY = [];
     this.SOCKET_LIST = {};
     this.PLAYER_LIST = {};
     this.HQ_LIST = {};
     this.SENTINEL_LIST = {};
+
     this.STATIC_SHARD_LIST = {};
     this.SHOOTING_SHARD_LIST = {};
     this.PLAYER_SHARD_LIST = {};
-    this.HQ_SHARD_LIST = {};
-
-    this.TILE_ARRAY = [];
+    this.HOME_SHARD_LIST = {};
 
     this.addPlayerPacket = [];
     this.addShardPacket = [];
@@ -25,6 +25,7 @@ function GameServer() {
     this.updateTilesPacket = [];
     this.updateShardsPacket = [];
     this.updatePlayersPacket = [];
+    this.updateSentinelsPacket = [];
 
     this.deletePlayerPacket = [];
     this.deleteShardPacket = [];
@@ -36,21 +37,27 @@ function GameServer() {
     this.HQTree = null;
     this.tileTree = null;
 
-    this.tileLength = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
+    this.tileLength = (entityConfig.WIDTH - 2 * entityConfig.BORDER_WIDTH) / Math.sqrt(entityConfig.TILES);
+
+    this.minx =  entityConfig.BORDER_WIDTH;
+    this.miny =  entityConfig.BORDER_WIDTH;
+    this.maxx =  entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
+    this.maxy =  entityConfig.WIDTH - entityConfig.BORDER_WIDTH
 }
 
 /** SERVER ENTITY INIT METHODS **/
 GameServer.prototype.initTiles = function () {
     this.tileTree = new QuadNode({
-        minx: 0,
-        miny: 0,
-        maxx: entityConfig.WIDTH,
-        maxy: entityConfig.WIDTH
+        minx: this.minx,
+        miny: this.miny,
+        maxx: this.maxx,
+        maxy: this.maxy
     });
     for (var i = 0; i < Math.sqrt(entityConfig.TILES); i++) {
         var row = [];
         for (var j = 0; j < Math.sqrt(entityConfig.TILES); j++) {
-            var tile = new Entity.Tile(this.tileLength * i, this.tileLength * j);
+            var tile = new Entity.Tile(entityConfig.BORDER_WIDTH + this.tileLength * i, 
+            	entityConfig.BORDER_WIDTH + this.tileLength * j);
             row[j] = tile;
 
             var centerX = tile.x + this.tileLength / 2;
@@ -59,10 +66,10 @@ GameServer.prototype.initTiles = function () {
             tile.quadItem = {
                 cell: tile,
                 bound: {
-                    minx: centerX - this.tileLength / 7,
-                    miny: centerY - this.tileLength / 7,
-                    maxx: centerX + this.tileLength / 7,
-                    maxy: centerY + this.tileLength / 7
+                    minx: centerX - this.tileLength/7,
+                    miny: centerY - this.tileLength/7,
+                    maxx: centerX + this.tileLength/7,
+                    maxy: centerY + this.tileLength/7 
                 }
             };
             this.tileTree.insert(tile.quadItem);
@@ -73,19 +80,19 @@ GameServer.prototype.initTiles = function () {
 
 GameServer.prototype.initShards = function () {
 	this.shootingShardTree = new QuadNode({
-        minx: 0,
-        miny: 0,
-        maxx: entityConfig.WIDTH,
-        maxy: entityConfig.WIDTH
+        minx: this.minx,
+        miny: this.miny,
+        maxx: this.maxx,
+        maxy: this.maxy
     });
 
     this.shardTree = new QuadNode({
-        minx: 0,
-        miny: 0,
-        maxx: entityConfig.WIDTH,
-        maxy: entityConfig.WIDTH
+        minx: this.minx,
+        miny: this.miny,
+        maxx: this.maxx,
+        maxy: this.maxy
     });
-
+    
     for (var i = 0; i < entityConfig.SHARDS; i++) {
         this.createEmptyShard();
     }
@@ -93,10 +100,10 @@ GameServer.prototype.initShards = function () {
 
 GameServer.prototype.initHQs = function () {
     this.HQTree = new QuadNode({
-        minx: 0,
-        miny: 0,
-        maxx: entityConfig.WIDTH,
-        maxy: entityConfig.WIDTH
+        minx: this.minx,
+        miny: this.miny,
+        maxx: this.maxx,
+        maxy: this.maxy
     });
 };
 
@@ -158,8 +165,8 @@ GameServer.prototype.createClientInitPacket = function (id) {
         })
     }
 
-    for (i in this.HQ_SHARD_LIST) {
-        currShard = this.HQ_SHARD_LIST[i];
+    for (i in this.HOME_SHARD_LIST) {
+        currShard = this.HOME_SHARD_LIST[i];
         shardPacket.push({
             name: currShard.name,
             id: currShard.id,
@@ -285,7 +292,6 @@ GameServer.prototype.checkPlayerCollision = function (player) {
     //shooting shard collision
     this.shootingShardTree.find(playerBound, function (shard) {
     	if (player !== shard.owner) {
-    		console.log("SHOT BITCH from " + shard.id);
     		this.removeShootingShard(shard, "GLOBAL");
     		this.addVoicePacket.push({
     			string: shard.name
@@ -426,8 +432,8 @@ GameServer.prototype.updateShards = function () {
 
     }
 
-    for (id in this.HQ_SHARD_LIST) {
-        currShard = this.HQ_SHARD_LIST[id];
+    for (id in this.HOME_SHARD_LIST) {
+        currShard = this.HOME_SHARD_LIST[id];
         currShard.rotate();
         this.updateShardsPacket.push({
             name: currShard.name,
@@ -451,7 +457,8 @@ GameServer.prototype.update = function () {
                 'playerInfo': this.updatePlayersPacket,
                 'tileInfo': this.updateTilesPacket,
                 'shardInfo': this.updateShardsPacket,
-                'HQInfo': this.updateHQPacket
+                'HQInfo': this.updateHQPacket,
+                'sentinelInfo': this.updateSentinelsPacket
             });
 
         currSocket.emit('addEntities',
@@ -488,6 +495,7 @@ GameServer.prototype.resetPackets = function () {
     this.updateTilesPacket = [];
     this.updateShardsPacket = [];
     this.updatePlayersPacket = [];
+    this.updateSentinelsPacket = [];
 
     this.deletePlayerPacket = [];
     this.deleteShardPacket = [];
@@ -573,8 +581,8 @@ GameServer.prototype.start = function () {
         }.bind(this));
 
         socket.on('removeShardHQ', function (data) {
-            var shard = this.HQ_SHARD_LIST[data.id];
-            var HQ = shard.HQ;
+            var shard = this.HOME_SHARD_LIST[data.id];
+            var HQ = shard.home;
 
             this.removeHQShard(HQ, shard, "LOCAL");
             this.addPlayerShard(player, shard);
@@ -630,7 +638,7 @@ GameServer.prototype.addShootingShard = function (shard, xVel, yVel) {
 
 GameServer.prototype.addHQShard = function (HQ, shard) {
     HQ.addShard(shard);
-    this.HQ_SHARD_LIST[shard.id] = shard;
+    this.HOME_SHARD_LIST[shard.id] = shard;
 
     this.updateHQPacket.push(
         {
@@ -641,12 +649,26 @@ GameServer.prototype.addHQShard = function (HQ, shard) {
     );
 };
 
+
+GameServer.prototype.addSentinelShard = function (sentinel, shard) {
+    sentinel.addShard(shard);
+    this.HOME_SHARD_LIST[shard.id] = shard;
+
+    this.updateSentinelsPacket.push(
+        {
+            id: sentinel.id,
+            supply: sentinel.supply,
+            shards: sentinel.shards
+        }
+    );
+};
+
 /** SERVER CREATION EVENTS **/
 GameServer.prototype.createEmptyShard = function () {
     var id = Math.random();
     var shard = new Entity.Shard(
-        Arithmetic.getRandomInt(0, entityConfig.WIDTH),
-        Arithmetic.getRandomInt(0, entityConfig.WIDTH),
+        Arithmetic.getRandomInt(entityConfig.BORDER_WIDTH, entityConfig.WIDTH-entityConfig.BORDER_WIDTH),
+        Arithmetic.getRandomInt(entityConfig.BORDER_WIDTH, entityConfig.WIDTH-entityConfig.BORDER_WIDTH),
         id
     );
     shard.quadItem = {
@@ -701,8 +723,16 @@ GameServer.prototype.createHeadquarters = function (player) {
 
 GameServer.prototype.createSentinel = function (player) {
     var tile = this.getPlayerTile(player);
-    if (tile !== null && tile.sentinel === null) {
+    if (tile !== null && tile.sentinel === null && 
+    	player.shards.length >= 2) {
+
         var sentinel = new Entity.Sentinel(player, player.x, player.y);
+	    for (var i = 0; i<player.shards.length; i++) {
+	    	var shard = this.PLAYER_SHARD_LIST[player.shards[i]];
+	    	this.removePlayerShard(player,shard, "LOCAL");
+	    	this.addSentinelShard(sentinel,shard);
+	    }
+
         this.SENTINEL_LIST[sentinel.id] = sentinel;
         this.addSentinelPacket.push(
             {
@@ -745,7 +775,7 @@ GameServer.prototype.removePlayer = function (player) {
 GameServer.prototype.removeHQ = function (HQ) {
     this.HQTree.remove(HQ.quadItem);
     for (var i = 0; i < HQ.shards.length; i++) {
-        var shard = this.HQ_SHARD_LIST[HQ.shards[i]];
+        var shard = this.HOME_SHARD_LIST[HQ.shards[i]];
         this.removeHQShard(HQ, shard, "GLOBAL");
     }
     this.deleteHQPacket.push({id: HQ.id});
@@ -792,14 +822,14 @@ GameServer.prototype.removeHQShard = function (HQ, shard, status) {
             }
         );
     }
-    delete this.HQ_SHARD_LIST[shard.id];
+    delete this.HOME_SHARD_LIST[shard.id];
 };
 
 
 /** SPECIAL METHODS **/
 GameServer.prototype.dropHQShard = function (HQ) {
 	if (HQ.getRandomShard()) {
-		var shard = this.HQ_SHARD_LIST[HQ.getRandomShard()];
+		var shard = this.HOME_SHARD_LIST[HQ.getRandomShard()];
 		this.removeHQShard(HQ,shard,"LOCAL");
 		this.addShootingShard(shard,
 			Arithmetic.getRandomInt(-30,30),

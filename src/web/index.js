@@ -7,8 +7,6 @@ socket.on('updateEntities', updateEntities);
 socket.on('deleteEntities', deleteEntities);
 socket.on('addEntities', addEntities);
 
-var SERVER_WIDTH = 400;
-
 var selfId = null;
 var PLAYER_LIST = {};
 var TILE_LIST = {};
@@ -108,7 +106,6 @@ function addEntities(data) {
     var voicePacket = data.voiceInfo;
     for (var i = 0; i < voicePacket.length; i++) {
         var voiceInfo = voicePacket[i];
-        
         var msg = new SpeechSynthesisUtterance(voiceInfo.string);
         window.speechSynthesis.speak(msg);
     }
@@ -153,6 +150,7 @@ function updateEntities(data) {
             var tileInfo = packet[i];
             var tile = TILE_LIST[tileInfo.id];
             tile.color = tileInfo.color;
+            console.log(tile.color);
         }
     };
 
@@ -175,10 +173,21 @@ function updateEntities(data) {
         }
     };
 
+    var updateSentinels = function (packet) {
+        for (var i = 0; i < packet.length; i++) {
+            var sentinelInfo = packet[i];
+            var sentinel = SENTINEL_LIST[sentinelInfo.id];
+            console.log("SENTINEL UPDATED: " + sentinel);
+            sentinel.supply = sentinelInfo.supply;
+            sentinel.shards = sentinelInfo.shards;
+        }
+    }
+
     updatePlayers(data.playerInfo);
     updateTiles(data.tileInfo);
     updateShards(data.shardInfo);
     updateHQs(data.HQInfo);
+    updateSentinels(data.sentinelInfo);
 }
 
 var drawScene = function () {
@@ -193,17 +202,16 @@ var drawScene = function () {
     };
 
     var drawTiles = function () {
-        ctx.clearRect(0, 0, 600, 600);
         for (var id in TILE_LIST) {
             var tile = TILE_LIST[id];
             ctx.fillStyle = tile.color;
             ctx.fillRect(tile.x, tile.y, tile.length, tile.length);
-            ctx.fillStyle = "#000000";
         }
     };
 
     var drawShards = function () {
         for (var id in SHARD_LIST) {
+            ctx.beginPath();
             var shard = SHARD_LIST[id];
             ctx.fillStyle = "#008000";
             if (shard.name !== null) {
@@ -211,22 +219,21 @@ var drawScene = function () {
                 ctx.fillText(shard.name, shard.x, shard.y);
             }
 
-            ctx.beginPath();
             ctx.arc(shard.x, shard.y, 5, 0, 2 * Math.PI, false);
             ctx.fill();
-
+            ctx.closePath();
         }
     };
 
     var drawHQs = function () {
         for (var id in HQ_LIST) {
+            ctx.beginPath();
             var HQ = HQ_LIST[id];
             var radius = 10;
             if (HQ.supply > 10) {
                 radius = 20;
             }
             ctx.fillStyle = "#003290";
-            ctx.beginPath();
             ctx.arc(HQ.x, HQ.y, radius, 0, 2 * Math.PI, false);
             ctx.fill();
             ctx.fillStyle = "#000000";
@@ -234,18 +241,19 @@ var drawScene = function () {
                 ctx.fillText(HQ.name, HQ.x, HQ.y + 20);
                 ctx.fillText(HQ.supply, HQ.x, HQ.y + 40);
             }
+            ctx.closePath();
         }
     };
 
     var drawSentinels = function () {
         for (var id in SENTINEL_LIST) {
+            ctx.beginPath();
             var sentinel = SENTINEL_LIST[id];
             var radius = 5;
             if (sentinel.supply > 10) {
                 radius = 7;
             }
             ctx.fillStyle = "#003290";
-            ctx.beginPath();
             ctx.arc(sentinel.x, sentinel.y, radius, 0, 2 * Math.PI, false);
             ctx.fill();
             ctx.fillStyle = "#000000";
@@ -254,6 +262,7 @@ var drawScene = function () {
                 ctx.fillText(sentinel.name, sentinel.x, sentinel.y + 20);
                 ctx.fillText(sentinel.supply, sentinel.x, sentinel.y + 40);
             }
+            ctx.closePath();
         }
     };
 
@@ -268,7 +277,6 @@ var drawScene = function () {
             }
             return value;
         }
-
         var player = PLAYER_LIST[selfId];
 
         ctx.translate( canvas.width/2 - player.x, canvas.width/2 - player.y);    
@@ -281,9 +289,11 @@ var drawScene = function () {
             ctx.moveTo(player.x, player.y);
             ctx.lineTo(player.x+ARROW.deltaX(), player.y + ARROW.deltaY());
             ctx.stroke();
+            ctx.closePath();
         }
     };
 
+    ctx.clearRect(0, 0, 2000, 2000);
     drawTiles();
     drawPlayers();
     drawShards();
@@ -297,12 +307,6 @@ var drawScene = function () {
 
 var clientLoop = function () {
     drawScene();
-    ctx.beginPath();
-    ctx.moveTo(20,20);
-    ctx.lineTo(20,100);
-    ctx.lineTo(70,100);
-    ctx.stroke();
-
 }
 
 
@@ -332,12 +336,27 @@ canvas.addEventListener("mousedown", function (event) {
 
 
 canvas.addEventListener("mouseup", function (event) {
-    var rect = canvas.getBoundingClientRect();
-    var x = event.clientX - rect.left;
-    var y = event.clientY - rect.top;
+    var magnitude = function (x,y) {
+        return x * x + y * y;
+    };
+
+    var normalize = function(x,y) {
+        return [x/magnitude(x,y), y/magnitude(x,y)];
+    };
+    var x,y;
+
+    if (magnitude(ARROW.deltaX(),ARROW.deltaY()) > 10000) {
+        var vector = normalize(ARROW.deltaX(), ARROW.deltaY());
+        x = -vector[0] * 10000;
+        y = -vector[1] * 10000;
+    }
+    else {
+        x = -ARROW.deltaX();
+        y = -ARROW.deltaY();
+    }
     socket.emit("arrowVector", {
-        x: -ARROW.deltaX(),
-        y: -ARROW.deltaY()
+        x: x,
+        y: y
     });
     ARROW = null;
 });

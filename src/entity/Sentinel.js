@@ -13,4 +13,11 @@ function Sentinel(owner, x, y) {
 }
 
 
+Sentinel.prototype.addShard = function (shard) {
+	this.supply ++;
+    shard.home = this;
+    this.shards.push(shard.id);
+};
+
+
 module.exports = Sentinel;

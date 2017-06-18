@@ -17,13 +17,13 @@ function Headquarter(owner, x, y) {
 
 Headquarter.prototype.addShard = function (shard) {
     this.supply ++;
-    shard.HQ = this;
+    shard.home = this;
     this.shards.push(shard.id);
 };
 
 Headquarter.prototype.removeShard = function (shard) {
     this.supply --;
-    shard.HQ = null;
+    shard.home = null;
     var index = this.shards.indexOf(shard.id);
     this.shards.splice(index, 1);
 };
