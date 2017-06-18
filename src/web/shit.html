@@ -1,0 +1,16 @@
+<script type="text/javascript">
+	function speakthis(msg) {
+	    var speechMessage = new SpeechSynthesisUtterance(msg);
+	    window.speechSynthesis.speak(speechMessage);
+	}
+
+	function speakthis2(msg) {
+	    var speechMessage = new SpeechSynthesisUtterance(msg);
+	    window.speechSynthesis.speak(speechMessage);
+	}
+</script>
+
+<input type="button" value="Close" onclick="speakthis('fuck')" />
+<input type="button" value="Close" onclick="speakthis2('fuck12')" />
+
+	

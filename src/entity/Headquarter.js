@@ -1,4 +1,5 @@
 const entityConfig = require('./entityConfig');
+const Arithmetic = require('../modules/Arithmetic');
 
 function Headquarter(owner, x, y) {
     this.owner = owner;
@@ -27,6 +28,11 @@ Headquarter.prototype.removeShard = function (shard) {
     this.shards.splice(index, 1);
 };
 
+
+Headquarter.prototype.getRandomShard = function () {
+    var randomIndex = Arithmetic.getRandomInt(0,this.shards.length-1);
+    return this.shards[randomIndex];
+}
 
 
 module.exports = Headquarter;
