@@ -196,6 +196,13 @@ function updateEntities(data) {
 
 var drawScene = function () {
 
+    var selfPlayer = PLAYER_LIST[selfId];
+
+    var inBounds = function(player,x,y) {
+        return x < (player.x+canvas.width) && x > (player.x-canvas.width)
+        && y < (player.y+canvas.width) && y > (player.y-canvas.width);
+    }
+
     var drawPlayers = function () {
         ctx.font = "20px Arial";
         ctx.fillStyle = "#000000";
@@ -208,8 +215,10 @@ var drawScene = function () {
     var drawTiles = function () {
         for (var id in TILE_LIST) {
             var tile = TILE_LIST[id];
-            ctx.fillStyle = tile.color;
-            ctx.fillRect(tile.x, tile.y, tile.length, tile.length);
+            if (inBounds(selfPlayer,tile.x, tile.y)) {
+                ctx.fillStyle = tile.color;
+                ctx.fillRect(tile.x, tile.y, tile.length, tile.length);
+            }
         }
     };
 
@@ -299,7 +308,7 @@ var drawScene = function () {
         }
     };
 
-    ctx.clearRect(0, 0, 2000, 2000);
+    ctx.clearRect(0, 0, 8000, 8000);
     drawTiles();
     drawPlayers();
     drawShards();
