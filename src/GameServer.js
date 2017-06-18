@@ -4,7 +4,7 @@ const entityConfig = require('./entity/entityConfig');
 const Arithmetic = require('./modules/Arithmetic');
 
 function GameServer() {
-	this.TILE_ARRAY = [];
+    this.TILE_LIST = {};
     this.SOCKET_LIST = {};
     this.PLAYER_LIST = {};
     this.HQ_LIST = {};
@@ -54,11 +54,10 @@ GameServer.prototype.initTiles = function () {
         maxy: this.maxy
     });
     for (var i = 0; i < Math.sqrt(entityConfig.TILES); i++) {
-        var row = [];
         for (var j = 0; j < Math.sqrt(entityConfig.TILES); j++) {
             var tile = new Entity.Tile(entityConfig.BORDER_WIDTH + this.tileLength * i, 
             	entityConfig.BORDER_WIDTH + this.tileLength * j);
-            row[j] = tile;
+            this.TILE_LIST[tile.id] = tile;
 
             var centerX = tile.x + this.tileLength / 2;
             var centerY = tile.y + this.tileLength / 2;
@@ -74,7 +73,6 @@ GameServer.prototype.initTiles = function () {
             };
             this.tileTree.insert(tile.quadItem);
         }
-        this.TILE_ARRAY[i] = row;
     }
 };
 
@@ -132,18 +130,18 @@ GameServer.prototype.createClientInitPacket = function (id) {
         })
     }
 
-    for (i = 0; i < this.TILE_ARRAY.length; i++) {
-        for (var j = 0; j < this.TILE_ARRAY[i].length; j++) {
-            currTile = this.TILE_ARRAY[i][j];
-            tilePacket.push({
-                id: currTile.id,
-                x: currTile.x,
-                y: currTile.y,
-                length: currTile.length,
-                color: currTile.color
-            });
-        }
+
+    for (i in this.TILE_LIST) {
+        currTile = this.TILE_LIST[i];
+        tilePacket.push({
+            id: currTile.id,
+            x: currTile.x,
+            y: currTile.y,
+            length: currTile.length,
+            color: currTile.color
+        }); 
     }
+    
 
     for (i in this.STATIC_SHARD_LIST) {
         currShard = this.STATIC_SHARD_LIST[i];
@@ -208,6 +206,10 @@ GameServer.prototype.createClientInitPacket = function (id) {
 
     return ret;
 };
+
+
+
+
 
 /** UPDATE METHODS **/
 GameServer.prototype.spawnShards = function () {
@@ -339,24 +341,6 @@ GameServer.prototype.checkCollisions = function () {
     }
 };
 
-GameServer.prototype.updateTiles = function () {
-    var tilesPacket = [];
-    for (var index in this.PLAYER_LIST) {
-        var currPlayer = this.PLAYER_LIST[index];
-        var xIndex = Math.floor(currPlayer.x / this.tileLength);
-        var yIndex = Math.floor(currPlayer.y / this.tileLength);
-        var tile = this.TILE_ARRAY[xIndex][yIndex];
-        tile.updateOwner(currPlayer);
-
-        tilesPacket.push({
-            id: tile.id,
-            owner: tile.owner,
-            health: tile.health,
-            color: tile.color
-        });
-    }
-    return tilesPacket;
-};
 
 GameServer.prototype.updatePlayers = function () {
     for (var index in this.PLAYER_LIST) {
@@ -459,7 +443,7 @@ GameServer.prototype.update = function () {
                 'HQInfo': this.addHQPacket,
                 'sentinelInfo': this.addSentinelPacket,
                 'voiceInfo': this.addVoicePacket
-            });
+            }); 
 
         currSocket.emit('updateEntities',
             {
