@@ -392,9 +392,7 @@ GameServer.prototype.updatePlayers = function () {
 };
 
 GameServer.prototype.updateShards = function () {
-    var id,
-        shard;
-
+    var id, shard;
     this.spawnShards();
     this.checkCollisions();
 

@@ -1,25 +1,24 @@
 const randomWord = require('random-word');
 const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
+var lerp = require('lerp');
 
 function Player(id) {
     this.id = id;
     this.x = entityConfig.WIDTH / 2;
     this.y = entityConfig.WIDTH / 2;
-    this.maxSpeed = 10;
+
     this.pressingUp = false;
     this.pressingDown = false;
     this.pressingLeft = false;
     this.pressingRight = false;
     this.pressingSpace = false;
     this.pressingA = false;
-
-    var randomColor = getRandomColor();
-    this.color = randomColor;
-
-    var randomName = randomWord();
-    this.name = randomName;
-
+    this.color = getRandomColor();
+    this.name = randomWord();
+    this.maxSpeed = 10;
+    this.xSpeed = 0;
+    this.ySpeed = 0;
     this.emptyShard = null;
     this.shards = [];
     this.headquarter = null;
@@ -39,24 +38,45 @@ function getRandomColor() {
 Player.prototype.updatePosition = function () {
     if (this.pressingDown) {
         if (!onBoundary(this.y + this.maxSpeed)) {
-            this.y += this.maxSpeed;
+            this.ySpeed = lerp(this.ySpeed, this.maxSpeed, 0.3);
+        }
+        else {
+            this.ySpeed = 0;
         }
     }
     if (this.pressingUp) {
         if (!onBoundary(this.y - this.maxSpeed)) {
-            this.y -= this.maxSpeed;
+            this.ySpeed = lerp(this.ySpeed, -this.maxSpeed, 0.3);
+        }
+        else {
+            this.ySpeed = 0;
         }
     }
     if (this.pressingLeft) {
         if (!onBoundary(this.x - this.maxSpeed)) {
-            this.x -= this.maxSpeed;
+            this.xSpeed = lerp(this.xSpeed, -this.maxSpeed, 0.3);
+        }
+        else {
+            this.xSpeed = 0;
         }
     }
     if (this.pressingRight) {
         if (!onBoundary(this.x + this.maxSpeed)) {
-            this.x += this.maxSpeed;
+            this.xSpeed = lerp(this.xSpeed, this.maxSpeed, 0.3);
+        }
+        else {
+            this.xSpeed = 0;
         }
     }
+    if (!this.pressingRight && !this.pressingLeft) {
+        this.xSpeed = lerp(this.xSpeed,0,0.3);
+    }
+    if (!this.pressingUp && !this.pressingDown) {
+        this.ySpeed = lerp(this.ySpeed,0,0.3);
+    }
+    this.y += this.ySpeed;
+    this.x += this.xSpeed;
+
 };
 
 var onBoundary = function (coord) {
