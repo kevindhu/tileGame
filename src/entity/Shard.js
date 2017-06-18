@@ -36,9 +36,6 @@ Shard.prototype.addVelocity = function (x,y) {
 
     this.deltaX = x/5;
     this.deltaY = y/5;
-
-    console.log(this.xVel);
-    console.log(this.deltaX);
 };
 
 Shard.prototype.decreaseVelocity = function () {

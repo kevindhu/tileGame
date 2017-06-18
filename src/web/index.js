@@ -105,7 +105,13 @@ function addEntities(data) {
         }
     }
 
-
+    var voicePacket = data.voiceInfo;
+    for (var i = 0; i < voicePacket.length; i++) {
+        var voiceInfo = voicePacket[i];
+        
+        var msg = new SpeechSynthesisUtterance(voiceInfo.string);
+        window.speechSynthesis.speak(msg);
+    }
 }
 
 function deleteEntities(data) {
