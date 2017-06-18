@@ -84,9 +84,11 @@ function initClient(data) {
 
 function addEntities(data) {
     var addEntity = function (packet, list, Entity) {
-        for (var i = 0; i < packet.length; i++) {
-            var info = packet[i];
-            list[info.id] = new Entity(info);
+        if (packet) {
+            for (var i = 0; i < packet.length; i++) {
+                var info = packet[i];
+                list[info.id] = new Entity(info);
+            }
         }
     };
 
@@ -96,18 +98,22 @@ function addEntities(data) {
     addEntity(data.sentinelInfo, SENTINEL_LIST, Sentinel);
 
     var UIPacket = data.UIInfo;
-    for (var i = 0; i < UIPacket.length; i++) {
-        var UIInfo = UIPacket[i];
-        if (selfId === UIInfo.id) {
-            openUI(UIInfo.action);
+    if (UIPacket) {
+        for (var i = 0; i < UIPacket.length; i++) {
+            var UIInfo = UIPacket[i];
+            if (selfId === UIInfo.id) {
+                openUI(UIInfo.action);
+            }
         }
     }
 
     var voicePacket = data.voiceInfo;
-    for (var i = 0; i < voicePacket.length; i++) {
-        var voiceInfo = voicePacket[i];
-        var msg = new SpeechSynthesisUtterance(voiceInfo.string);
-        window.speechSynthesis.speak(msg);
+    if (voicePacket) {
+        for (var i = 0; i < voicePacket.length; i++) {
+            var voiceInfo = voicePacket[i];
+            var msg = new SpeechSynthesisUtterance(voiceInfo.string);
+            window.speechSynthesis.speak(msg);
+        }
     }
 }
 
@@ -150,7 +156,6 @@ function updateEntities(data) {
             var tileInfo = packet[i];
             var tile = TILE_LIST[tileInfo.id];
             tile.color = tileInfo.color;
-            console.log(tile.color);
         }
     };
 
@@ -177,7 +182,6 @@ function updateEntities(data) {
         for (var i = 0; i < packet.length; i++) {
             var sentinelInfo = packet[i];
             var sentinel = SENTINEL_LIST[sentinelInfo.id];
-            console.log("SENTINEL UPDATED: " + sentinel);
             sentinel.supply = sentinelInfo.supply;
             sentinel.shards = sentinelInfo.shards;
         }
@@ -277,9 +281,11 @@ var drawScene = function () {
             }
             return value;
         }
-        var player = PLAYER_LIST[selfId];
 
-        ctx.translate( canvas.width/2 - player.x, canvas.width/2 - player.y);    
+        var player = PLAYER_LIST[selfId];
+        if (player) {
+            ctx.translate( canvas.width/2 - player.x, canvas.width/2 - player.y);    
+        }
     };
 
     var drawArrow = function () {

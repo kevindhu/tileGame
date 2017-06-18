@@ -452,6 +452,15 @@ GameServer.prototype.update = function () {
     for (var index in this.SOCKET_LIST) {
         var currSocket = this.SOCKET_LIST[index];
 
+        currSocket.emit('addEntities',
+            {
+                'playerInfo': this.addPlayerPacket,
+                'shardInfo': this.addShardPacket,
+                'HQInfo': this.addHQPacket,
+                'sentinelInfo': this.addSentinelPacket,
+                'voiceInfo': this.addVoicePacket
+            });
+
         currSocket.emit('updateEntities',
             {
                 'playerInfo': this.updatePlayersPacket,
@@ -463,13 +472,13 @@ GameServer.prototype.update = function () {
 
         currSocket.emit('addEntities',
             {
-                'playerInfo': this.addPlayerPacket,
-                'shardInfo': this.addShardPacket,
-                'HQInfo': this.addHQPacket,
-                'sentinelInfo': this.addSentinelPacket,
-                'UIInfo': this.addUIPacket,
-                'voiceInfo': this.addVoicePacket
+                'UIInfo': this.addUIPacket
             });
+
+    
+
+        
+
 
         currSocket.emit('deleteEntities',
             {
