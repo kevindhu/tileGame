@@ -34,7 +34,7 @@ function GameServer() {
     this.deleteSentinelPacket = [];
 
     this.shardTree = null;
-    this.HQTree = null;
+    this.hQTree = null;
     this.tileTree = null;
 
     this.tileLength = (entityConfig.WIDTH - 2 * entityConfig.BORDER_WIDTH) / Math.sqrt(entityConfig.TILES);
@@ -97,7 +97,7 @@ GameServer.prototype.initShards = function () {
 };
 
 GameServer.prototype.initHQs = function () {
-    this.HQTree = new QuadNode({
+    this.hQTree = new QuadNode({
         minx: this.minx,
         miny: this.miny,
         maxx: this.maxx,
@@ -271,11 +271,11 @@ GameServer.prototype.checkShardCollision = function (shard) {
         maxy: shard.y + entityConfig.SHARD_WIDTH
     };
 
-	this.HQTree.find(shardBound, function (HQ) {
+	this.hQTree.find(shardBound, function (HQ) {
 		if (shard.owner !== HQ.owner) {
 			this.removeShootingShard(shard, "GLOBAL");
+            this.dropHQShard(HQ);
 		}
-		this.dropHQShard(HQ);
 		
 	}.bind(this))
 }
@@ -330,7 +330,7 @@ GameServer.prototype.checkPlayerCollision = function (player) {
     }.bind(this));
 
     //player-HQ collision
-    this.HQTree.find(playerBound, function (HQ) {
+    this.hQTree.find(playerBound, function (HQ) {
             if (player === HQ.owner) {
                 for (var i = player.shards.length-1; i >= 0; i--) {
                     var shard = this.PLAYER_SHARD_LIST[player.shards[i]];
@@ -467,7 +467,6 @@ GameServer.prototype.update = function () {
     this.updatePlayers();
     this.updateShards();
 
-
     for (var index in this.SOCKET_LIST) {
         var socket = this.SOCKET_LIST[index];
 
@@ -493,12 +492,6 @@ GameServer.prototype.update = function () {
             {
                 'UIInfo': this.addUIPacket
             });
-
-    
-
-        
-
-
         socket.emit('deleteEntities',
             {
                 'playerInfo': this.deletePlayerPacket,
@@ -506,6 +499,7 @@ GameServer.prototype.update = function () {
                 'HQInfo': this.deleteHQPacket,
                 'UIInfo': this.deleteUIPacket
             });
+        socket.emit('drawScene', {});
     }
     this.resetPackets();
 };
@@ -737,7 +731,7 @@ GameServer.prototype.createHeadquarters = function (player) {
                 maxy: headquarter.y + headquarter.radius
             }
         };
-        this.HQTree.insert(headquarter.quadItem);
+        this.hQTree.insert(headquarter.quadItem);
         player.headquarter = headquarter;
         this.addHQPacket.push({
             id: headquarter.id,
@@ -804,7 +798,7 @@ GameServer.prototype.removePlayer = function (player) {
 
 
 GameServer.prototype.removeHQ = function (HQ) {
-    this.HQTree.remove(HQ.quadItem);
+    this.hQTree.remove(HQ.quadItem);
     for (var i = HQ.shards.length - 1; i >= 0; i--) {
         var shard = this.HOME_SHARD_LIST[HQ.shards[i]];
         this.removeHQShard(HQ, shard, "GLOBAL");

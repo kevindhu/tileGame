@@ -3,9 +3,10 @@ var ctx = canvas.getContext("2d");
 
 var socket = io();
 socket.on('init', initClient);
+socket.on('addEntities', addEntities);
 socket.on('updateEntities', updateEntities);
 socket.on('deleteEntities', deleteEntities);
-socket.on('addEntities', addEntities);
+socket.on('drawScene', drawScene);
 
 var selfId = null;
 var PLAYER_LIST = {};
@@ -14,6 +15,7 @@ var SHARD_LIST = {};
 var HQ_LIST = {};
 var SENTINEL_LIST = {};
 var ARROW = null;
+
 
 var Player = function (playerInfo) {
     this.id = playerInfo.id;
@@ -117,6 +119,7 @@ function addEntities(data) {
     }
 }
 
+
 function deleteEntities(data) {
     var deleteEntity = function (packet, list) {
         for (var i = 0; i < packet.length; i++) {
@@ -194,8 +197,7 @@ function updateEntities(data) {
     updateSentinels(data.sentinelInfo);
 }
 
-var drawScene = function () {
-
+function drawScene(data) {
     var selfPlayer = PLAYER_LIST[selfId];
 
     var inBounds = function(player,x,y) {
@@ -281,19 +283,17 @@ var drawScene = function () {
 
     var translateScene = function () {
         ctx.setTransform(1,0,0,1,0,0);
-        var clamp = function (value, min, max){
-            if(value < min) {
-                return min;
-            }
-            else if(value > max) {
-                return max;
-            }
-            return value;
-        }
-
         var player = PLAYER_LIST[selfId];
         if (player) {
-            ctx.translate( canvas.width/2 - player.x, canvas.width/2 - player.y);    
+            if (keys[17] && keys[38] && scaleFactor < 3) {
+                scaleFactor += 0.2;
+            }
+            if (keys[17] && keys[40] && scaleFactor > 1) {
+                scaleFactor -= 0.2;
+            }
+            ctx.translate(canvas.width/2, canvas.height/2);
+            ctx.scale(scaleFactor, scaleFactor);
+            ctx.translate(-player.x, -player.y)
         }
     };
 
@@ -318,28 +318,26 @@ var drawScene = function () {
     translateScene();
 };
 
-
-
-var clientLoop = function () {
-    drawScene();
-}
-
-
-setInterval(clientLoop, 1000 / 25);
+var keys = [];
+var scaleFactor = 1; 
 
 document.onkeydown = function (event) {
+    keys[event.keyCode] = true;
     var id = returnId(event.keyCode);
     if (id !== null) {
         socket.emit('keyEvent', {id: id, state: true});
     }
 };
 
-document.onkeyup = function (event) {
+document.onkeyup = function (event) {   
+    keys[event.keyCode] = false;
     var id = returnId(event.keyCode);
     if (id !== null) {
         socket.emit('keyEvent', {id: id, state: false});
     }
 };
+
+
 
 canvas.addEventListener("mousedown", function (event) {
 

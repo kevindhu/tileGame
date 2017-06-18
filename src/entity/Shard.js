@@ -1,4 +1,5 @@
 const entityConfig = require('./entityConfig');
+var lerp = require('lerp');
 
 function Shard(x, y, id) {
     this.name = null;
@@ -8,8 +9,6 @@ function Shard(x, y, id) {
 
     this.xVel = 0;
     this.yVel = 0;
-    this.deltaX = 0;
-    this.deltaY = 0;
     this.xSwitched = false;
     this.ySwitched = false;
 
@@ -36,36 +35,31 @@ Shard.prototype.addVelocity = function (x,y) {
     this.xVel = x;
     this.yVel = y;
 
-    this.deltaX = x/10;
-    this.deltaY = y/10;
-
     this.xSwitched = false;
     this.ySwitched = false;
 };
 
-Shard.prototype.decreaseVelocity = function () {
-    this.xVel -= this.deltaX;
-    this.yVel -= this.deltaY;
-    if (this.xVel < 0.5 && this.xVel > -0.5) {
+
+Shard.prototype.updatePosition = function () {
+    if (this.xVel > -0.1 && this.xVel < 0.1) {
         this.xVel = 0;
         this.yVel = 0;
     }
-};
 
-Shard.prototype.updatePosition = function () {
     if (onBoundary(this.x) && !this.xSwitched) {
         this.xVel = -this.xVel;
-        this.deltaX = -this.deltaX;
         this.xSwitched = true;
     }
-    this.x += this.xVel;
     if (onBoundary(this.y) && !this.ySwitched) {
         this.yVel = -this.yVel;
-        this.deltaY = -this.deltaY;
         this.ySwitched = true;
     }
+
+    this.x += this.xVel;
     this.y += this.yVel;
-    this.decreaseVelocity();
+
+    this.xVel = lerp(this.xVel,0,0.2);
+    this.yVel = lerp(this.yVel,0,0.2);
 };
 
 

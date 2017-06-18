@@ -1,7 +1,7 @@
-var WIDTH = 3000;
-var HEIGHT = 3000;
-var TILES = 1000;
-var SHARDS = 20;
+var WIDTH = 10000;
+var HEIGHT = 10000;
+var TILES = 5000;
+var SHARDS = 300;
 var SHARD_WIDTH = 10;
 var BORDER_WIDTH = 100;
 
