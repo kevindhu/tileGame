@@ -32,7 +32,7 @@ Headquarter.prototype.removeShard = function (shard) {
 Headquarter.prototype.getRandomShard = function () {
     var randomIndex = Arithmetic.getRandomInt(0,this.shards.length-1);
     return this.shards[randomIndex];
-}
+};
 
 
 module.exports = Headquarter;

@@ -109,8 +109,8 @@ function addEntities(data) {
     if (UIPacket) {
         for (var i = 0; i < UIPacket.length; i++) {
             var UIInfo = UIPacket[i];
-            if (selfId === UIInfo.id) {
-                openUI(UIInfo.action);
+            if (selfId === UIInfo.playerId) {
+                openUI(UIInfo);
             }
         }
     }
@@ -136,7 +136,7 @@ function deleteEntities(data) {
 
     deleteEntity(data.playerInfo, PLAYER_LIST);
     deleteEntity(data.shardInfo, SHARD_LIST);
-    deleteEntity(data.HQInfo, HQ_LIST);
+    deleteEntity(data.homeInfo, HOME_LIST);
 
 
     var UIPacket = data.UIInfo;
@@ -187,14 +187,6 @@ function updateEntities(data) {
         }
     };
 
-    var updateSentinels = function (packet) {
-        for (var i = 0; i < packet.length; i++) {
-            var sentinelInfo = packet[i];
-            var sentinel = SENTINEL_LIST[sentinelInfo.id];
-            sentinel.supply = sentinelInfo.supply;
-            sentinel.shards = sentinelInfo.shards;
-        }
-    }
 
     updatePlayers(data.playerInfo);
     updateTiles(data.tileInfo);
@@ -245,46 +237,26 @@ function drawScene(data) {
         }
     };
 
-    var drawHQs = function () {
-        for (var id in HQ_LIST) {
+    var drawHomes = function () {
+        for (var id in HOME_LIST) {
             ctx.beginPath();
-            var HQ = HQ_LIST[id];
+            var home = HOME_LIST[id];
             var radius = 10;
-            if (HQ.supply > 10) {
+            if (home.supply > 10) {
                 radius = 20;
             }
             ctx.fillStyle = "#003290";
-            ctx.arc(HQ.x, HQ.y, radius, 0, 2 * Math.PI, false);
+            ctx.arc(home.x, home.y, radius, 0, 2 * Math.PI, false);
             ctx.fill();
             ctx.fillStyle = "#000000";
-            if (HQ.owner !== null) {
-                ctx.fillText(HQ.name, HQ.x, HQ.y + 20);
-                ctx.fillText(HQ.supply, HQ.x, HQ.y + 40);
+            if (home.owner !== null) {
+                ctx.fillText(home.name, home.x, home.y + 20);
+                ctx.fillText(home.supply, home.x, home.y + 40);
             }
             ctx.closePath();
         }
     };
 
-    var drawSentinels = function () {
-        for (var id in SENTINEL_LIST) {
-            ctx.beginPath();
-            var sentinel = SENTINEL_LIST[id];
-            var radius = 5;
-            if (sentinel.supply > 10) {
-                radius = 7;
-            }
-            ctx.fillStyle = "#003290";
-            ctx.arc(sentinel.x, sentinel.y, radius, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.fillStyle = "#000000";
-            if (sentinel.owner !== null) {
-                ctx.font = "10px Arial";
-                ctx.fillText(sentinel.name, sentinel.x, sentinel.y + 20);
-                ctx.fillText(sentinel.supply, sentinel.x, sentinel.y + 40);
-            }
-            ctx.closePath();
-        }
-    };
 
     var translateScene = function () {
         ctx.setTransform(1,0,0,1,0,0);
@@ -318,8 +290,7 @@ function drawScene(data) {
     drawTiles();
     drawPlayers();
     drawShards();
-    drawHQs();
-    drawSentinels();
+    drawHomes();
     drawArrow();
     translateScene();
 };
@@ -434,15 +405,15 @@ function defineMessage() {
     closeUI("name shard");
 }
 
-function addShardsToList(list) {
-    for (var i = 0; i < HQ_LIST[selfId].shards.length; i++) {
+function addShardsToList(list, homeId) {
+    for (var i = 0; i < HOME_LIST[homeId].shards.length; i++) {
         var entry = document.createElement('li');
-        var shard = SHARD_LIST[HQ_LIST[selfId].shards[i]];
+        var shard = SHARD_LIST[HOME_LIST[homeId].shards[i]];
         entry.id = shard.id;
 
         (function (_id) {
             entry.addEventListener("click", function () {
-                socket.emit("removeShardHQ", {id: _id});
+                socket.emit("removeHomeShard", {id: _id});
             });
         })(entry.id);
 
