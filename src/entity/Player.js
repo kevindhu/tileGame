@@ -5,8 +5,6 @@ var lerp = require('lerp');
 
 function Player(id, name) {
     this.id = id;
-    this.x = entityConfig.WIDTH / 2;
-    this.y = entityConfig.WIDTH / 2;
 
     this.pressingUp = false;
     this.pressingDown = false;
@@ -14,17 +12,28 @@ function Player(id, name) {
     this.pressingRight = false;
     this.pressingSpace = false;
     this.pressingA = false;
+    
+    this.x = entityConfig.WIDTH / 2;
+    this.y = entityConfig.WIDTH / 2;
     this.color = getRandomColor();
-    this.name = name;
+    this.name = getName(name);
+    this.health = 1;
     this.maxSpeed = 10;
     this.xSpeed = 0;
     this.ySpeed = 0;
-    this.emptyShard = null;
     this.shards = [];
+
+    this.emptyShard = null;
     this.headquarter = null;
-    this.health = 1;
+    this.faction = null;
 }
 
+
+function getName(name) {
+    if (name === "") {
+        return "unnamed friend";
+    }
+}
 
 function getRandomColor() {
     var letters = '0123456789ABCDEF';

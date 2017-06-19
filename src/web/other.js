@@ -3,7 +3,8 @@ var ctx = canvas.getContext("2d");
 
 canvas.style.visibility = "hidden";
 var nameButton = document.getElementById("nameSubmit");
-var nameInput = document.getElementById("nameInput");
+var playerNameInput = document.getElementById("playerNameInput");
+var factionNameInput = document.getElementById("factionNameInput");
 var playerNamer = document.getElementById("player_namer");
 
 
@@ -11,9 +12,10 @@ playerNamer.style.display = "block";
 
 nameButton.addEventListener("click", function () {
     canvas.style.visibility = "visible";
-    socket.emit("playerName",
+    socket.emit("newPlayer",
         {
-            name: nameInput.value
+            name: playerNameInput.value,
+            faction: factionNameInput.value
         });
     playerNamer.style.display = 'none';
 });

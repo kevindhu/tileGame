@@ -2,7 +2,7 @@ var canvas = document.getElementById("bigCanvas");
 var ctx = canvas.getContext("2d");
 var socket = io();
 
-
+socket.on('addFactionsUI', addFactionstoUI)
 socket.on('init', initClient);
 socket.on('addEntities', addEntities);
 socket.on('updateEntities', updateEntities);
@@ -16,6 +16,7 @@ var SHARD_LIST = {};
 var HQ_LIST = {};
 var SENTINEL_LIST = {};
 var ARROW = null;
+var FACTIONS = ['meme','shit', 'ass'];
 
 
 var Player = function (playerInfo) {
@@ -67,6 +68,19 @@ var Arrow = function (x,y) {
     }
 };
 
+
+function addFactionstoUI(data) {
+    var factions = document.getElementById('factions');
+    var packet = data.factions;
+
+    for (var i = 0; i<packet.length; i++) {
+        var name = packet[i];
+        console.log(name);
+        var option = document.createElement('option');
+        option.value = name;
+        factions.appendChild(option);
+    }
+}
 
 
 
@@ -321,7 +335,7 @@ function drawScene(data) {
 };
 
 var keys = [];
-var scaleFactor = 1; 
+var scaleFactor = 1.5; 
 
 document.onkeydown = function (event) {
     keys[event.keyCode] = true;

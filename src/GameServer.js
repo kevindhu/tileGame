@@ -7,6 +7,11 @@ function GameServer() {
     this.TILE_LIST = {};
     this.SOCKET_LIST = {};
     this.PLAYER_LIST = {};
+    this.FACTION_LIST = {
+        'shit': 'shit',
+        'ass': 'shit',
+        'butt': 'shit'
+    };
     this.HQ_LIST = {};
     this.SENTINEL_LIST = {};
 
@@ -229,6 +234,16 @@ GameServer.prototype.createTileInitPacket = function (id, bound) {
     ret['sentinelInfo'] = sentinelPacket;
     ret['selfId'] = id;
 
+    return ret;
+};
+
+GameServer.prototype.createFactionsPacket = function () {
+    var ret = {};
+    var factionsPacket = [];
+    for (var i in this.FACTION_LIST) {
+        factionsPacket.push(i);
+    }
+    ret['factions'] = factionsPacket;
     return ret;
 };
 
@@ -549,7 +564,7 @@ GameServer.prototype.start = function () {
 
     io.sockets.on('connection', function (socket) {
         var player;
-        
+
         socket.id = Math.random();
         this.SOCKET_LIST[socket.id] = socket;
         console.log("Client #" + socket.id + " has joined the server");
@@ -557,8 +572,10 @@ GameServer.prototype.start = function () {
         socket.stage = 0;
         socket.timer = 20;
         this.sendInitPackets(socket);
-        socket.on('playerName', function (data) {
+        socket.on('newPlayer', function (data) {
             player = this.createPlayer(socket, data.name);
+            player.faction = data.faction;
+            this.FACTION_LIST[data.faction] = data.faction;
         }.bind(this));
 
         socket.on('keyEvent', function (data) {
@@ -884,6 +901,7 @@ GameServer.prototype.sendInitPackets = function (socket) {
     var stage = socket.stage;
     if (stage === 0) {
         socket.emit('init', this.createMainInitPacket(socket.id));
+        socket.emit('addFactionsUI', this.createFactionsPacket());
     }
     if (stage === 1) {
         socket.emit('init', this.createTileInitPacket(socket.id, [0,entityConfig.TILES/4]));
