@@ -285,10 +285,10 @@ function drawScene(data) {
         ctx.setTransform(1,0,0,1,0,0);
         var player = PLAYER_LIST[selfId];
         if (player) {
-            if (keys[17] && keys[38] && scaleFactor < 3) {
+            if (keys[17] && keys[38] && scaleFactor < 2) {
                 scaleFactor += 0.2;
             }
-            if (keys[17] && keys[40] && scaleFactor > 1) {
+            if (keys[17] && keys[40] && scaleFactor > 0.7) {
                 scaleFactor -= 0.2;
             }
             ctx.translate(canvas.width/2, canvas.height/2);
@@ -389,22 +389,26 @@ var returnId = function (keyCode) {
     var id = null;
     switch (keyCode) {
         case 39:
+        case 68:
             id = 'right';
             break;
         case 40:
+        case 83:
             id = 'down';
             break;
         case 37:
+        case 65:
             id = 'left';
             break;
         case 38:
+        case 87:
             id = 'up';
             break;
         case 32:
             id = 'space';
             break;
-        case 65:
-            id = 'A';
+        case 90:
+            id = 'Z';
             break;
     }
     return id;

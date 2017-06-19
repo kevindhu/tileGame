@@ -22,6 +22,7 @@ function Player(id) {
     this.emptyShard = null;
     this.shards = [];
     this.headquarter = null;
+    this.health = 1;
 }
 
 
@@ -120,5 +121,18 @@ Player.prototype.transformEmptyShard = function (name) {
         this.emptyShard = null;
     }
 };
+
+Player.prototype.decreaseHealth = function () {
+    this.health --;
+}
+
+Player.prototype.reset = function () {
+    this.x = entityConfig.WIDTH / 2;
+    this.y = entityConfig.WIDTH / 2;
+    this.maxSpeed = 10;
+    this.xSpeed = 0;
+    this.ySpeed = 0;
+    this.health = 1;
+}
 
 module.exports = Player;
