@@ -1,7 +1,8 @@
 var canvas = document.getElementById("bigCanvas");
 var ctx = canvas.getContext("2d");
-
 var socket = io();
+
+
 socket.on('init', initClient);
 socket.on('addEntities', addEntities);
 socket.on('updateEntities', updateEntities);
@@ -283,6 +284,7 @@ function drawScene(data) {
 
     var translateScene = function () {
         ctx.setTransform(1,0,0,1,0,0);
+        console.log(selfId);
         var player = PLAYER_LIST[selfId];
         if (player) {
             if (keys[17] && keys[38] && scaleFactor < 2) {
@@ -340,11 +342,12 @@ document.onkeyup = function (event) {
 
 
 canvas.addEventListener("mousedown", function (event) {
-
-    var rect = canvas.getBoundingClientRect();
-    var x = event.clientX - rect.left;
-    var y = event.clientY - rect.top;
-    ARROW = new Arrow(x, y);
+    if (PLAYER_LIST[selfId]) {
+        var rect = canvas.getBoundingClientRect();
+        var x = event.clientX - rect.left;
+        var y = event.clientY - rect.top;
+        ARROW = new Arrow(x, y);
+    }
 });
 
 
@@ -444,6 +447,7 @@ function addShardsToList(list) {
         list.appendChild(entry);
     }
 }
+
 
 
 

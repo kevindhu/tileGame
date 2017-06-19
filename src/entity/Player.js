@@ -3,7 +3,7 @@ const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
 var lerp = require('lerp');
 
-function Player(id) {
+function Player(id, name) {
     this.id = id;
     this.x = entityConfig.WIDTH / 2;
     this.y = entityConfig.WIDTH / 2;
@@ -15,7 +15,7 @@ function Player(id) {
     this.pressingSpace = false;
     this.pressingA = false;
     this.color = getRandomColor();
-    this.name = randomWord();
+    this.name = name;
     this.maxSpeed = 10;
     this.xSpeed = 0;
     this.ySpeed = 0;

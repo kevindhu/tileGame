@@ -332,24 +332,23 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 
     //player-HQ collision
     this.hQTree.find(playerBound, function (HQ) {   
-            if (player === HQ.owner) {
-                for (var i = player.shards.length-1; i >= 0; i--) {
-                    var shard = this.PLAYER_SHARD_LIST[player.shards[i]];
-                    this.removePlayerShard(player, shard, "LOCAL");
-                    this.addHQShard(HQ, shard);
-                }
-                if (player.pressingSpace) {
-                    this.addUIPacket.push(
-                        {
-                            id: player.id,
-                            action: "hq info"
-                        }
-                    );
-
-                }
+        if (player === HQ.owner) {
+            for (var i = player.shards.length-1; i >= 0; i--) {
+                var shard = this.PLAYER_SHARD_LIST[player.shards[i]];
+                this.removePlayerShard(player, shard, "LOCAL");
+                this.addHQShard(HQ, shard);
             }
-        }.bind(this)
-    );
+            if (player.pressingSpace) {
+                this.addUIPacket.push(
+                    {
+                        id: player.id,
+                        action: "hq info"
+                    }
+                );
+
+            }
+        }
+    }.bind(this));
 
 
 
@@ -547,19 +546,25 @@ GameServer.prototype.start = function () {
 
     /** START WEBSOCKET SERVICE **/
     var io = require('socket.io')(server, {});
+
     io.sockets.on('connection', function (socket) {
+        var player;
+        
         socket.id = Math.random();
         this.SOCKET_LIST[socket.id] = socket;
         console.log("Client #" + socket.id + " has joined the server");
 
-        var player = this.createPlayer(socket);
-
         socket.stage = 0;
         socket.timer = 20;
         this.sendInitPackets(socket);
-
+        socket.on('playerName', function (data) {
+            player = this.createPlayer(socket, data.name);
+        }.bind(this));
 
         socket.on('keyEvent', function (data) {
+            if (!player) {
+                return;
+            }
             switch (data.id) {
                 case "left":
                     player.pressingLeft = data.state;
@@ -583,19 +588,25 @@ GameServer.prototype.start = function () {
                     }
                     break;
             }
-        }.bind(this));
+         }.bind(this));
 
         socket.on('textInput', function (data) {
-            player.transformEmptyShard(data.word);
+            if (player) {
+                player.transformEmptyShard(data.word);
+            }
         }.bind(this));
 
+
         socket.on("arrowVector", function (data) {
-        	if (player.getRandomShard()) {
-	        	var shard = this.PLAYER_SHARD_LIST[player.getRandomShard()];
-	        	this.removePlayerShard(player, shard, "LOCAL");
-	        	shard.owner = player;
-	        	this.addShootingShard(shard, data.x, data.y);
-	        }
+            if (!player) {
+                return;
+            }
+            if (player.getRandomShard()) {
+    	        var shard = this.PLAYER_SHARD_LIST[player.getRandomShard()];
+    	        this.removePlayerShard(player, shard, "LOCAL");
+    	        shard.owner = player;
+    	        this.addShootingShard(shard, data.x, data.y);
+    	    }
         }.bind(this));
 
         socket.on('removeShardHQ', function (data) {
@@ -612,11 +623,12 @@ GameServer.prototype.start = function () {
                     shards: HQ.shards
                 }
             );
-
-            this.addUIPacket.push({
-                id: player.id,
-                action: "hq info"
-            });
+            this.addUIPacket.push(
+                {
+                    id: player.id,
+                    action: "hq info"
+                }
+            );
         }.bind(this));
 
         socket.on('disconnect', function () {
@@ -682,8 +694,8 @@ GameServer.prototype.addSentinelShard = function (sentinel, shard) {
 };
 
 /** SERVER CREATION EVENTS **/
-GameServer.prototype.createPlayer = function (socket) {
-    var player = new Entity.Player(socket.id);
+GameServer.prototype.createPlayer = function (socket, name) {
+    var player = new Entity.Player(socket.id, name);
         this.PLAYER_LIST[socket.id] = player;
         this.addPlayerPacket.push({
             id: player.id,
@@ -787,6 +799,9 @@ GameServer.prototype.createSentinel = function (player) {
 
 /** SERVER REMOVE EVENTS **/
 GameServer.prototype.removePlayer = function (player) {
+    if (!player) {
+        return;
+    }
     for (var i = player.shards.length - 1; i >= 0; i--) {
         var shard = this.PLAYER_SHARD_LIST[player.shards[i]];
         this.removePlayerShard(player, shard, "GLOBAL");
@@ -858,7 +873,7 @@ GameServer.prototype.removeHQShard = function (HQ, shard, status) {
 
 /** SPECIAL METHODS **/
 GameServer.prototype.resetPlayer = function (player) {
-    for (var i = player.shards.length-1; i>=0; i--) {
+    for (var i = player.shards.length; i>=0; i--) {
         this.dropPlayerShard(player);
     }
     player.reset();
@@ -888,12 +903,22 @@ GameServer.prototype.sendInitPackets = function (socket) {
 GameServer.prototype.dropPlayerShard = function (player) {
     if (player.getRandomShard()) {
         var shard = this.PLAYER_SHARD_LIST[player.getRandomShard()];
-        this.removePlayerShard(player,shard,"LOCAL");
-        this.addShootingShard(shard,
-            Arithmetic.getRandomInt(-30,30),
-            Arithmetic.getRandomInt(-30,30)
-            );
     }
+    else if (player.emptyShard) {
+        var shard = player.emptyShard;
+        this.deleteUIPacket.push({
+                id: shard.owner.id,
+                action: "name shard"
+            });
+    }
+    else {
+        return;
+    }
+    this.removePlayerShard(player,shard,"LOCAL");
+    this.addShootingShard(shard,
+        Arithmetic.getRandomInt(-30,30),
+        Arithmetic.getRandomInt(-30,30)
+    );
 }
 
 
