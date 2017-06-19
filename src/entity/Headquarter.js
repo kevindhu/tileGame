@@ -10,7 +10,7 @@ function Headquarter(owner, x, y) {
     this.supply = 0;
     this.radius = 10;
     this.shards = [];  //NOTICE: contains shardIds
-
+    this.type = "Headquarter";
     this.timer = 0;
     this.isOpen = false;
 }

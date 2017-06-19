@@ -13,8 +13,7 @@ var selfId = null;
 var PLAYER_LIST = {};
 var TILE_LIST = {};
 var SHARD_LIST = {};
-var HQ_LIST = {};
-var SENTINEL_LIST = {};
+var HOME_LIST = {};
 var ARROW = null;
 var FACTIONS = ['meme','shit', 'ass'];
 
@@ -38,22 +37,16 @@ var Shard = function (shardInfo) {
     this.y = shardInfo.y;
     this.name = shardInfo.name;
 };
-var Headquarter = function (HQInfo) {
-    this.supply = HQInfo.supply;
-    this.id = HQInfo.id;
-    this.x = HQInfo.x;
-    this.y = HQInfo.y;
-    this.name = HQInfo.owner;
-    this.shards = HQInfo.shards;
+var Home = function (homeInfo) {
+    this.supply = homeInfo.supply;
+    this.id = homeInfo.id;
+    this.x = homeInfo.x;
+    this.y = homeInfo.y;
+    this.name = homeInfo.owner;
+    this.shards = homeInfo.shards;
 };
-var Sentinel = function (sentinelInfo) {
-    this.supply = sentinelInfo.supply;
-    this.id = sentinelInfo.id;
-    this.x = sentinelInfo.x;
-    this.y = sentinelInfo.y;
-    this.name = sentinelInfo.owner;
-    this.shards = sentinelInfo.shards;
-};
+
+
 var Arrow = function (x,y) {
     this.preX = x;
     this.preY = y;
@@ -94,8 +87,7 @@ function initClient(data) {
     addEntity(data.tileInfo, TILE_LIST, Tile);
     addEntity(data.playerInfo, PLAYER_LIST, Player);
     addEntity(data.shardInfo, SHARD_LIST, Shard);
-    addEntity(data.HQInfo, HQ_LIST, Headquarter);
-    addEntity(data.sentinelInfo, SENTINEL_LIST, Sentinel);
+    addEntity(data.homeInfo, HOME_LIST, Home);
     selfId = data.selfId;
 }
 
@@ -111,8 +103,7 @@ function addEntities(data) {
 
     addEntity(data.playerInfo, PLAYER_LIST, Player);
     addEntity(data.shardInfo, SHARD_LIST, Shard);
-    addEntity(data.HQInfo, HQ_LIST, Headquarter);
-    addEntity(data.sentinelInfo, SENTINEL_LIST, Sentinel);
+    addEntity(data.homeInfo, HOME_LIST, Home);
 
     var UIPacket = data.UIInfo;
     if (UIPacket) {
@@ -187,12 +178,12 @@ function updateEntities(data) {
         }
     };
 
-    var updateHQs = function (packet) {
+    var updateHomes = function (packet) {
         for (var i = 0; i < packet.length; i++) {
-            var HQInfo = packet[i];
-            var HQ = HQ_LIST[HQInfo.id];
-            HQ.supply = HQInfo.supply;
-            HQ.shards = HQInfo.shards;
+            var homeInfo = packet[i];
+            var home = HOME_LIST[homeInfo.id];
+            home.supply = homeInfo.supply;
+            home.shards = homeInfo.shards;
         }
     };
 
@@ -208,8 +199,7 @@ function updateEntities(data) {
     updatePlayers(data.playerInfo);
     updateTiles(data.tileInfo);
     updateShards(data.shardInfo);
-    updateHQs(data.HQInfo);
-    updateSentinels(data.sentinelInfo);
+    updateHomes(data.homeInfo);
 }
 
 function drawScene(data) {

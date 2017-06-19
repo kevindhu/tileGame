@@ -33,6 +33,7 @@ function getName(name) {
     if (name === "") {
         return "unnamed friend";
     }
+    return name;
 }
 
 function getRandomColor() {

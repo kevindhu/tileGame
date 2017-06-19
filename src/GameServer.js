@@ -9,8 +9,8 @@ function GameServer() {
     this.PLAYER_LIST = {};
     this.FACTION_LIST = {
         'shit': 'shit',
-        'ass': 'shit',
-        'butt': 'shit'
+        'ass': 'ass',
+        'butt': 'butt'
     };
     this.HQ_LIST = {};
     this.SENTINEL_LIST = {};
@@ -26,11 +26,10 @@ function GameServer() {
     this.addUIPacket = [];
     this.addSentinelPacket = [];
 
-    this.updateHQPacket = [];
+    this.updateHomePacket = [];
     this.updateTilesPacket = [];
     this.updateShardsPacket = [];
     this.updatePlayersPacket = [];
-    this.updateSentinelsPacket = [];
 
     this.deletePlayerPacket = [];
     this.deleteShardPacket = [];
@@ -291,7 +290,15 @@ GameServer.prototype.checkShardCollision = function (shard) {
             this.dropHQShard(HQ);
 		}
 		
-	}.bind(this))
+	}.bind(this));
+
+    this.sentinelTree.find(shardBound, function (HQ) {
+        if (shard.owner !== HQ.owner) {
+            this.removeShootingShard(shard, "GLOBAL");
+            this.dropHQShard(HQ);
+        }
+        
+    }.bind(this));
 }
 
 GameServer.prototype.checkPlayerCollision = function (player) {
@@ -499,8 +506,7 @@ GameServer.prototype.update = function () {
                 'playerInfo': this.updatePlayersPacket,
                 'tileInfo': this.updateTilesPacket,
                 'shardInfo': this.updateShardsPacket,
-                'HQInfo': this.updateHQPacket,
-                'sentinelInfo': this.updateSentinelsPacket
+                'homeInfo': this.updateHomePacket,
             });
 
         socket.emit('addEntities',
@@ -528,11 +534,10 @@ GameServer.prototype.resetPackets = function () {
     this.addVoicePacket = [];
     this.addSentinelPacket = [];
 
-    this.updateHQPacket = [];
+    this.updateHomePacket = [];
     this.updateTilesPacket = [];
     this.updateShardsPacket = [];
     this.updatePlayersPacket = [];
-    this.updateSentinelsPacket = [];
 
     this.deletePlayerPacket = [];
     this.deleteShardPacket = [];
@@ -633,7 +638,7 @@ GameServer.prototype.start = function () {
             this.removeHQShard(HQ, shard, "LOCAL");
             this.addPlayerShard(player, shard);
 
-            this.updateHQPacket.push(
+            this.updateHomePacket.push(
                 {
                     id: HQ.id,
                     supply: HQ.supply,
@@ -687,7 +692,7 @@ GameServer.prototype.addHQShard = function (HQ, shard) {
     HQ.addShard(shard);
     this.HOME_SHARD_LIST[shard.id] = shard;
 
-    this.updateHQPacket.push(
+    this.updateHomePacket.push(
         {
             id: HQ.id,
             supply: HQ.supply,
@@ -701,7 +706,7 @@ GameServer.prototype.addSentinelShard = function (sentinel, shard) {
     sentinel.addShard(shard);
     this.HOME_SHARD_LIST[shard.id] = shard;
 
-    this.updateSentinelsPacket.push(
+    this.updateHomePacket.push(
         {
             id: sentinel.id,
             supply: sentinel.supply,
@@ -869,18 +874,18 @@ GameServer.prototype.removePlayerShard = function (player, shard, status) {
     delete this.PLAYER_SHARD_LIST[shard.id];
 };
 
-GameServer.prototype.removeHQShard = function (HQ, shard, status) {
-    HQ.removeShard(shard);
+GameServer.prototype.removeHomeShard = function (home, shard, status) {
+    home.removeShard(shard);
 
     if (status === "GLOBAL") {
         this.deleteShardPacket.push({id: shard.id});
     }
     else {
-        this.updateHQPacket.push(
+        this.updateHomePacket.push(
             {
-                id: HQ.id,
-                supply: HQ.supply,
-                shards: HQ.shards
+                id: home.id,
+                supply: home.supply,
+                shards: home.shards
             }
         );
     }
@@ -940,10 +945,10 @@ GameServer.prototype.dropPlayerShard = function (player) {
 }
 
 
-GameServer.prototype.dropHQShard = function (HQ) {
-	if (HQ.getRandomShard()) {
+GameServer.prototype.dropHomeShard = function (home) {
+	if (home.getRandomShard()) {
 		var shard = this.HOME_SHARD_LIST[HQ.getRandomShard()];
-		this.removeHQShard(HQ,shard,"LOCAL");
+		this.removeHomeShard(home,shard,"LOCAL");
 		this.addShootingShard(shard,
 			Arithmetic.getRandomInt(-30,30),
 			Arithmetic.getRandomInt(-30,30)

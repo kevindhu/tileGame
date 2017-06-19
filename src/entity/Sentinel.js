@@ -10,6 +10,7 @@ function Sentinel(owner, x, y) {
     this.radius = 10;
     this.shards = [];
     this.color = owner.color;
+    this.type = "Sentinel";
 }
 
 
