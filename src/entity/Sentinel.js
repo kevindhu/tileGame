@@ -12,6 +12,7 @@ function Sentinel(owner, x, y) {
     this.shards = [];
     this.color = owner.color;
     this.type = "Sentinel";
+    this.level = 0;
 }
 
 Sentinel.prototype.getRandomShard = function () {

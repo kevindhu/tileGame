@@ -737,7 +737,8 @@ GameServer.prototype.createHeadquarters = function (player) {
             x: headquarter.x,
             y: headquarter.y,
             supply: headquarter.supply,
-            shards: headquarter.shards
+            shards: headquarter.shards,
+            level: headquarter.level
         });
 
         player.pressingSpace = false;
@@ -779,7 +780,8 @@ GameServer.prototype.createSentinel = function (player) {
                 x: sentinel.x,
                 y: sentinel.y,
                 supply: sentinel.supply,
-                shards: sentinel.shards
+                shards: sentinel.shards,
+                level: sentinel.level
             }
         );
         tile.setSentinel(sentinel);

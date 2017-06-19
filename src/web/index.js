@@ -44,6 +44,7 @@ var Home = function (homeInfo) {
     this.y = homeInfo.y;
     this.name = homeInfo.owner;
     this.shards = homeInfo.shards;
+    this.level = homeInfo.level;
 };
 
 
@@ -242,8 +243,8 @@ function drawScene(data) {
             ctx.beginPath();
             var home = HOME_LIST[id];
             var radius = 10;
-            if (home.supply > 10) {
-                radius = 20;
+            if (home.level > 1) {
+                radius = 30;
             }
             ctx.fillStyle = "#003290";
             ctx.arc(home.x, home.y, radius, 0, 2 * Math.PI, false);

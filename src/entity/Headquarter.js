@@ -13,6 +13,7 @@ function Headquarter(owner, x, y) {
     this.type = "Headquarter";
     this.timer = 0;
     this.isOpen = false;
+    this.level = 2;
 }
 
 Headquarter.prototype.addShard = function (shard) {
