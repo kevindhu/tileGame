@@ -221,6 +221,8 @@ function drawScene(data) {
         for (var id in TILE_LIST) {
             var tile = TILE_LIST[id];
             if (inBounds(selfPlayer,tile.x, tile.y)) {
+                ctx.fillStyle = "#000000";
+                ctx.strokeRect(tile.x, tile.y, tile.length, tile.length);
                 ctx.fillStyle = tile.color;
                 ctx.fillRect(tile.x, tile.y, tile.length, tile.length);
             }

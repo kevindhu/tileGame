@@ -256,21 +256,14 @@ GameServer.prototype.checkShardCollision = function (shard) {
     };
 
     this.homeTree.find(shardBound, function (home) {
-        if (shard.owner.faction !== home.owner) {
+        if (shard.owner && shard.owner.faction !== home.owner) {
             this.removeShootingShard(shard, "GLOBAL");
             this.dropHomeShard(home); //make this so it is based on a probability
             //add shard from HQ if HQ is healthy
             var hq = home.owner.headquarter;
-            if (hq !== home && hq.supply() > 2) {
+            if (hq !== home && hq.supply() > 0) {
                 this.transferHomeShards(hq,home);
             }
-        }
-    }.bind(this));
-
-    this.homeTree.find(shardBound, function (HQ) {
-        if (shard.owner.faction !== HQ.owner) {
-            this.removeShootingShard(shard, "GLOBAL");
-            this.dropHomeShard(HQ);
         }
     }.bind(this));
 };
@@ -315,7 +308,7 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 
     //shooting shard collision
     this.shootingShardTree.find(playerBound, function (shard) {
-        if (player.faction !== shard.owner.faction) {
+        if (shard.owner && player.faction !== shard.owner.faction) {
             this.removeShootingShard(shard, "GLOBAL");
             this.decreasePlayerHealth(player, 1);
         }
