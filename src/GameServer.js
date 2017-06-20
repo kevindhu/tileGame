@@ -312,7 +312,6 @@ GameServer.prototype.checkPlayerCollision = function (player) {
             this.removeShootingShard(shard, "GLOBAL");
             this.decreasePlayerHealth(player, 1);
         }
-
     }.bind(this));
 
     //player-home collision
@@ -339,7 +338,6 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 
 };
 
-
 GameServer.prototype.checkCollisions = function () {
     for (var id in this.PLAYER_LIST) {
         var player = this.PLAYER_LIST[id];
@@ -351,14 +349,12 @@ GameServer.prototype.checkCollisions = function () {
     }
 };
 
-
 GameServer.prototype.updatePlayers = function () {
     for (var index in this.PLAYER_LIST) {
         var player = this.PLAYER_LIST[index];
         player.updatePosition();
 
         var tile = this.getPlayerTile(player);
-
         if (tile) {
             if (tile.owner === player.faction) {
                 player.increaseHealth(0.1);
@@ -379,8 +375,7 @@ GameServer.prototype.updatePlayers = function () {
         if (socket.timer !== 0) {
             socket.timer -= 1;
         }
-        else if (socket.stage != 5) {
-            //console.log("COMMENCING STAGE " + socket.stage);
+        else if (socket.stage !== 5) {
             this.sendInitPackets(socket);
             socket.timer = 20;
         }
@@ -871,6 +866,7 @@ GameServer.prototype.removeHomeShard = function (home, shard, status) {
             }
         );
     }
+
     delete this.HOME_SHARD_LIST[shard.id];
 };
 
@@ -945,7 +941,7 @@ GameServer.prototype.dropHomeShard = function (home) {
 };
 
 GameServer.prototype.transferHomeShards = function (h1, h2) {
-    var shard = h1.getRandomShard();
+    var shard = this.HOME_SHARD_LIST[h1.getRandomShard()];
     this.removeHomeShard(h1,shard,"LOCAL");
     this.addHomeShard(h2,shard);
 };

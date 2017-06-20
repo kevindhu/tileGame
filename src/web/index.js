@@ -203,8 +203,8 @@ function drawScene(data) {
     var selfPlayer = PLAYER_LIST[selfId];
 
     var inBounds = function(player,x,y) {
-        return x < (player.x+canvas.width) && x > (player.x-canvas.width)
-        && y < (player.y+canvas.width) && y > (player.y-canvas.width);
+        return x < (player.x+canvas.width/2) && x > (player.x-canvas.width/2)
+        && y < (player.y+canvas.width/2) && y > (player.y-canvas.width/2);
     }
 
     var drawPlayers = function () {
