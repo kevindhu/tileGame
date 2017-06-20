@@ -879,16 +879,20 @@ GameServer.prototype.sendInitPackets = function (socket) {
         socket.emit('addFactionsUI', this.createFactionsPacket());
     }
     if (stage === 1) {
-        socket.emit('init', this.createTileInitPacket(socket.id, [0, entityConfig.TILES / 4]));
+        socket.emit('init', this.createTileInitPacket(socket.id,
+            [0, entityConfig.TILES / 4]));
     }
     if (stage === 2) {
-        socket.emit('init', this.createTileInitPacket(socket.id, [entityConfig.TILES / 4, entityConfig.TILES / 2]));
+        socket.emit('init', this.createTileInitPacket(socket.id,
+            [entityConfig.TILES / 4, entityConfig.TILES / 2]));
     }
     if (stage === 3) {
-        socket.emit('init', this.createTileInitPacket(socket.id, [entityConfig.TILES / 2, entityConfig.TILES * 3 / 4]));
+        socket.emit('init', this.createTileInitPacket(socket.id,
+            [entityConfig.TILES / 2, entityConfig.TILES * 3 / 4]));
     }
     if (stage === 4) {
-        socket.emit('init', this.createTileInitPacket(socket.id, [entityConfig.TILES * 3 / 4, entityConfig.TILES]));
+        socket.emit('init', this.createTileInitPacket(socket.id,
+            [entityConfig.TILES * 3 / 4, entityConfig.TILES]));
     }
     socket.stage++;
 };
