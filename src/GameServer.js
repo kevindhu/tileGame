@@ -258,7 +258,8 @@ GameServer.prototype.checkShardCollision = function (shard) {
     this.homeTree.find(shardBound, function (home) {
         if (shard.owner.faction !== home.owner) {
             this.removeShootingShard(shard, "GLOBAL");
-            this.dropHomeShard(home);
+            this.dropHomeShard(home); //make this so it is based on a probability
+            //add shard from HQ if HQ is healthy
         }
     }.bind(this));
 
