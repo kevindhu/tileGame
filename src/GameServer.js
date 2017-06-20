@@ -166,7 +166,6 @@ GameServer.prototype.createMainInitPacket = function (id) {
             owner: home.owner.name,
             x: home.x,
             y: home.y,
-            supply: home.supply,
             shards: home.shards
         })
     }
@@ -317,10 +316,7 @@ GameServer.prototype.checkPlayerCollision = function (player) {
         if (player !== shard.owner) {
             console.log("SHOT A PLAYER!");
             this.removeShootingShard(shard, "GLOBAL");
-            player.decreaseHealth();
-            if (player.health == 0) {
-                this.resetPlayer(player);
-            }
+            this.decreasePlayerHealth(player,1);
         }
 
     }.bind(this));
@@ -366,6 +362,18 @@ GameServer.prototype.updatePlayers = function () {
     for (var index in this.PLAYER_LIST) {
         var player = this.PLAYER_LIST[index];
         player.updatePosition();
+
+        var tile = this.getPlayerTile(player);
+        if (tile) {
+            if (tile.owner === player) {
+                player.increaseHealth(0.1);
+            }
+            else if (tile.owner !== null) {
+                console.log("PLAYER IS HURT!");
+                this.decreasePlayerHealth(player, 0.1);
+            }
+        }
+
         this.updatePlayersPacket.push({
             id: player.id,
             x: player.x,
@@ -611,7 +619,6 @@ GameServer.prototype.start = function () {
             this.updateHomePacket.push(
                 {
                     id: HQ.id,
-                    supply: HQ.supply,
                     shards: HQ.shards
                 }
             );
@@ -666,8 +673,8 @@ GameServer.prototype.addHomeShard = function (home, shard) {
     this.updateHomePacket.push(
         {
             id: home.id,
-            supply: home.supply,
-            shards: home.shards
+            shards: home.shards,
+            level: home.level
         }
     );
 };
@@ -736,7 +743,6 @@ GameServer.prototype.createHeadquarters = function (player) {
             owner: headquarter.owner.name,
             x: headquarter.x,
             y: headquarter.y,
-            supply: headquarter.supply,
             shards: headquarter.shards,
             level: headquarter.level
         });
@@ -779,7 +785,6 @@ GameServer.prototype.createSentinel = function (player) {
                 owner: sentinel.owner.name,
                 x: sentinel.x,
                 y: sentinel.y,
-                supply: sentinel.supply,
                 shards: sentinel.shards,
                 level: sentinel.level
             }
@@ -859,8 +864,8 @@ GameServer.prototype.removeHomeShard = function (home, shard, status) {
         this.updateHomePacket.push(
             {
                 id: home.id,
-                supply: home.supply,
-                shards: home.shards
+                shards: home.shards,
+                level: home.level
             }
         );
     }
@@ -876,6 +881,13 @@ GameServer.prototype.resetPlayer = function (player) {
     player.reset();
 
 }
+
+GameServer.prototype.decreasePlayerHealth = function (player, amount) {
+    player.decreaseHealth(amount);
+    if (player.health <= 0) {
+        this.resetPlayer(player);
+    }
+};
 
 GameServer.prototype.sendInitPackets = function (socket) {
     var stage = socket.stage;
@@ -918,7 +930,6 @@ GameServer.prototype.dropPlayerShard = function (player) {
         Arithmetic.getRandomInt(-30, 30)
     );
 };
-
 
 GameServer.prototype.dropHomeShard = function (home) {
     if (home.getRandomShard()) {

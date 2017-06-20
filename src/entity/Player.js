@@ -132,8 +132,14 @@ Player.prototype.transformEmptyShard = function (name) {
     }
 };
 
-Player.prototype.decreaseHealth = function () {
-    this.health --;
+Player.prototype.decreaseHealth = function (amount) {
+    this.health -= amount;
+}
+
+Player.prototype.increaseHealth = function (amount) {
+    if (this.health !== 10) {
+        this.health += amount;
+    }
 }
 
 Player.prototype.reset = function () {

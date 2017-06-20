@@ -38,7 +38,6 @@ var Shard = function (shardInfo) {
     this.name = shardInfo.name;
 };
 var Home = function (homeInfo) {
-    this.supply = homeInfo.supply;
     this.id = homeInfo.id;
     this.x = homeInfo.x;
     this.y = homeInfo.y;
@@ -183,8 +182,12 @@ function updateEntities(data) {
         for (var i = 0; i < packet.length; i++) {
             var homeInfo = packet[i];
             var home = HOME_LIST[homeInfo.id];
-            home.supply = homeInfo.supply;
-            home.shards = homeInfo.shards;
+            if (homeInfo.shards) {
+                home.shards = homeInfo.shards;
+            }
+            if (homeInfo.level) {
+                home.level = homeInfo.level;
+            }
         }
     };
 
@@ -243,8 +246,11 @@ function drawScene(data) {
             ctx.beginPath();
             var home = HOME_LIST[id];
             var radius = 10;
-            if (home.level > 1) {
+            if (home.level === 1) {
                 radius = 30;
+            }
+            if (home.level === 2) {
+                radius = 50;
             }
             ctx.fillStyle = "#003290";
             ctx.arc(home.x, home.y, radius, 0, 2 * Math.PI, false);
@@ -252,7 +258,7 @@ function drawScene(data) {
             ctx.fillStyle = "#000000";
             if (home.owner !== null) {
                 ctx.fillText(home.name, home.x, home.y + 20);
-                ctx.fillText(home.supply, home.x, home.y + 40);
+                ctx.fillText(home.shards.length, home.x, home.y + 40);
             }
             ctx.closePath();
         }
