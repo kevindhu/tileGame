@@ -17,7 +17,7 @@ function Player(id, name) {
     this.y = entityConfig.WIDTH / 2;
     this.color = getRandomColor();
     this.name = getName(name);
-    this.health = 1;
+    this.health = 5;
     this.maxSpeed = 10;
     this.xSpeed = 0;
     this.ySpeed = 0;
@@ -137,10 +137,10 @@ Player.prototype.decreaseHealth = function (amount) {
 }
 
 Player.prototype.increaseHealth = function (amount) {
-    if (this.health !== 10) {
+    if (this.health <= 10) {
         this.health += amount;
     }
-}
+};
 
 Player.prototype.reset = function () {
     this.x = entityConfig.WIDTH / 2;

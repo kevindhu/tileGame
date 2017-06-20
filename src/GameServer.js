@@ -66,10 +66,10 @@ GameServer.prototype.initTiles = function () {
             tile.quadItem = {
                 cell: tile,
                 bound: {
-                    minx: centerX - this.tileLength / 7,
-                    miny: centerY - this.tileLength / 7,
-                    maxx: centerX + this.tileLength / 7,
-                    maxy: centerY + this.tileLength / 7
+                    minx: centerX - this.tileLength / 2,
+                    miny: centerY - this.tileLength / 2,
+                    maxx: centerX + this.tileLength / 2,
+                    maxy: centerY + this.tileLength / 2
                 }
             };
             this.tileTree.insert(tile.quadItem);
@@ -124,7 +124,8 @@ GameServer.prototype.createMainInitPacket = function (id) {
             id: player.id,
             name: player.name,
             x: player.x,
-            y: player.y
+            y: player.y,
+            health: player.health
         })
     }
 
@@ -364,6 +365,7 @@ GameServer.prototype.updatePlayers = function () {
         player.updatePosition();
 
         var tile = this.getPlayerTile(player);
+
         if (tile) {
             if (tile.owner === player) {
                 player.increaseHealth(0.1);
@@ -377,7 +379,8 @@ GameServer.prototype.updatePlayers = function () {
         this.updatePlayersPacket.push({
             id: player.id,
             x: player.x,
-            y: player.y
+            y: player.y,
+            health: player.health
         });
 
         var socket = this.SOCKET_LIST[player.id];
@@ -485,7 +488,7 @@ GameServer.prototype.update = function () {
                 'playerInfo': this.updatePlayersPacket,
                 'tileInfo': this.updateTilesPacket,
                 'shardInfo': this.updateShardsPacket,
-                'homeInfo': this.updateHomePacket,
+                'homeInfo': this.updateHomePacket
             });
 
         socket.emit('addEntities',
@@ -689,7 +692,8 @@ GameServer.prototype.createPlayer = function (socket, name) {
         id: player.id,
         name: player.name,
         x: player.x,
-        y: player.y
+        y: player.y,
+        health: player.health
     });
     return player;
 };

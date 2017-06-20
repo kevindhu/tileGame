@@ -23,6 +23,7 @@ var Player = function (playerInfo) {
     this.name = playerInfo.name;
     this.x = playerInfo.x;
     this.y = playerInfo.y;
+    this.health = playerInfo.health;
 };
 var Tile = function (tileInfo) {
     this.id = tileInfo.id;
@@ -157,6 +158,7 @@ function updateEntities(data) {
             var player = PLAYER_LIST[playerInfo.id];
             player.x = playerInfo.x;
             player.y = playerInfo.y;
+            player.health = playerInfo.health;
         }
     };
 
@@ -212,6 +214,7 @@ function drawScene(data) {
         for (var playerId in PLAYER_LIST) {
             var player = PLAYER_LIST[playerId];
             ctx.fillText(player.name, player.x, player.y);
+            ctx.fillRect(player.x, player.y, player.health * 10, 10);
         }
     };
 
