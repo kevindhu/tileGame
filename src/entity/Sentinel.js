@@ -3,10 +3,10 @@ const Arithmetic = require('../modules/Arithmetic');
 
 function Sentinel(owner, x, y) {
     this.id = Math.random();
-    this.owner = owner;
+    this.owner = owner.faction;
     this.x = x;
     this.y = y;
-    this.name = owner.name;
+    this.name = this.owner.name;
     this.radius = 10;
     this.shards = [];
     this.color = owner.color;

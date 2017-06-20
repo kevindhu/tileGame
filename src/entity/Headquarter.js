@@ -1,12 +1,12 @@
 const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
 
-function Headquarter(owner, x, y) {
-    this.owner = owner;
-    this.id = owner.id;
+function Headquarter(faction, x, y) {
+    this.owner = faction;
+    this.id = Math.random();
     this.x = x;
     this.y = y;
-    this.name = owner.name;
+    this.name = faction.name;
     this.radius = 10;
     this.shards = [];  //NOTICE: contains shardIds
     this.type = "Headquarter";

@@ -7,11 +7,7 @@ function GameServer() {
     this.TILE_LIST = {};
     this.SOCKET_LIST = {};
     this.PLAYER_LIST = {};
-    this.FACTION_LIST = {
-        'meme': 'meme',
-        'boiz': 'boiz',
-        'butt': 'butt'
-    };
+    this.FACTION_LIST = {};
     this.HOME_LIST = {};
 
     this.STATIC_SHARD_LIST = {};
@@ -116,7 +112,7 @@ GameServer.prototype.createMainInitPacket = function (id) {
         homePacket = [],
         player,
         shard,
-        hq;
+        home;
 
     for (i in this.PLAYER_LIST) {
         player = this.PLAYER_LIST[i];
@@ -163,6 +159,7 @@ GameServer.prototype.createMainInitPacket = function (id) {
     for (i in this.HOME_LIST) {
         home = this.HOME_LIST[i];
         homePacket.push({
+            level: home.level,
             id: home.id,
             owner: home.owner.name,
             x: home.x,
@@ -259,15 +256,14 @@ GameServer.prototype.checkShardCollision = function (shard) {
     };
 
     this.homeTree.find(shardBound, function (home) {
-        if (shard.owner !== home.owner) {
+        if (shard.owner.faction !== home.owner) {
             this.removeShootingShard(shard, "GLOBAL");
             this.dropHomeShard(home);
         }
-
     }.bind(this));
 
     this.homeTree.find(shardBound, function (HQ) {
-        if (shard.owner !== HQ.owner) {
+        if (shard.owner.faction !== HQ.owner) {
             this.removeShootingShard(shard, "GLOBAL");
             this.dropHomeShard(HQ);
         }
@@ -314,17 +310,16 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 
     //shooting shard collision
     this.shootingShardTree.find(playerBound, function (shard) {
-        if (player !== shard.owner) {
-            console.log("SHOT A PLAYER!");
+        if (player.faction !== shard.owner.faction) {
             this.removeShootingShard(shard, "GLOBAL");
-            this.decreasePlayerHealth(player,1);
+            this.decreasePlayerHealth(player, 1);
         }
 
     }.bind(this));
 
     //player-home collision
     this.homeTree.find(playerBound, function (home) {
-        if (player === home.owner) {
+        if (player.faction === home.owner) {
             for (var i = player.shards.length - 1; i >= 0; i--) {
                 var shard = this.PLAYER_SHARD_LIST[player.shards[i]];
                 this.removePlayerShard(player, shard, "LOCAL");
@@ -367,11 +362,10 @@ GameServer.prototype.updatePlayers = function () {
         var tile = this.getPlayerTile(player);
 
         if (tile) {
-            if (tile.owner === player) {
+            if (tile.owner === player.faction) {
                 player.increaseHealth(0.1);
             }
             else if (tile.owner !== null) {
-                console.log("PLAYER IS HURT!");
                 this.decreasePlayerHealth(player, 0.1);
             }
         }
@@ -392,7 +386,6 @@ GameServer.prototype.updatePlayers = function () {
             this.sendInitPackets(socket);
             socket.timer = 20;
         }
-        ;
     }
 };
 
@@ -559,9 +552,7 @@ GameServer.prototype.start = function () {
         socket.timer = 20;
         this.sendInitPackets(socket);
         socket.on('newPlayer', function (data) {
-            player = this.createPlayer(socket, data.name);
-            player.faction = data.faction;
-            this.FACTION_LIST[data.faction] = data.faction;
+            player = this.createPlayer(socket, data);
         }.bind(this));
 
         socket.on('keyEvent', function (data) {
@@ -583,7 +574,6 @@ GameServer.prototype.start = function () {
                     break;
                 case "space":
                     player.pressingSpace = data.state;
-                    this.createHeadquarters(player);
                     break;
                 case "Z":
                     if (data.state) {
@@ -683,10 +673,14 @@ GameServer.prototype.addHomeShard = function (home, shard) {
 };
 
 
-
 /** SERVER CREATION EVENTS **/
-GameServer.prototype.createPlayer = function (socket, name) {
-    var player = new Entity.Player(socket.id, name);
+GameServer.prototype.createPlayer = function (socket, info) {
+    var faction = this.FACTION_LIST[info.faction];
+    if (!faction) {
+        faction = this.createFaction(info.faction);
+    }
+
+    var player = faction.addPlayer(socket.id, info.name);
     this.PLAYER_LIST[socket.id] = player;
     this.addPlayerPacket.push({
         id: player.id,
@@ -727,10 +721,11 @@ GameServer.prototype.createEmptyShard = function () {
     return shard;
 };
 
-GameServer.prototype.createHeadquarters = function (player) {
-    if (player.headquarter === null) {
-        var headquarter = new Entity.Headquarter(player, player.x, player.y);
+GameServer.prototype.createHeadquarters = function (faction) {
+    if (faction.headquarter === null) {
+        var headquarter = new Entity.Headquarter(faction, faction.x, faction.y);
         this.HOME_LIST[headquarter.id] = headquarter;
+
         headquarter.quadItem = {
             cell: headquarter,
             bound: {
@@ -741,7 +736,7 @@ GameServer.prototype.createHeadquarters = function (player) {
             }
         };
         this.homeTree.insert(headquarter.quadItem);
-        player.headquarter = headquarter;
+
         this.addHomePacket.push({
             id: headquarter.id,
             owner: headquarter.owner.name,
@@ -751,9 +746,8 @@ GameServer.prototype.createHeadquarters = function (player) {
             level: headquarter.level
         });
 
-        player.pressingSpace = false;
+        faction.headquarter = headquarter;
     }
-
 
 
 };
@@ -761,6 +755,8 @@ GameServer.prototype.createHeadquarters = function (player) {
 GameServer.prototype.createSentinel = function (player) {
     var tile = this.getPlayerTile(player);
     if (tile !== null && tile.sentinel === null &&
+        Math.abs(tile.x + tile.length / 2 - player.x) < (tile.length / 8) &&
+        Math.abs(tile.y + tile.length / 2 - player.y) < (tile.length / 8) &&
         player.shards.length >= 2) {
 
         var sentinel = new Entity.Sentinel(player, player.x, player.y);
@@ -804,6 +800,13 @@ GameServer.prototype.createSentinel = function (player) {
     }
 };
 
+GameServer.prototype.createFaction = function (name) {
+    var faction = new Entity.Faction(name);
+    this.FACTION_LIST[faction.name] = faction;
+    this.createHeadquarters(faction);
+    return faction;
+};
+
 /** SERVER REMOVE EVENTS **/
 GameServer.prototype.removePlayer = function (player) {
     if (!player) {
@@ -815,9 +818,6 @@ GameServer.prototype.removePlayer = function (player) {
     }
     if (player.emptyShard !== null) {
         this.removePlayerShard(player, player.emptyShard, "GLOBAL");
-    }
-    if (player.headquarter !== null) {
-        this.removeHQ(player.headquarter);
     }
     this.deletePlayerPacket.push({id: player.id});
     delete this.PLAYER_LIST[player.id];

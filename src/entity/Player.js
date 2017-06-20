@@ -79,6 +79,8 @@ Player.prototype.updatePosition = function () {
             this.xSpeed = 0;
         }
     }
+
+
     if (!this.pressingRight && !this.pressingLeft) {
         this.xSpeed = lerp(this.xSpeed,0,0.3);
     }
@@ -87,6 +89,22 @@ Player.prototype.updatePosition = function () {
     }
     this.y += this.ySpeed;
     this.x += this.xSpeed;
+
+
+    var checkStuck = function (coord) {
+        if (onBoundary(coord)) {
+            if (coord < entityConfig.WIDTH/2) {
+                return this.BORDER_WIDTH + 100;
+            }
+            else {
+                return entityConfig.WIDTH - this.BORDER_WIDTH - 100;
+            }
+
+        }
+        return coord;
+    };
+    this.x = checkStuck(this.x);
+    this.y = checkStuck(this.y);
 
 };
 

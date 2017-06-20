@@ -69,7 +69,6 @@ function addFactionstoUI(data) {
 
     for (var i = 0; i<packet.length; i++) {
         var name = packet[i];
-        console.log(name);
         var option = document.createElement('option');
         option.value = name;
         factions.appendChild(option);
@@ -270,7 +269,6 @@ function drawScene(data) {
 
     var translateScene = function () {
         ctx.setTransform(1,0,0,1,0,0);
-        console.log(selfId);
         var player = PLAYER_LIST[selfId];
         if (player) {
             if (keys[17] && keys[38] && scaleFactor < 2) {
