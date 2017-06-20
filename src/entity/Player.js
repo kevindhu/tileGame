@@ -92,24 +92,33 @@ Player.prototype.updatePosition = function () {
 
 
     var checkStuck = function (coord) {
-        if (onBoundary(coord)) {
+        var newCoord;
+        if (overBoundary(coord)) {
             if (coord < entityConfig.WIDTH/2) {
-                return this.BORDER_WIDTH + 100;
+                var newCoord = entityConfig.BORDER_WIDTH + 100;
+                return newCoord;
             }
             else {
-                return entityConfig.WIDTH - this.BORDER_WIDTH - 100;
+                var newCoord = entityConfig.WIDTH - entityConfig.BORDER_WIDTH - 100;
+                return newCoord;
             }
-
         }
         return coord;
     };
+
+
     this.x = checkStuck(this.x);
     this.y = checkStuck(this.y);
-
 };
 
 var onBoundary = function (coord) {
-    return coord <= entityConfig.BORDER_WIDTH || coord >= entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
+    return coord <= entityConfig.BORDER_WIDTH ||
+        coord >= entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
+};
+
+var overBoundary = function (coord) {
+    return coord < entityConfig.BORDER_WIDTH - 1 ||
+        coord > entityConfig.WIDTH - entityConfig.BORDER_WIDTH + 1;
 };
 
 

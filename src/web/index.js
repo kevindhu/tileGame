@@ -294,7 +294,7 @@ function drawScene(data) {
         }
     };
 
-    ctx.clearRect(0, 0, 8000, 8000);
+    ctx.clearRect(0, 0, 10000, 10000);
     drawTiles();
     drawPlayers();
     drawShards();

@@ -15,6 +15,10 @@ function Headquarter(faction, x, y) {
     this.level = 2;
 }
 
+Headquarter.prototype.supply = function () {
+    return this.shards.length;
+};
+
 Headquarter.prototype.addShard = function (shard) {
     shard.home = this;
     this.shards.push(shard.id);

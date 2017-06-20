@@ -260,6 +260,10 @@ GameServer.prototype.checkShardCollision = function (shard) {
             this.removeShootingShard(shard, "GLOBAL");
             this.dropHomeShard(home); //make this so it is based on a probability
             //add shard from HQ if HQ is healthy
+            var hq = home.owner.headquarter;
+            if (hq !== home && hq.supply() > 2) {
+                this.transferHomeShards(hq,home);
+            }
         }
     }.bind(this));
 
@@ -879,21 +883,6 @@ GameServer.prototype.removeHomeShard = function (home, shard, status) {
 
 
 /** SPECIAL METHODS **/
-GameServer.prototype.resetPlayer = function (player) {
-    for (var i = player.shards.length; i >= 0; i--) {
-        this.dropPlayerShard(player);
-    }
-    player.reset();
-
-}
-
-GameServer.prototype.decreasePlayerHealth = function (player, amount) {
-    player.decreaseHealth(amount);
-    if (player.health <= 0) {
-        this.resetPlayer(player);
-    }
-};
-
 GameServer.prototype.sendInitPackets = function (socket) {
     var stage = socket.stage;
     if (stage === 0) {
@@ -913,6 +902,21 @@ GameServer.prototype.sendInitPackets = function (socket) {
         socket.emit('init', this.createTileInitPacket(socket.id, [entityConfig.TILES * 3 / 4, entityConfig.TILES]));
     }
     socket.stage++;
+};
+
+GameServer.prototype.resetPlayer = function (player) {
+    for (var i = player.shards.length; i >= 0; i--) {
+        this.dropPlayerShard(player);
+    }
+    player.reset();
+
+}
+
+GameServer.prototype.decreasePlayerHealth = function (player, amount) {
+    player.decreaseHealth(amount);
+    if (player.health <= 0) {
+        this.resetPlayer(player);
+    }
 };
 
 GameServer.prototype.dropPlayerShard = function (player) {
@@ -945,6 +949,12 @@ GameServer.prototype.dropHomeShard = function (home) {
             Arithmetic.getRandomInt(-30, 30)
         );
     }
+};
+
+GameServer.prototype.transferHomeShards = function (h1, h2) {
+    var shard = h1.getRandomShard();
+    this.removeHomeShard(h1,shard,"LOCAL");
+    this.addHomeShard(h2,shard);
 };
 
 /** MISC METHODS **/
