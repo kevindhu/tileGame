@@ -10,6 +10,7 @@ function Tile(x, y) {
     this.health = 0;
     this.length = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
     this.sentinel = null;
+    this.alert = false;
 }
 
 function getRandomColor() {

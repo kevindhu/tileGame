@@ -35,6 +35,7 @@ var Tile = function (tileInfo) {
     this.y = tileInfo.y;
     this.length = tileInfo.length;
     this.color = tileInfo.color;
+    this.alert = tileInfo.alert;
 };
 var Shard = function (shardInfo) {
     this.id = shardInfo.id;
@@ -170,6 +171,7 @@ function updateEntities(data) {
             var tileInfo = packet[i];
             var tile = TILE_LIST[tileInfo.id];
             tile.color = tileInfo.color;
+            tile.alert = tileInfo.alert;
         }
     };
 
@@ -195,7 +197,6 @@ function updateEntities(data) {
             }
         }
     };
-
 
     updatePlayers(data.playerInfo);
     updateTiles(data.tileInfo);
@@ -272,7 +273,6 @@ function drawScene(data) {
 
 
     var drawMap = function () {
-        console.log(Object.size(TILE_LIST));
         function hexToRgb(hex) {
             var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return {
@@ -295,13 +295,13 @@ function drawScene(data) {
 
             for (var id in TILE_LIST) {
                 tile = TILE_LIST[id];
-                if (tile && inBounds(selfPlayer,tile.x, tile.y)) {
+                if (tile.alert || tile && inBounds(selfPlayer,tile.x, tile.y)) {
                     tileRGB = hexToRgb(tile.color);
                 }
                 else {
-                    tileRGB.r = 100;
-                    tileRGB.g = 156;
-                    tileRGB.b = 123;
+                    tileRGB.r = 0;
+                    tileRGB.g = 0;
+                    tileRGB.b = 0;
                 }
 
                 imgData.data[i]= tileRGB.r;

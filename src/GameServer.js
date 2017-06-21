@@ -196,7 +196,8 @@ GameServer.prototype.createTileInitPacket = function (id, bound) {
                 x: tile.x,
                 y: tile.y,
                 color: tile.color,
-                length: tile.length
+                length: tile.length,
+                alert: tile.alert
             });
         }
         count++;
@@ -229,16 +230,16 @@ GameServer.prototype.spawnShards = function () {
     }
 };
 
-GameServer.prototype.getPlayerTile = function (player) {
-    var playerBound = {
-        minx: player.x - entityConfig.SHARD_WIDTH,
-        miny: player.y - entityConfig.SHARD_WIDTH,
-        maxx: player.x + entityConfig.SHARD_WIDTH,
-        maxy: player.y + entityConfig.SHARD_WIDTH
+GameServer.prototype.getEntityTile = function (entity) {
+    var entityBound = {
+        minx: entity.x - entityConfig.SHARD_WIDTH,
+        miny: entity.y - entityConfig.SHARD_WIDTH,
+        maxx: entity.x + entityConfig.SHARD_WIDTH,
+        maxy: entity.y + entityConfig.SHARD_WIDTH
     };
     var ret = null;
 
-    this.tileTree.find(playerBound, function (tile) {
+    this.tileTree.find(entityBound, function (tile) {
         ret = tile;
     }.bind(this));
     if (ret !== null) {
@@ -257,9 +258,19 @@ GameServer.prototype.checkShardCollision = function (shard) {
 
     this.homeTree.find(shardBound, function (home) {
         if (shard.owner && shard.owner.faction !== home.owner) {
+
+            var tile = this.getEntityTile(shard);
+            tile.alert = true;
+            this.updateTilesPacket.push({
+                id: tile.id,
+                owner: tile.owner.name,
+                health: tile.health,
+                color: tile.color,
+                alert: tile.alert
+            });
+
             this.removeShootingShard(shard, "GLOBAL");
-            this.dropHomeShard(home); //make this so it is based on a probability
-            //add shard from HQ if HQ is healthy
+            this.dropHomeShard(home);
             var hq = home.owner.headquarter;
             if (hq !== home && hq.supply() > 0) {
                 this.transferHomeShards(hq,home);
@@ -354,7 +365,7 @@ GameServer.prototype.updatePlayers = function () {
         var player = this.PLAYER_LIST[index];
         player.updatePosition();
 
-        var tile = this.getPlayerTile(player);
+        var tile = this.getEntityTile(player);
         if (tile) {
             if (tile.owner === player.faction) {
                 player.increaseHealth(0.1);
@@ -746,7 +757,7 @@ GameServer.prototype.createHeadquarters = function (faction) {
 };
 
 GameServer.prototype.createSentinel = function (player) {
-    var tile = this.getPlayerTile(player);
+    var tile = this.getEntityTile(player);
     if (tile !== null && tile.sentinel === null &&
         Math.abs(tile.x + tile.length / 2 - player.x) < (tile.length / 8) &&
         Math.abs(tile.y + tile.length / 2 - player.y) < (tile.length / 8) &&
@@ -788,7 +799,7 @@ GameServer.prototype.createSentinel = function (player) {
             id: tile.id,
             owner: tile.owner.name,
             health: tile.health,
-            color: tile.color
+            color: tile.color,
         });
     }
 };
@@ -873,7 +884,6 @@ GameServer.prototype.removeHomeShard = function (home, shard, status) {
 
 /** SPECIAL METHODS **/
 GameServer.prototype.sendInitPackets = function (socket) {
-	console.log(entityConfig.TILES);
     var stage = socket.stage;
     if (stage === 0) {
         socket.emit('init', this.createMainInitPacket(socket.id));
