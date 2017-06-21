@@ -873,6 +873,7 @@ GameServer.prototype.removeHomeShard = function (home, shard, status) {
 
 /** SPECIAL METHODS **/
 GameServer.prototype.sendInitPackets = function (socket) {
+	console.log(entityConfig.TILES);
     var stage = socket.stage;
     if (stage === 0) {
         socket.emit('init', this.createMainInitPacket(socket.id));

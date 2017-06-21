@@ -16,6 +16,9 @@ var SHARD_LIST = {};
 var HOME_LIST = {};
 var ARROW = null;
 
+var serverMap = null;
+var mapTimer = 0;
+
 
 
 
@@ -222,9 +225,6 @@ function drawScene(data) {
         for (var id in TILE_LIST) {
             var tile = TILE_LIST[id];
             if (inBounds(selfPlayer,tile.x, tile.y)) {
-                //ctx.fillStyle = "#000000";
-                //ctx.strokeRect(tile.x, tile.y, tile.length, tile.length);
-
                 ctx.fillStyle = tile.color;
                 ctx.fillRect(tile.x, tile.y, tile.length, tile.length);
             }
@@ -271,6 +271,58 @@ function drawScene(data) {
     };
 
 
+    var drawMap = function () {
+        console.log(Object.size(TILE_LIST));
+        function hexToRgb(hex) {
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            }
+        }
+        if (mapTimer <= 0 || serverMap === null) {
+            var player = PLAYER_LIST[selfId];
+            var tileLength = Math.sqrt(Object.size(TILE_LIST));
+            if (tileLength === 0 || !player) {
+                return;
+            }
+            var imgData = ctx.createImageData(tileLength, tileLength);
+            var tile;
+            var tileRGB = {};
+            var i = 0;
+
+
+            for (var id in TILE_LIST) {
+                tile = TILE_LIST[id];
+                if (tile && inBounds(selfPlayer,tile.x, tile.y)) {
+                    tileRGB = hexToRgb(tile.color);
+                }
+                else {
+                    tileRGB.r = 100;
+                    tileRGB.g = 156;
+                    tileRGB.b = 123;
+                }
+
+                imgData.data[i]= tileRGB.r;
+                imgData.data[i+1]= tileRGB.g;
+                imgData.data[i+2]= tileRGB.b;
+                imgData.data[i+3]=255;
+                i += 4;
+            }
+            imgData = scaleImageData(imgData,4,ctx);
+            serverMap = imgData;
+            mapTimer = 25;
+        }
+        else {
+            mapTimer -= 1;
+        }
+
+        ctx.putImageData(serverMap,100,100);
+
+    };
+
+
     var translateScene = function () {
         ctx.setTransform(1,0,0,1,0,0);
         var player = PLAYER_LIST[selfId];
@@ -298,50 +350,46 @@ function drawScene(data) {
         }
     };
 
-    var drawMap = function () {
-        var player = PLAYER_LIST[selfId];
-
-        var tileLength = Math.sqrt(Object.size(TILE_LIST));
-        if (tileLength === 0) {
-            return;
-        }
-        var imgData = ctx.createImageData(tileLength, tileLength);
-        var tile, tileRGB;
-        var i = 0;
-        for (var id in TILE_LIST) {
-            tile = TILE_LIST[id];
-            tileRGB = hexToRgb(tile.color);
-            imgData.data[i]=tileRGB.r;
-            imgData.data[i+1]=tileRGB.g;
-            imgData.data[i+2]=tileRGB.b;
-            imgData.data[i+3]=255;
-            i += 4;
-        }
-
-        function hexToRgb(hex) {
-            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            console.log(result[1]);
-            return {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            }
-        }
-
-
-        ctx.putImageData(imgData,player.x,player.y);
-    };
-
     ctx.clearRect(0, 0, 10000, 10000);
     drawTiles();
     drawPlayers();
     drawShards();
     drawHomes();
     drawArrow();
-    //drawMap();
     translateScene();
+    drawMap();
 
 }
+
+
+
+function scaleImageData(imageData, scale, context) {
+  var scaled = context.createImageData(imageData.width * scale, imageData.height * scale);
+
+  for(var row = 0; row < imageData.height; row++) {
+    for(var col = 0; col < imageData.width; col++) {
+      var sourcePixel = [
+        imageData.data[(row * imageData.width + col) * 4 + 0],
+        imageData.data[(row * imageData.width + col) * 4 + 1],
+        imageData.data[(row * imageData.width + col) * 4 + 2],
+        imageData.data[(row * imageData.width + col) * 4 + 3]
+      ];
+      for(var y = 0; y < scale; y++) {
+        var destRow = row * scale + y;
+        for(var x = 0; x < scale; x++) {
+          var destCol = col * scale + x;
+          for(var i = 0; i < 4; i++) {
+            scaled.data[(destRow * scaled.width + destCol) * 4 + i] =
+              sourcePixel[i];
+          }
+        }
+      }
+    }
+  }
+
+  return scaled;
+}
+
 
 var keys = [];
 var scaleFactor = 1.5; 

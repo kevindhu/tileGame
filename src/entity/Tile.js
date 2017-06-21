@@ -6,10 +6,19 @@ function Tile(x, y) {
     this.x = x;
     this.y = y;
     this.owner = null;
-    this.color = "#FFFFFF";
+    this.color = getRandomColor();
     this.health = 0;
     this.length = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
     this.sentinel = null;
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
 }
 
 
