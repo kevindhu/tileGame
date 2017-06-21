@@ -1,7 +1,8 @@
 var canvas = document.getElementById("bigCanvas");
 var ctx = canvas.getContext("2d");
-
 canvas.style.visibility = "hidden";
+
+
 var nameButton = document.getElementById("nameSubmit");
 var playerNameInput = document.getElementById("playerNameInput");
 var factionNameInput = document.getElementById("factionNameInput");

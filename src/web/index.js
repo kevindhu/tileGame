@@ -272,7 +272,9 @@ function drawScene(data) {
     };
 
 
+
     var drawMap = function () {
+        var player = PLAYER_LIST[selfId];
         function hexToRgb(hex) {
             var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return {
@@ -282,11 +284,10 @@ function drawScene(data) {
             }
         }
         if (mapTimer <= 0 || serverMap === null) {
-            var player = PLAYER_LIST[selfId];
             var tileLength = Math.sqrt(Object.size(TILE_LIST));
             if (tileLength === 0 || !player) {
                 return;
-            }
+            }   
             var imgData = ctx.createImageData(tileLength, tileLength);
             var tile;
             var tileRGB = {};
@@ -311,15 +312,25 @@ function drawScene(data) {
                 i += 4;
             }
             imgData = scaleImageData(imgData,4,ctx);
-            serverMap = imgData;
+
+            var tempCanvas = document.createElement("canvas"),
+            tempCtx = tempCanvas.getContext("2d");
+            tempCanvas.width = 100;
+            tempCanvas.height = 100;
+
+            tempCtx.putImageData(imgData, 0, 0);
+            serverMap = tempCanvas;
             mapTimer = 25;
         }
+
         else {
             mapTimer -= 1;
         }
 
-        ctx.putImageData(serverMap,100,100);
+        ctx.rotate(90*Math.PI/180);
+        ctx.drawImage(serverMap, player.y, -player.x);
 
+        ctx.rotate(270*Math.PI/180);
     };
 
 
@@ -363,31 +374,25 @@ function drawScene(data) {
 
 
 
-function scaleImageData(imageData, scale, context) {
-  var scaled = context.createImageData(imageData.width * scale, imageData.height * scale);
-
-  for(var row = 0; row < imageData.height; row++) {
-    for(var col = 0; col < imageData.width; col++) {
-      var sourcePixel = [
-        imageData.data[(row * imageData.width + col) * 4 + 0],
-        imageData.data[(row * imageData.width + col) * 4 + 1],
-        imageData.data[(row * imageData.width + col) * 4 + 2],
-        imageData.data[(row * imageData.width + col) * 4 + 3]
-      ];
-      for(var y = 0; y < scale; y++) {
-        var destRow = row * scale + y;
-        for(var x = 0; x < scale; x++) {
-          var destCol = col * scale + x;
-          for(var i = 0; i < 4; i++) {
-            scaled.data[(destRow * scaled.width + destCol) * 4 + i] =
-              sourcePixel[i];
-          }
+function scaleImageData(imageData, scale, ctx) {
+    var scaled = ctx.createImageData(imageData.width * scale, imageData.height * scale);
+    var subLine = ctx.createImageData(scale, 1).data
+    for (var row = 0; row < imageData.height; row++) {
+        for (var col = 0; col < imageData.width; col++) {
+            var sourcePixel = imageData.data.subarray(
+                (row * imageData.width + col) * 4,
+                (row * imageData.width + col) * 4 + 4
+            );
+            for (var x = 0; x < scale; x++) subLine.set(sourcePixel, x*4)
+            for (var y = 0; y < scale; y++) {
+                var destRow = row * scale + y;
+                var destCol = col * scale;
+                scaled.data.set(subLine, (destRow * scaled.width + destCol) * 4)
+            }
         }
-      }
     }
-  }
 
-  return scaled;
+    return scaled;
 }
 
 
