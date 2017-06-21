@@ -41,4 +41,20 @@ Tile.prototype.setSentinel = function (sentinel) {
     this.owner = sentinel.owner;
 };
 
+Tile.prototype.addQuadItem = function () {
+    var centerX = this.x + this.length / 2;
+    var centerY = this.y + this.length / 2;
+
+    this.quadItem = {
+                cell: this,
+                bound: {
+                    minx: centerX - this.length / 2,
+                    miny: centerY - this.length / 2,
+                    maxx: centerX + this.length / 2,
+                    maxy: centerY + this.length / 2
+                }
+            };
+}
+
+
 module.exports = Tile;

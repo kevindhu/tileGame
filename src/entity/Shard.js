@@ -24,7 +24,7 @@ function Shard(x, y, id) {
 
 Shard.prototype.rotate = function () {
     if (this.home !== null) {
-        var radius = 20;
+        var radius = this.home.radius;
         this.x = this.home.x + radius * Math.cos(this.theta);
         this.y = this.home.y + radius * Math.sin(this.theta);
         this.theta += Math.PI / 50;
@@ -60,6 +60,27 @@ Shard.prototype.updatePosition = function () {
 
     this.xVel = lerp(this.xVel,0,0.2);
     this.yVel = lerp(this.yVel,0,0.2);
+};
+
+Shard.prototype.addQuadItem = function () {
+    this.quadItem = {
+        cell: this,
+        bound: {
+            minx: this.x - this.radius,
+            miny: this.y - this.radius,
+            maxx: this.x + this.radius,
+            maxy: this.y + this.radius
+        }
+    };
+};
+
+Shard.prototype.updateQuadItem = function () {
+    this.quadItem.bound = {
+        minx: this.x - this.radius,
+        miny: this.y - this.radius,
+        maxx: this.x + this.radius,
+        maxy: this.y + this.radius
+    }
 };
 
 

@@ -2,11 +2,11 @@ const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
 var Player = require("./Player");
 
-function Faction(name) {
+function Faction(name, coords) {
     this.name = name;
     this.players = []; //contains player Ids
-    this.x = Arithmetic.getRandomInt(250,1000);
-    this.y = Arithmetic.getRandomInt(250,1000);
+    this.x = coords.x;
+    this.y = coords.y;
     this.headquarter = null;
 }
 

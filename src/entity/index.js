@@ -4,5 +4,7 @@ module.exports = {
     Shard: require('./Shard'),
     Headquarter: require('./Headquarter'),
     Sentinel: require('./Sentinel'),
+    Tower: require('./Tower'),
     Faction: require('./Faction')
+
 };

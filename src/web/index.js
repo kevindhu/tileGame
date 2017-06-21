@@ -217,8 +217,8 @@ function drawScene(data) {
         ctx.fillStyle = "#000000";
         for (var playerId in PLAYER_LIST) {
             var player = PLAYER_LIST[playerId];
-            ctx.fillText(player.name, player.x, player.y);
-            ctx.fillRect(player.x, player.y, player.health * 10, 10);
+            ctx.fillText(player.name, player.x - 4.6 * player.name.length, player.y - 10);
+            ctx.fillRect(player.x - 5 * player.health, player.y + 10, player.health * 10, 10);
         }
     };
 
@@ -311,12 +311,12 @@ function drawScene(data) {
                 imgData.data[i+3]=255;
                 i += 4;
             }
-            imgData = scaleImageData(imgData,4,ctx);
+            imgData = scaleImageData(imgData,3,ctx);
 
             var tempCanvas = document.createElement("canvas"),
             tempCtx = tempCanvas.getContext("2d");
-            tempCanvas.width = 100;
-            tempCanvas.height = 100;
+            tempCanvas.width = 500;
+            tempCanvas.height = 500;
 
             tempCtx.putImageData(imgData, 0, 0);
             serverMap = tempCanvas;
@@ -328,8 +328,9 @@ function drawScene(data) {
         }
 
         ctx.rotate(90*Math.PI/180);
-        ctx.drawImage(serverMap, player.y, -player.x);
-
+        ctx.scale(1/scaleFactor,-1/scaleFactor);
+        ctx.drawImage(serverMap, player.y * scaleFactor + canvas.width/4, player.x * scaleFactor - canvas.width/2 + 40);
+        ctx.scale(scaleFactor,-scaleFactor);
         ctx.rotate(270*Math.PI/180);
     };
 
@@ -488,6 +489,9 @@ var returnId = function (keyCode) {
             break;
         case 90:
             id = 'Z';
+            break;
+        case 88:
+            id = 'X';
             break;
     }
     return id;
