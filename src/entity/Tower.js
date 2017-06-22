@@ -7,10 +7,12 @@ function Tower(owner, x, y) {
     this.x = x;
     this.y = y;
     this.name = this.owner.name;
-    this.radius = 10;
     this.shards = [];
     this.color = "#125212";
+    this.hasColor = true;
     this.level = 0;
+    this.radius = 10;
+    this.health = 30;
 }
 
 Tower.prototype.getRandomShard = function () {

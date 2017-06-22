@@ -7,14 +7,23 @@ function Sentinel(owner, x, y) {
     this.x = x;
     this.y = y;
     this.name = this.owner.name;
-    this.radius = 10;
     this.shards = [];
     this.color = owner.color;
     this.type = "Sentinel";
     this.level = 0;
+    this.hasColor = false;
+
+    this.radius = 10;
+    this.health = 1;
 }
 
-Sentinel.prototype.getRandomShard = function () {
+
+Sentinel.prototype.decreaseHealth = function (amount) {
+    this.health -= amount;
+};
+
+
+Sentinel.prototype.getRandomShard = function () {   
     var randomIndex = Arithmetic.getRandomInt(0,this.shards.length-1);
     return this.shards[randomIndex];
 };
@@ -30,13 +39,15 @@ Sentinel.prototype.getSupply = function () {
 };
 
 Sentinel.prototype.addShard = function (shard) {
-    if (this.getSupply() > 3) {
+    if (this.getSupply() > 0) {
         this.level = 1;
         this.radius = 30;
+        this.health = 30;
     }
-    if (this.getSupply() > 5) {
+    if (this.getSupply() > 1) {
         this.level = 2;
         this.radius = 50;
+        this.health = 80;
     }
     shard.home = this;
     this.shards.push(shard.id);

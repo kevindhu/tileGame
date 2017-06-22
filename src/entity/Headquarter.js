@@ -13,6 +13,7 @@ function Headquarter(faction, x, y) {
     this.timer = 0;
     this.isOpen = false;
     this.level = 2;
+    this.hasColor = false;
 }
 
 Headquarter.prototype.supply = function () {

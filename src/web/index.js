@@ -50,6 +50,8 @@ var Home = function (homeInfo) {
     this.name = homeInfo.owner;
     this.shards = homeInfo.shards;
     this.level = homeInfo.level;
+    this.hasColor = homeInfo.hasColor;
+    this.health = homeInfo.health;
 };
 
 
@@ -189,12 +191,11 @@ function updateEntities(data) {
         for (var i = 0; i < packet.length; i++) {
             var homeInfo = packet[i];
             var home = HOME_LIST[homeInfo.id];
-            if (homeInfo.shards) {
-                home.shards = homeInfo.shards;
-            }
-            if (homeInfo.level) {
-                home.level = homeInfo.level;
-            }
+
+            home.shards = homeInfo.shards;
+            home.level = homeInfo.level;
+            home.health = homeInfo.health;
+            home.hasColor = homeInfo.hasColor;
         }
     };
 
@@ -257,6 +258,7 @@ function drawScene(data) {
                 radius = 30;
             }
             if (home.level === 2) {
+                
                 radius = 50;
             }
             ctx.fillStyle = "#003290";
@@ -496,37 +498,6 @@ var returnId = function (keyCode) {
     }
     return id;
 };
-
-function defineMessage() {
-    var text = document.getElementById("textInput").value;
-    if (text !== null) {
-        socket.emit('textInput',
-            {
-                id: selfId,
-                word: text
-            }
-        )
-    }
-    closeUI("name shard");
-}
-
-function addShardsToList(list, homeId) {
-    for (var i = 0; i < HOME_LIST[homeId].shards.length; i++) {
-        var entry = document.createElement('li');
-        var shard = SHARD_LIST[HOME_LIST[homeId].shards[i]];
-        entry.id = shard.id;
-
-        (function (_id) {
-            entry.addEventListener("click", function () {
-                socket.emit("removeHomeShard", {id: _id});
-            });
-        })(entry.id);
-
-
-        entry.appendChild(document.createTextNode(shard.name));
-        list.appendChild(entry);
-    }
-}
 
 
 

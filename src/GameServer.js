@@ -87,7 +87,6 @@ GameServer.prototype.spawnShards = function () {
 };
 
 GameServer.prototype.getEntityTile = function (entity) {
-    //console.log(entity.x, entity.y);
     var entityBound = {
         minx: entity.x - entityConfig.SHARD_WIDTH,
         miny: entity.y - entityConfig.SHARD_WIDTH,
@@ -120,6 +119,9 @@ GameServer.prototype.checkShardCollision = function (shard) {
             this.packetHandler.updateTilesPackets(tile);
 
             this.removeShootingShard(shard, "GLOBAL");
+
+            //damage the home
+            this.decreaseHomeHealth(home, 1);
             this.dropHomeShard(home);
             var hq = home.owner.headquarter;
             if (hq !== home && hq.supply() > 0) {
@@ -306,7 +308,23 @@ GameServer.prototype.start = function () {
             player = this.createPlayer(socket, data);
         }.bind(this));
 
-        socket.on('keyEvent', function (data) {
+        socket.on('newColor', function (data) {
+            home = this.HOME_LIST[data.home];
+            if (home.level < 2 && home.hasColor === true) { //prevent cheating
+                return;
+            }
+
+            var tile = this.getEntityTile(home);
+            console.log(home.id + " has been chosen for home!");
+            console.log(tile.id + " has been chosen!");
+            if (tile.owner) {
+                this.setTileColor(tile, data.color);
+                home.hasColor = true;
+                this.packetHandler.updateHomePackets(home);
+            }
+        }.bind(this));
+
+        socket.on('keyEvent', function x(data) {
             if (!player) {
                 return;
             }
@@ -467,7 +485,7 @@ GameServer.prototype.createSentinel = function (player) {
             this.removePlayerShard(player, shard, "LOCAL");
             this.addHomeShard(sentinel, shard);
         }
-        tile.setSentinel(sentinel);
+        tile.setHome(sentinel);
 
         this.HOME_LIST[sentinel.id] = sentinel;
         this.packetHandler.addHomePackets(sentinel);
@@ -532,14 +550,14 @@ GameServer.prototype.removePlayer = function (player) {
     delete this.PLAYER_LIST[player.id];
 };
 
-GameServer.prototype.removeHQ = function (HQ) {
-    this.homeTree.remove(HQ.quadItem);
-    for (var i = HQ.shards.length - 1; i >= 0; i--) {
-        var shard = this.HOME_SHARD_LIST[HQ.shards[i]];
-        this.removeHomeShard(HQ, shard, "GLOBAL");
+GameServer.prototype.removeHome = function (home) {
+    this.homeTree.remove(home.quadItem);
+    for (var i = home.shards.length - 1; i >= 0; i--) {
+        this.dropHomeShard(home);
     }
-    this.packetHandler.deleteHomePackets(HQ.id);
-    delete this.HOME_LIST[HQ.id];
+
+    this.packetHandler.deleteHomePackets(home.id);
+    delete this.HOME_LIST[home.id];
 };
 
 GameServer.prototype.removeStaticShard = function (shard, status) {
@@ -595,6 +613,15 @@ GameServer.prototype.decreasePlayerHealth = function (player, amount) {
     if (player.health <= 0) {
         this.resetPlayer(player);
     }
+    this.packetHandler.updatePlayersPackets(player);
+};
+
+GameServer.prototype.decreaseHomeHealth = function (home, amount) {
+    home.decreaseHealth(amount);
+    if (home.health <= 0) {
+        this.removeHome(home);
+    }
+    this.packetHandler.updateHomePackets(home);
 };
 
 GameServer.prototype.dropPlayerShard = function (player) {
@@ -616,7 +643,7 @@ GameServer.prototype.dropPlayerShard = function (player) {
 };
 
 GameServer.prototype.dropHomeShard = function (home) {
-    if (home.getRandomShard()) {
+    if (home.getRandomShard())   {
         var shard = this.HOME_SHARD_LIST[home.getRandomShard()];
         this.removeHomeShard(home, shard, "LOCAL");
         this.addShootingShard(shard,
@@ -631,6 +658,15 @@ GameServer.prototype.transferHomeShards = function (h1, h2) {
     this.removeHomeShard(h1,shard,"LOCAL");
     this.addHomeShard(h2,shard);
 };
+
+GameServer.prototype.setTileColor = function (tile, color) {
+    if (color !== "" && color !== undefined && color !== null) {
+        console.log(tile.id + " is being colored " + color);
+        tile.setColor(color);
+        this.packetHandler.updateTilesPackets(tile);
+    }
+};
+
 
 /** MISC METHODS **/
 Object.size = function (obj) {

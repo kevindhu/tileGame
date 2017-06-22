@@ -105,7 +105,8 @@ PacketHandler.prototype.createMainInitPacket = function (id) {
             owner: home.owner.name,
             x: home.x,
             y: home.y,
-            shards: home.shards
+            shards: home.shards,
+            health: home.health
         })
     }
 
@@ -216,7 +217,9 @@ PacketHandler.prototype.addHomePackets = function (home) {
             x: home.x,
             y: home.y,
             shards: home.shards,
-            level: home.level
+            level: home.level,
+            hasColor: home.hasColor,
+            health: home.health
         });
 };
 
@@ -228,7 +231,9 @@ PacketHandler.prototype.updateHomePackets = function (home) {
             {
                 id: home.id,
                 shards: home.shards,
-                level: home.level
+                level: home.level,
+                hasColor: home.hasColor,
+                health: home.health
             }
         );
 };

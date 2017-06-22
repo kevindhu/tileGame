@@ -6,7 +6,7 @@ function Tile(x, y) {
     this.x = x;
     this.y = y;
     this.owner = null;
-    this.color = getRandomColor();
+    this.color = "#FFFFFF"; //getRandomColor();
     this.health = 0;
     this.length = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
     this.sentinel = null;
@@ -23,6 +23,11 @@ function getRandomColor() {
 }
 
 
+Tile.prototype.setColor = function (color) {
+    this.color = color;
+};
+
+
 
 Tile.prototype.updateOwner = function (newOwner) {
     if (this.health > 0 && newOwner.name !== this.owner) {
@@ -35,11 +40,18 @@ Tile.prototype.updateOwner = function (newOwner) {
     }
 };
 
-Tile.prototype.setSentinel = function (sentinel) {
-    this.sentinel = sentinel;
-    this.color = sentinel.color;
-    this.owner = sentinel.owner;
+Tile.removeHome = function (home) {
+    if (this.home === home) {
+        this.home = null;
+        this.owner = null;
+    }
+}
+
+Tile.prototype.setHome = function (home) {
+    this.home = home;
+    this.owner = home.owner;
 };
+
 
 Tile.prototype.addQuadItem = function () {
     var centerX = this.x + this.length / 2;
