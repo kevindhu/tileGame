@@ -31,7 +31,9 @@ Headquarter.prototype.removeShard = function (shard) {
     this.shards.splice(index, 1);
 };
 
-
+Headquarter.prototype.decreaseHealth = function (amount) {
+    this.health -= amount;
+};
 
 Headquarter.prototype.getRandomShard = function () {
     var randomIndex = Arithmetic.getRandomInt(0,this.shards.length-1);

@@ -45,11 +45,14 @@ function openUI(info) {
         homeFaction.innerHTML = home.id;
 
         homeInfo.style.display = 'block';
-        var list = document.getElementById('shards_list');
-        list.innerHTML = "";
 
-        addShardsToList(list, home);
-        addColorPicker(home);
+        var shardsList = document.getElementById('shards_list');
+        var colorPicker = document.getElementById('color_picker');
+        shardsList.innerHTML = "";
+        colorPicker.innerHTML = "";
+
+        addShardsToList(shardsList, home);
+        addColorPicker(colorPicker, home);
     }
 }
 
@@ -102,12 +105,9 @@ function addShardsToList(list, home) {
     }
 }
 
-var colorPicker = document.getElementById("color_picker");
-var colorSubmitButton = document.getElementById("color_submit");
-var colorInput = document.getElementById("color_input");
 
 
-function addColorPicker(home) {
+function addColorPicker(colorPicker, home) {
     if (!home.hasColor && home.level > 1) {
         colorPicker.style.visibility = "visible";
     }
@@ -117,7 +117,12 @@ function addColorPicker(home) {
         return;
     }
 
-
+    var colorInput = document.createElement("input");
+    var colorSubmitButton = document.createElement('button');
+    colorPicker.appendChild(colorInput);
+    colorPicker.appendChild(colorSubmitButton);
+    
+    colorInput.type = "text";
     colorSubmitButton.addEventListener("click", function () {
     socket.emit("newColor",
         {
@@ -125,9 +130,7 @@ function addColorPicker(home) {
             home: home.id
         });
     colorInput.value = "";
-    closeUI('home info');
 
-    var elClone = colorSubmitButton.cloneNode(true);
-    colorSubmitButton.parentNode.replaceChild(elClone, colorSubmitButton);
+    closeUI('home info');
 });
 }

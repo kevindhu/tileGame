@@ -19,6 +19,11 @@ Faction.prototype.addPlayer = function (id, playerName) {
     return player;
 };
 
+Faction.prototype.getRandomPlayer = function () {
+    var randomIndex = Arithmetic.getRandomInt(0,this.players.length-1);
+    return this.players[randomIndex];
+}
+
 
 
 module.exports = Faction;

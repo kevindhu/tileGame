@@ -19,6 +19,7 @@ function GameServer() {
     this.shardTree = null;
     this.homeTree = null;
     this.tileTree = null;
+    this.towerTree = null;
 
     this.minx = entityConfig.BORDER_WIDTH;
     this.miny = entityConfig.BORDER_WIDTH;
@@ -70,8 +71,17 @@ GameServer.prototype.initShards = function () {
     }
 };
 
-GameServer.prototype.initHQs = function () {
+GameServer.prototype.initHomes = function () {
     this.homeTree = new QuadNode({
+        minx: this.minx,
+        miny: this.miny,
+        maxx: this.maxx,
+        maxy: this.maxy
+    });
+};
+
+GameServer.prototype.initTowers = function () {
+    this.towerTree = new QuadNode({
         minx: this.minx,
         miny: this.miny,
         maxx: this.maxx,
@@ -187,6 +197,15 @@ GameServer.prototype.checkPlayerCollision = function (player) {
             }
         }
     }.bind(this));
+
+
+    //player + tower collision
+    this.towerTree.find(playerBound, function (tower) {
+        if (player.faction !== tower.owner) {
+            //tower shoots at player
+            this.shootTowerShard(tower, player);
+        }
+    }.bind(this));
 };
 
 GameServer.prototype.checkCollisions = function () {
@@ -300,7 +319,8 @@ GameServer.prototype.start = function () {
     /** INIT SERVER OBJECTS **/
     this.initTiles();
     this.initShards();
-    this.initHQs();
+    this.initHomes();
+    this.initTowers();
 
     /** START WEBSOCKET SERVICE **/
     var io = require('socket.io')(server, {});
@@ -326,8 +346,6 @@ GameServer.prototype.start = function () {
             }
 
             var tile = this.getEntityTile(home);
-            console.log(home.id + " has been chosen for home!");
-            console.log(tile.id + " has been chosen!");
             if (tile.owner) {
                 this.setTileColor(tile, data.color);
                 home.hasColor = true;
@@ -470,6 +488,9 @@ GameServer.prototype.createEmptyShard = function () {
 GameServer.prototype.createHeadquarters = function (faction) {
     if (faction.headquarter === null) {
         var headquarter = new Entity.Headquarter(faction, faction.x, faction.y);
+        var tile = this.getEntityTile(headquarter);
+        tile.setHome(headquarter);
+
         this.HOME_LIST[headquarter.id] = headquarter;
         headquarter.addQuadItem();
         this.homeTree.insert(headquarter.quadItem);
@@ -480,7 +501,7 @@ GameServer.prototype.createHeadquarters = function (faction) {
 
 GameServer.prototype.createSentinel = function (player) {
     var tile = this.getEntityTile(player);
-    if (tile !== null && tile.sentinel === null &&
+    if (tile !== null && tile.home === null &&
         Math.abs(tile.x + tile.length / 2 - player.x) < (tile.length / 8) &&
         Math.abs(tile.y + tile.length / 2 - player.y) < (tile.length / 8) &&
         player.shards.length >= 2) {
@@ -507,14 +528,15 @@ GameServer.prototype.createSentinel = function (player) {
 GameServer.prototype.createTower = function (player) {
     var tile = this.getEntityTile(player);
     if (tile !== null &&
-        tile.sentinel !== null &&
-        tile.sentinel.owner === player.faction &&
+        tile.home !== null &&
+        tile.owner === player.faction &&
         player.shards.length >= 2) {
 
         var tower = new Entity.Tower(player, player.x, player.y);
-
         tower.addQuadItem();
+        tower.addBigQuadItem();
         this.homeTree.insert(tower.quadItem);
+        this.towerTree.insert(tower.bigQuadItem);
 
         for (var i = player.shards.length - 1; i >= 0; i--) {
             var shard = this.PLAYER_SHARD_LIST[player.shards[i]];
@@ -611,6 +633,16 @@ GameServer.prototype.removeHomeShard = function (home, shard, status) {
 
 
 /** SPECIAL METHODS **/
+GameServer.prototype.shootTowerShard = function (tower, player) {
+    if (tower.getSupply() > 0) {
+        var shard = this.HOME_SHARD_LIST[tower.getRandomShard()];
+        this.removeHomeShard(tower, shard, "LOCAL");
+        shard.owner = this.PLAYER_LIST[tower.owner.getRandomPlayer()];
+        this.addShootingShard(shard, (player.x - tower.x) / 4, (player.y - tower.y) / 4);
+    }
+    this.packetHandler.updateHomePackets(tower);
+}
+
 
 GameServer.prototype.resetPlayer = function (player) {
     for (var i = player.shards.length; i >= 0; i--) {
@@ -620,6 +652,9 @@ GameServer.prototype.resetPlayer = function (player) {
 };
 
 GameServer.prototype.decreasePlayerHealth = function (player, amount) {
+    if (!amount) {
+        throw "NO AMOUNT SPECIFIED";
+    }
     player.decreaseHealth(amount);
     if (player.health <= 0) {
         this.resetPlayer(player);

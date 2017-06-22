@@ -76,10 +76,10 @@ Shard.prototype.addQuadItem = function () {
 
 Shard.prototype.updateQuadItem = function () {
     this.quadItem.bound = {
-        minx: this.x - this.radius,
-        miny: this.y - this.radius,
-        maxx: this.x + this.radius,
-        maxy: this.y + this.radius
+        minx: this.x - this.radius * 4,
+        miny: this.y - this.radius * 4,
+        maxx: this.x + this.radius * 4,
+        maxy: this.y + this.radius * 4
     }
 };
 

@@ -56,4 +56,16 @@ Tower.prototype.addQuadItem = function () {
     };
 }
 
+Tower.prototype.addBigQuadItem = function () {
+    this.bigQuadItem = {
+        cell: this,
+        bound: {
+            minx: this.x - 300,
+            miny: this.y - 300,
+            maxx: this.x + 300,
+            maxy: this.y + 300
+        }
+    };
+}
+
 module.exports = Tower;

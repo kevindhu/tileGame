@@ -176,7 +176,7 @@ Player.prototype.reset = function () {
     this.maxSpeed = 10;
     this.xSpeed = 0;
     this.ySpeed = 0;
-    this.health = 1;
+    this.health = 5;
 }
 
 module.exports = Player;

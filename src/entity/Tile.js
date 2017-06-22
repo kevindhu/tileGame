@@ -5,11 +5,10 @@ function Tile(x, y) {
     this.id = randomId;
     this.x = x;
     this.y = y;
+    this.home = null;
     this.owner = null;
     this.color = "#FFFFFF"; //getRandomColor();
-    this.health = 0;
     this.length = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
-    this.sentinel = null;
     this.alert = false;
 }
 
@@ -27,18 +26,6 @@ Tile.prototype.setColor = function (color) {
     this.color = color;
 };
 
-
-
-Tile.prototype.updateOwner = function (newOwner) {
-    if (this.health > 0 && newOwner.name !== this.owner) {
-        this.health--;
-    }
-    else {
-        this.owner = newOwner.name;
-        this.health++;
-        this.color = newOwner.color;
-    }
-};
 
 Tile.removeHome = function (home) {
     if (this.home === home) {

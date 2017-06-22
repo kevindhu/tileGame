@@ -236,17 +236,20 @@ function drawScene(data) {
 
     var drawShards = function () {
         for (var id in SHARD_LIST) {
-            ctx.beginPath();
             var shard = SHARD_LIST[id];
-            ctx.fillStyle = "#008000";
-            if (shard.name !== null) {
-                ctx.font = "30px Arial";
-                ctx.fillText(shard.name, shard.x, shard.y);
-            }
 
-            ctx.arc(shard.x, shard.y, 5, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.closePath();
+            if (selfPlayer && inBounds(selfPlayer, shard.x, shard.y)) {
+                ctx.beginPath();
+                ctx.fillStyle = "#008000";
+                if (shard.name !== null) {
+                    ctx.font = "30px Arial";
+                    ctx.fillText(shard.name, shard.x, shard.y);
+                }
+                
+                ctx.arc(shard.x, shard.y, 5, 0, 2 * Math.PI, false);
+                ctx.fill();
+                ctx.closePath();
+            }
         }
     };
 
