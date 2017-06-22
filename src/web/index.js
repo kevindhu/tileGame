@@ -206,6 +206,7 @@ function updateEntities(data) {
 }
 
 function drawScene(data) {
+
     var selfPlayer = PLAYER_LIST[selfId];
 
     var inBounds = function(player,x,y) {

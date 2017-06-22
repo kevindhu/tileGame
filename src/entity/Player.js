@@ -19,6 +19,7 @@ function Player(id, name) {
     this.name = getName(name);
     this.health = 5;
     this.maxSpeed = 10;
+    this.timer = 0;
     this.xSpeed = 0;
     this.ySpeed = 0;
     this.shards = [];

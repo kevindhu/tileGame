@@ -26,7 +26,6 @@ function openUI(info) {
     var shardNamer = document.getElementById('shard_namer');
     var homeInfo = document.getElementById('home_info');
     var action = info.action;
-    console.log(info.homeId);
     var home = HOME_LIST[info.homeId];
 
 
@@ -109,9 +108,7 @@ var colorInput = document.getElementById("color_input");
 
 
 function addColorPicker(home) {
-    console.log("ADDING COLOR PICKER!");
     if (!home.hasColor && home.level > 1) {
-        console.log("DOESNT HAVE COLOR!");
         colorPicker.style.visibility = "visible";
     }
     else {
@@ -119,6 +116,7 @@ function addColorPicker(home) {
         colorPicker.style.visibility = "hidden";
         return;
     }
+
 
     colorSubmitButton.addEventListener("click", function () {
     socket.emit("newColor",
@@ -128,5 +126,8 @@ function addColorPicker(home) {
         });
     colorInput.value = "";
     closeUI('home info');
+
+    var elClone = colorSubmitButton.cloneNode(true);
+    colorSubmitButton.parentNode.replaceChild(elClone, colorSubmitButton);
 });
 }

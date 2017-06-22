@@ -176,7 +176,14 @@ GameServer.prototype.checkPlayerCollision = function (player) {
                 this.addHomeShard(home, shard);
             }
             if (player.pressingSpace) {
+                if (player.timer > 0) {
+                    return;
+                }
+                else {
+                    player.timer = 100;
+                }
                 this.packetHandler.addUIPackets(player,home,"home info");
+                player.timer -= 1;
             }
         }
     }.bind(this));
@@ -197,6 +204,10 @@ GameServer.prototype.updatePlayers = function () {
     for (var index in this.PLAYER_LIST) {
         var player = this.PLAYER_LIST[index];
         player.updatePosition();
+
+        if (player.timer > 0) {
+            player.timer -= 1;
+        }
 
         var tile = this.getEntityTile(player);
         if (tile) {
