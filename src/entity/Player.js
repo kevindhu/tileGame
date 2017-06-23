@@ -5,6 +5,7 @@ var lerp = require('lerp');
 
 function Player(id, name, faction, gameServer) {
     this.gameServer = gameServer;
+    this.packetHandler = gameServer.packetHandler;
     this.id = id;
 
     this.x = entityConfig.WIDTH / 2;
@@ -24,7 +25,7 @@ function Player(id, name, faction, gameServer) {
 }
 
 Player.prototype.init = function () {
-    this.gameServer.PLAYER_LIST[socket.id] = this;
+    this.gameServer.PLAYER_LIST[this.id] = this;
     this.gameServer.packetHandler.addPlayerPackets(this);
 }
 
@@ -42,7 +43,7 @@ Player.prototype.dropAllShards = function () {
 Player.prototype.onDelete = function () {
     this.dropAllShards();
     delete this.gameServer.PLAYER_LIST[this.id];
-    this.packetHandler.deletePlayerPackets(player);
+    this.packetHandler.deletePlayerPackets(this);
 }
 
 
@@ -52,7 +53,7 @@ Player.prototype.update = function () {
     }
     this.updatePosition();
 
-    var tile = this.gameServer.getEntityTile(player);
+    var tile = this.gameServer.getEntityTile(this);
     if (tile) {
         if (tile.owner === this.faction) {
             this.increaseHealth(0.1);
@@ -61,7 +62,6 @@ Player.prototype.update = function () {
             this.decreaseHealth(0.1);
         }
     }
-
     this.packetHandler.updatePlayersPackets(this);
 }
 
@@ -145,7 +145,7 @@ Player.prototype.addShard = function (shard) {
     else {
         this.shards.push(shard.id);
     }
-    shard.becomePlayer();
+    shard.becomePlayer(this);
     this.gameServer.PLAYER_SHARD_LIST[shard.id] = shard;
 };
 
@@ -173,7 +173,7 @@ Player.prototype.decreaseHealth = function (amount) {
     if (this.health <= 0) {
         this.reset();
     }
-    this.packetHandler.updatePlayersPackets(player);
+    this.packetHandler.updatePlayersPackets(this);
 }
 
 Player.prototype.increaseHealth = function (amount) {

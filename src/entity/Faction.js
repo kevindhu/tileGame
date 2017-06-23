@@ -4,7 +4,7 @@ var Player = require("./Player");
 var Headquarter = require("./Headquarter");
 var Sentinel = require("./Sentinel");
 
-function Faction(name, coords, gameServer) {
+function Faction(name, gameServer) {
     this.gameServer = gameServer;
     this.name = name;
     this.players = [];
@@ -15,7 +15,7 @@ function Faction(name, coords, gameServer) {
 Faction.prototype.init = function () {
     this.getCoords();
     this.addHeadquarter();
-    this.FACTION_LIST[this.name] = this;
+    this.gameServer.FACTION_LIST[this.name] = this;
 }
 
 Faction.prototype.getCoords = function () {
@@ -33,7 +33,7 @@ Faction.prototype.getCoords = function () {
 
 
 Faction.prototype.addPlayer = function (id, playerName) {
-    var player = new Player(id, playerName, this, gameServer);
+    var player = new Player(id, playerName, this, this.gameServer);
     player.x = this.x;
     player.y = this.y;
     this.players.push(player.id);
@@ -42,7 +42,7 @@ Faction.prototype.addPlayer = function (id, playerName) {
 
 Faction.prototype.addHeadquarter = function () {
     if (!this.headquarter) {
-        var headquarter = new Headquarter(faction, faction.x, faction.y);
+        var headquarter = new Headquarter(this, this.x, this.y, this.gameServer);
         this.headquarter = headquarter;
     }
 }
@@ -51,16 +51,17 @@ Faction.prototype.addSentinel = function (player) {
     var tile = this.gameServer.getEntityTile(player);
     //TODO: clean this conditional by not having absolute value shit
     if (tile !== null && tile.home === null &&
-        Math.abs(tile.x - player.x) < (tile.length / 8) &&
-        Math.abs(tile.y - player.y) < (tile.length / 8) &&
+        Math.abs(tile.x + tile.length/2 - player.x) < (tile.length / 2) &&
+        Math.abs(tile.y + tile.length/2 - player.y) < (tile.length / 2) &&
         player.shards.length >= 2) {
 
-        var sentinel = new Sentinel(player, tile.x + tile.length/2, 
-            tile.y + tile.length/2);
+        var sentinel = new Sentinel(player.faction, tile.x + tile.length/2, 
+            tile.y + tile.length/2, this.gameServer);
 
         for (var i = player.shards.length - 1; i >= 0; i--) {
             var shard = this.gameServer.PLAYER_SHARD_LIST[player.shards[i]];
-            this.addShard(shard);
+            player.removeShard(shard);
+            sentinel.addShard(shard);
         }
     }
 };
@@ -73,11 +74,12 @@ Faction.prototype.addTower = function (player) {
         tile.owner === player.faction &&
         player.shards.length >= 2) {
 
-        var tower = new Entity.Tower(player, player.x, player.y);
+        var tower = new Entity.Tower(player, player.x, player.y, this.gameServer);
 
         for (var i = player.shards.length - 1; i >= 0; i--) {
             var shard = this.gameServer.PLAYER_SHARD_LIST[player.shards[i]];
-            this.addShard(shard);
+            player.removeShard(shard);
+            sentinel.addShard(shard);
         }
     }
 }

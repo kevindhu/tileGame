@@ -10,4 +10,6 @@ function inherits(ctor, superCtor) {
   });
 };
 
-module.exports = inherits;
+module.exports = {
+	inherits: inherits
+}

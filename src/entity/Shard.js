@@ -28,14 +28,15 @@ function Shard(x, y, gameServer) {
 
 Shard.prototype.init = function () {
     this.addQuadItem();
-    this.gameServer.shardTree.insert(thisquadItem);
-    this.gameServer.STATIC_SHARD_LIST[id] = this;
+    this.gameServer.shardTree.insert(this.quadItem);
+    this.gameServer.STATIC_SHARD_LIST[this.id] = this;
     this.packetHandler.addShardPackets(this);
 };
 
 
 Shard.prototype.limbo = function () {
-    delete.this.gameServer.shardTree.remove(this.quadItem);
+    this.gameServer.shardTree.remove(this.quadItem);
+    this.gameServer.shootingShardTree.remove(this.quadItem);
 
     delete this.gameServer.PLAYER_SHARD_LIST[this.id];
     delete this.gameServer.SHOOTING_SHARD_LIST[this.id];
@@ -45,10 +46,11 @@ Shard.prototype.limbo = function () {
 
 Shard.prototype.becomeStatic = function () {
     this.owner = null;
+    this.timer = 0;
     this.type = "static";
-    this.updateQuadItem();
     this.limbo();
 
+    this.updateQuadItem();
     this.gameServer.shardTree.insert(this.quadItem);
     this.gameServer.STATIC_SHARD_LIST[this.id] = this;
 };
@@ -56,15 +58,15 @@ Shard.prototype.becomeStatic = function () {
 Shard.prototype.becomeShooting = function (player, xVel, yVel) {
     this.owner = player;
     this.type = "shooting";
-    this.addVelocity(xVel, yVel);
     this.limbo();
+    this.addVelocity(xVel, yVel);
 
-    this.gameServer.shardTree.insert(this.quadItem);
+    this.gameServer.shootingShardTree.insert(this.quadItem);
     this.gameServer.SHOOTING_SHARD_LIST[this.id] = this;
 }
 
-Shard.prototype.becomePlayer = function () {
-    this.owner = this;
+Shard.prototype.becomePlayer = function (player) {
+    this.owner = player;
     this.timer = 100;
     this.type = "player";
     this.updateQuadItem();
@@ -135,7 +137,7 @@ Shard.prototype.onDelete = function () {
 }
 
 Shard.prototype.move = function () {
-    if (this.xVel !== 0) {
+    if (this.xVel === 0) {
         this.becomeStatic();
     }
     if (this.xVel > -0.1 && this.xVel < 0.1) {
@@ -180,7 +182,7 @@ Shard.prototype.updateQuadItem = function () {
         miny: this.y - this.radius * 4,
         maxx: this.x + this.radius * 4,
         maxy: this.y + this.radius * 4
-    }
+    };
 };
 
 

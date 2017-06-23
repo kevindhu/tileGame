@@ -24,7 +24,7 @@ function GameServer() {
     this.minx = entityConfig.BORDER_WIDTH;
     this.miny = entityConfig.BORDER_WIDTH;
     this.maxx = entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
-    this.maxy = entityConfig.WIDTH - entityConfig.BORDER_WIDTH
+    this.maxy = entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
     this.tileLength = (entityConfig.WIDTH - 2 * entityConfig.BORDER_WIDTH) /
         Math.sqrt(entityConfig.TILES);
 
@@ -42,11 +42,8 @@ GameServer.prototype.initTiles = function () {
     for (var i = 0; i < Math.sqrt(entityConfig.TILES); i++) {
         for (var j = 0; j < Math.sqrt(entityConfig.TILES); j++) {
             var tile = new Entity.Tile(entityConfig.BORDER_WIDTH + this.tileLength * i,
-                entityConfig.BORDER_WIDTH + this.tileLength * j);
+                entityConfig.BORDER_WIDTH + this.tileLength * j, this);
 
-            tile.addQuadItem();
-            this.tileTree.insert(tile.quadItem);
-            this.TILE_LIST[tile.id] = tile;
         }
     }
 };
@@ -151,8 +148,10 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 
     //player + static shard collision
     this.shardTree.find(playerBound, function (shard) {
-        if (player !== shard.owner && shard.timer === 0
-            && player.emptyShard === null) {
+        if (player !== shard.owner && shard.timer === 0 &&
+         player.emptyShard === null) {
+
+
             if (shard.owner !== null) {
                 if (shard.name === null) {
                     this.packetHandler.deleteUIPackets(shard.owner.id,"name shard");
@@ -179,6 +178,7 @@ GameServer.prototype.checkPlayerCollision = function (player) {
     this.homeTree.find(playerBound, function (home) {
         if (player.faction === home.owner) {
             for (var i = player.shards.length - 1; i >= 0; i--) {
+                console.log(player.shards);
                 var shard = this.PLAYER_SHARD_LIST[player.shards[i]];
                 player.removeShard(shard);
                 home.addShard(shard);
@@ -241,17 +241,17 @@ GameServer.prototype.updateShards = function () {
 
     for (id in this.PLAYER_SHARD_LIST) {
         shard = this.PLAYER_SHARD_LIST[id];
-        shard.update();
+        shard.updatePosition();
     }
 
     for (id in this.SHOOTING_SHARD_LIST) {
         shard = this.SHOOTING_SHARD_LIST[id];
-        shard.update();
+        shard.updatePosition();
     }
 
     for (id in this.HOME_SHARD_LIST) {
         shard = this.HOME_SHARD_LIST[id];
-        shard.update();
+        shard.updatePosition();
     }
 };
 
@@ -285,7 +285,7 @@ GameServer.prototype.start = function () {
     var io = require('socket.io')(server, {});
 
     io.sockets.on('connection', function (socket) {
-        var player;
+        var player; 
 
         socket.id = Math.random();
         this.SOCKET_LIST[socket.id] = socket;
@@ -334,6 +334,7 @@ GameServer.prototype.start = function () {
                     break;
                 case "Z":
                     if (data.state) {
+                        console.log("adding sentinel");
                         player.faction.addSentinel(player);
                     }
                     break;
@@ -374,7 +375,9 @@ GameServer.prototype.start = function () {
 
         socket.on('disconnect', function () {
             console.log("Client #" + socket.id + " has left the server");
-            player.onDelete();
+            if (player) {
+                player.onDelete();
+            }
             delete this.SOCKET_LIST[socket.id];
         }.bind(this));
     }.bind(this));
@@ -389,7 +392,7 @@ GameServer.prototype.start = function () {
 GameServer.prototype.createPlayer = function (socket, info) {
     var faction = this.FACTION_LIST[info.faction];
     if (!faction) {
-        faction = new Faction(info.faction);
+        faction = new Entity.Faction(info.faction, this);
     }
 
     var player = faction.addPlayer(socket.id, info.name);
@@ -400,6 +403,7 @@ GameServer.prototype.createEmptyShard = function () {
     var shard = new Entity.Shard(
         Arithmetic.getRandomInt(entityConfig.BORDER_WIDTH, entityConfig.WIDTH - entityConfig.BORDER_WIDTH),
         Arithmetic.getRandomInt(entityConfig.BORDER_WIDTH, entityConfig.WIDTH - entityConfig.BORDER_WIDTH),
+        this
     );
 };
 

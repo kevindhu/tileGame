@@ -1,10 +1,12 @@
 const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
+var EntityFunctions = require('./EntityFunctions');
 
 function Home(faction, x, y, gameServer) {
     if (!gameServer) {
         throw "forgot the gameServer dumbass";
     }
+    console.log(faction.name);
 
     this.gameServer = gameServer;
     this.packetHandler = gameServer.packetHandler;
@@ -17,7 +19,6 @@ function Home(faction, x, y, gameServer) {
     this.y = y;
 
     this.shards = [];
-    this.color = owner.color;
 
     this.level = 0;
     this.hasColor = false;
@@ -47,7 +48,7 @@ Home.prototype.decreaseHealth = function (amount) {
     this.health -= amount;
 
     if (this.health <= 0) {
-        this.onDeath();
+        this.onDelete();
     }
     else {
         this.packetHandler.updateHomePackets(this);
@@ -88,7 +89,7 @@ Home.prototype.dropShard = function () {
     if (shard) {
         var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
         this.removeShard(shard);
-        shard.becomeShooting(randomPlayer, Arithmetic.getRandomInt(-30, 30), 
+        shard.becomeShooting(this.randomPlayer, Arithmetic.getRandomInt(-30, 30), 
             Arithmetic.getRandomInt(-30, 30))
     }
 };

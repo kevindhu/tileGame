@@ -12,22 +12,21 @@ function Tile(x, y, gameServer) {
     this.color = "#FFFFFF"; //getRandomColor();
     this.length = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
     this.alert = false;
+    this.init();
 }
 
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
+Tile.prototype.init = function () {
+    this.addQuadItem();
+    this.gameServer.tileTree.insert(this.quadItem);
+    this.gameServer.TILE_LIST[this.id] = this;
+};
+
 
 
 Tile.prototype.setColor = function (color) {
     if (color !== "" && color !== undefined && color !== null) {
         this.color = color;
-        this.packetHandler.updateTilesPackets(tile);
+        this.packetHandler.updateTilesPackets(this);
     }
 };
 
@@ -63,7 +62,16 @@ Tile.prototype.addQuadItem = function () {
             maxy: centerY + this.length / 2
         }
     };
-}
+};
 
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
 
 module.exports = Tile;
