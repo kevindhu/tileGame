@@ -139,7 +139,9 @@ Shard.prototype.onDelete = function () {
 Shard.prototype.move = function () {
     if (this.xVel === 0) {
         this.becomeStatic();
+        return;
     }
+    
     if (this.xVel > -0.1 && this.xVel < 0.1) {
         this.xVel = 0;
         this.yVel = 0;

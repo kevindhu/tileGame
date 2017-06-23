@@ -12,6 +12,7 @@ function Tower(faction, x, y, gameServer) {
     this.radius = 10;
     this.health = 30;
     this.init();
+    this.mainInit();
 }
 
 EntityFunctions.inherits(Tower, Home);

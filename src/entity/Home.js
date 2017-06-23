@@ -6,7 +6,6 @@ function Home(faction, x, y, gameServer) {
     if (!gameServer) {
         throw "forgot the gameServer dumbass";
     }
-    console.log(faction.name);
 
     this.gameServer = gameServer;
     this.packetHandler = gameServer.packetHandler;
@@ -27,7 +26,6 @@ function Home(faction, x, y, gameServer) {
     this.health = 1;
 
     this.randomPlayer = this.gameServer.PLAYER_LIST[this.owner.getRandomPlayer()];
-    this.mainInit();
 }
 
 
@@ -37,7 +35,6 @@ Home.prototype.mainInit = function () {
         tile.setHome(this);
         this.packetHandler.updateTilesPackets(tile);
     }
-
     this.gameServer.HOME_LIST[this.id] = this;
     this.addQuadItem();
     this.gameServer.homeTree.insert(this.quadItem);
@@ -101,21 +98,28 @@ Home.prototype.giveShard = function (home) {
 }
 
 Home.prototype.addShard = function (shard) {
-    if (this.getSupply() > 0) {
+    if (this.getSupply() > 0 && this.level < 1) {
         this.level = 1;
         this.radius = 30;
         this.health = 30;
+        this.updateHomeTree();
     }
-    if (this.getSupply() > 1) {
+    if (this.getSupply() > 1 && this.level < 2) {
         this.level = 2;
         this.radius = 50;
         this.health = 80;
+        this.updateHomeTree();
     }
     shard.becomeHome(this);
     this.shards.push(shard.id);
     this.packetHandler.updateHomePackets(this);
 };
 
+Home.prototype.updateHomeTree = function () {
+    this.updateQuadItem();
+    this.gameServer.homeTree.remove(this.quadItem);
+    this.gameServer.homeTree.insert(this.quadItem);
+};
 
 Home.prototype.addQuadItem = function () {
     this.quadItem = {
@@ -128,5 +132,15 @@ Home.prototype.addQuadItem = function () {
         }
     };
 }
+
+Home.prototype.updateQuadItem = function () {
+    this.quadItem.bound = {
+            minx: this.x - this.radius,
+            miny: this.y - this.radius,
+            maxx: this.x + this.radius,
+            maxy: this.y + this.radius
+    };
+}
+
 
 module.exports = Home;

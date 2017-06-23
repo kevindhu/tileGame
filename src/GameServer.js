@@ -178,20 +178,19 @@ GameServer.prototype.checkPlayerCollision = function (player) {
     this.homeTree.find(playerBound, function (home) {
         if (player.faction === home.owner) {
             for (var i = player.shards.length - 1; i >= 0; i--) {
-                console.log(player.shards);
                 var shard = this.PLAYER_SHARD_LIST[player.shards[i]];
                 player.removeShard(shard);
                 home.addShard(shard);
             }
             if (player.pressingSpace) {
                 if (player.timer > 0) {
+                    player.timer -= 1;
                     return;
                 }
                 else {
-                    player.timer = 100;
+                    player.timer = 15;
                 }
                 this.packetHandler.addUIPackets(player,home,"home info");
-                player.timer -= 1;
             }
         }
     }.bind(this));
@@ -334,7 +333,6 @@ GameServer.prototype.start = function () {
                     break;
                 case "Z":
                     if (data.state) {
-                        console.log("adding sentinel");
                         player.faction.addSentinel(player);
                     }
                     break;

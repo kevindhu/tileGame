@@ -239,6 +239,7 @@ PacketHandler.prototype.updateHomePackets = function (home) {
 };
 
 PacketHandler.prototype.updateTilesPackets = function (tile) {
+    console.log(tile.color);
 	this.updateTilesPacket.push({
             id: tile.id,
             owner: tile.owner.name,

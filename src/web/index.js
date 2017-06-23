@@ -172,8 +172,11 @@ function updateEntities(data) {
         for (var i = 0; i < packet.length; i++) {
             var tileInfo = packet[i];
             var tile = TILE_LIST[tileInfo.id];
-            tile.color = tileInfo.color;
-            tile.alert = tileInfo.alert;
+            if (tile) {
+                console.log(tileInfo.color);
+                tile.color = tileInfo.color;
+                tile.alert = tileInfo.alert;
+            }
         }
     };
 
@@ -281,7 +284,7 @@ function drawScene(data) {
 
     var drawMap = function () {
         var player = PLAYER_LIST[selfId];
-        function hexToRgb(hex) {
+        function hexToRGB(hex) {
             var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return {
                 r: parseInt(result[1], 16),
@@ -303,7 +306,7 @@ function drawScene(data) {
             for (var id in TILE_LIST) {
                 tile = TILE_LIST[id];
                 if (tile.alert || tile && inBounds(selfPlayer,tile.x, tile.y)) {
-                    tileRGB = hexToRgb(tile.color);
+                    tileRGB = hexToRGB(tile.color);
                 }
                 else {
                     tileRGB.r = 0;

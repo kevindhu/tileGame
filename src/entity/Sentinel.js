@@ -11,6 +11,7 @@ function Sentinel(faction, x, y, gameServer) {
     this.hasColor = false;
     this.radius = 10;
     this.health = 1;
+    this.mainInit();
 }
 
 EntityFunctions.inherits(Sentinel, Home);

@@ -24,10 +24,21 @@ Tile.prototype.init = function () {
 
 
 Tile.prototype.setColor = function (color) {
+    var isValidHex = function (color) {
+        return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(color);
+    };
+    
     if (color !== "" && color !== undefined && color !== null) {
-        this.color = color;
+        if (isValidHex(color)) {
+            this.color = color;
+        }
+        else {
+            this.color = "#FFFFFF";
+        }
         this.packetHandler.updateTilesPackets(this);
     }
+
+
 };
 
 
