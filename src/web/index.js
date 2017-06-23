@@ -268,7 +268,7 @@ function drawScene(data) {
             ctx.fill();
             ctx.fillStyle = "#000000";
             if (home.owner !== null) {
-                ctx.fillText(home.name, home.x, home.y + 20);
+                //ctx.fillText(home.name, home.x, home.y + 20);
                 ctx.fillText(home.shards.length, home.x, home.y + 40);
             }
             ctx.closePath();
@@ -278,14 +278,15 @@ function drawScene(data) {
     var drawFactions = function () {
         for (var id in FACTION_LIST) {
             var faction = FACTION_LIST[id];
-            ctx.font =  faction.size * 30 + "px Arial";
+            console.log(faction.name);
+            ctx.font = faction.size * 30 + "px Arial";
             ctx.fillText(faction.name, faction.x, faction.y);
         }
     }
 
 
 
-    var drawMap = function () {
+    var drawMiniMap = function () {
         var player = PLAYER_LIST[selfId];
         function hexToRGB(hex) {
             var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
@@ -379,9 +380,10 @@ function drawScene(data) {
     drawPlayers();
     drawShards();
     drawHomes();
+    drawFactions();
     drawArrow();
     translateScene();
-    drawMap();
+    drawMiniMap();
 
 }
 
