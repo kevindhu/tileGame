@@ -190,7 +190,6 @@ Player.prototype.dropRandomShard = function () {
 
 Player.prototype.dropShard = function (shard) {
     if (shard) {
-        var shard = this.gameServer.PLAYER_SHARD_LIST[this.getRandomShard()];
         this.removeShard(shard);
         shard.becomeShooting(this, Arithmetic.getRandomInt(-30, 30), 
             Arithmetic.getRandomInt(-30, 30))

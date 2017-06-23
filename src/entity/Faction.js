@@ -6,19 +6,21 @@ var Sentinel = require("./Sentinel");
 
 function Faction(name, gameServer) {
     this.gameServer = gameServer;
+    this.packetHandler = gameServer.packetHandler;
     this.name = name;
     this.players = [];
-
+    this.homes = [];
     this.init();
 }
 
 Faction.prototype.init = function () {
-    this.getCoords();
+    this.getInitCoords();
     this.addHeadquarter();
     this.gameServer.FACTION_LIST[this.name] = this;
+    this.packetHandler.addFactionPackets(this);
 }
 
-Faction.prototype.getCoords = function () {
+Faction.prototype.getInitCoords= function () {
     var tile = null;
     var coords = {};
     while (tile === null || tile.owner !== null) {
@@ -28,6 +30,19 @@ Faction.prototype.getCoords = function () {
     }
     this.x = tile.x + tile.length/2;
     this.y = tile.y + tile.length/2;
+}
+
+Faction.prototype.updateCoords = function () {
+    var avgCoords = [0, 0];
+    for (var i = 0; i<this.homes.length; i++) {
+        var home = this.gameServer.HOME_LIST[this.homes[i]];
+        avgCoords[0] += home.x;
+        avgCoords[1] += home.y;
+    }
+    this.x = avgCoords[0]/this.homes.length;
+    this.y = avgCoords[1]/this.homes.length;
+
+    this.packetHandler.updateFactionPackets(this);
 }
 
 
@@ -44,6 +59,8 @@ Faction.prototype.addHeadquarter = function () {
     if (!this.headquarter) {
         var headquarter = new Headquarter(this, this.x, this.y, this.gameServer);
         this.headquarter = headquarter;
+        this.homes.push(headquarter.id);
+        this.updateCoords();
     }
 }
 
@@ -63,6 +80,8 @@ Faction.prototype.addSentinel = function (player) {
             player.removeShard(shard);
             sentinel.addShard(shard);
         }
+        this.homes.push(sentinel.id);
+        this.updateCoords();
     }
 };
 

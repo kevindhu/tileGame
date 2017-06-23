@@ -64,7 +64,6 @@ GameServer.prototype.initShards = function () {
     });
 
     for (var i = 0; i < entityConfig.SHARDS; i++) {
-
         this.createEmptyShard();
     }
 };
@@ -321,7 +320,7 @@ GameServer.prototype.start = function () {
                     break;
                 case "right":
                     player.pressingRight = data.state;
-                    break;
+                    break;  
                 case "up":
                     player.pressingUp = data.state;
                     break;

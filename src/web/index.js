@@ -3,25 +3,32 @@ var ctx = canvas.getContext("2d");
 var socket = io();
 
 socket.on('addFactionsUI', addFactionstoUI)
-socket.on('init', initClient);
 socket.on('addEntities', addEntities);
 socket.on('updateEntities', updateEntities);
 socket.on('deleteEntities', deleteEntities);
 socket.on('drawScene', drawScene);
 
 var selfId = null;
+
+var FACTION_LIST = {};
 var PLAYER_LIST = {};
 var TILE_LIST = {};
 var SHARD_LIST = {};
 var HOME_LIST = {};
-var ARROW = null;
 
+var ARROW = null;
 var serverMap = null;
 var mapTimer = 0;
 
 
 
-
+var Faction = function (factionInfo) {
+    this.id = factionInfo.id;
+    this.name = factionInfo.name;
+    this.x = factionInfo.x;
+    this.y = factionInfo.y;
+    this.size = factionInfo.size;
+};
 var Player = function (playerInfo) {
     this.id = playerInfo.id;
     this.name = playerInfo.name;
@@ -84,33 +91,22 @@ function addFactionstoUI(data) {
 
 
 
-function initClient(data) {
+function addEntities(data) {
     var addEntity = function (packet, list, Entity) {
+        if (!packet) {
+            return;
+        }
         for (var i = 0; i < packet.length; i++) {
             var info = packet[i];
             list[info.id] = new Entity(info);
         }
     };
+
     addEntity(data.tileInfo, TILE_LIST, Tile);
     addEntity(data.playerInfo, PLAYER_LIST, Player);
     addEntity(data.shardInfo, SHARD_LIST, Shard);
     addEntity(data.homeInfo, HOME_LIST, Home);
-    selfId = data.selfId;
-}
-
-function addEntities(data) {
-    var addEntity = function (packet, list, Entity) {
-        if (packet) {
-            for (var i = 0; i < packet.length; i++) {
-                var info = packet[i];
-                list[info.id] = new Entity(info);
-            }
-        }
-    };
-
-    addEntity(data.playerInfo, PLAYER_LIST, Player);
-    addEntity(data.shardInfo, SHARD_LIST, Shard);
-    addEntity(data.homeInfo, HOME_LIST, Home);
+    addEntity(data.factionInfo, FACTION_LIST, Faction);
 
     var UIPacket = data.UIInfo;
     if (UIPacket) {
@@ -121,20 +117,17 @@ function addEntities(data) {
             }
         }
     }
-
-    var voicePacket = data.voiceInfo;
-    if (voicePacket) {
-        for (var i = 0; i < voicePacket.length; i++) {
-            var voiceInfo = voicePacket[i];
-            var msg = new SpeechSynthesisUtterance(voiceInfo.string);
-            window.speechSynthesis.speak(msg);
-        }
+    if (data.selfId) {
+        selfId = data.selfId;
     }
 }
 
 
 function deleteEntities(data) {
     var deleteEntity = function (packet, list) {
+        if (!packet) {
+            return;
+        }
         for (var i = 0; i < packet.length; i++) {
             var info = packet[i];
             delete list[info.id];
@@ -144,6 +137,7 @@ function deleteEntities(data) {
     deleteEntity(data.playerInfo, PLAYER_LIST);
     deleteEntity(data.shardInfo, SHARD_LIST);
     deleteEntity(data.homeInfo, HOME_LIST);
+    deleteEntity(data.factionInfo, FACTION_LIST);
 
 
     var UIPacket = data.UIInfo;
@@ -158,54 +152,55 @@ function deleteEntities(data) {
 }
 
 function updateEntities(data) {
-    var updatePlayers = function (packet) {
+    function updateEntities(packet, list, callback) {
+        if (!packet) {
+            return;
+        }
         for (var i = 0; i < packet.length; i++) {
-            var playerInfo = packet[i];
-            var player = PLAYER_LIST[playerInfo.id];
-            player.x = playerInfo.x;
-            player.y = playerInfo.y;
-            player.health = playerInfo.health;
+            var entityInfo = packet[i];
+            var entity = list[entityInfo.id];
+            callback(entity, entityInfo);
+        }
+    }
+
+    var updateFactions = function (faction, factionInfo) {
+        faction.x = factionInfo.x;
+        faction.y = factionInfo.y;
+        faction.size = factionInfo.size;
+    };
+    
+    var updateHomes = function (home, homeInfo) {
+        home.shards = homeInfo.shards;
+        home.level = homeInfo.level;
+        home.health = homeInfo.health;
+        home.hasColor = homeInfo.hasColor;
+    };
+
+    var updateShards = function (shard, shardInfo) {
+        shard.x = shardInfo.x;
+        shard.y = shardInfo.y;
+        shard.name = shardInfo.name;
+    };
+
+    var updateTiles = function (tile, tileInfo) {
+        if (tile) {
+            tile.color = tileInfo.color;
+            tile.alert = tileInfo.alert;
         }
     };
 
-    var updateTiles = function (packet) {
-        for (var i = 0; i < packet.length; i++) {
-            var tileInfo = packet[i];
-            var tile = TILE_LIST[tileInfo.id];
-            if (tile) {
-                console.log(tileInfo.color);
-                tile.color = tileInfo.color;
-                tile.alert = tileInfo.alert;
-            }
-        }
+    var updatePlayers = function (player, playerInfo) {
+        player.x = playerInfo.x;
+        player.y = playerInfo.y;
+        player.health = playerInfo.health;
     };
 
-    var updateShards = function (packet) {
-        for (var i = 0; i < packet.length; i++) {
-            var shardInfo = packet[i];
-            var shard = SHARD_LIST[shardInfo.id];
-            shard.x = shardInfo.x;
-            shard.y = shardInfo.y;
-            shard.name = shardInfo.name;
-        }
-    };
 
-    var updateHomes = function (packet) {
-        for (var i = 0; i < packet.length; i++) {
-            var homeInfo = packet[i];
-            var home = HOME_LIST[homeInfo.id];
-
-            home.shards = homeInfo.shards;
-            home.level = homeInfo.level;
-            home.health = homeInfo.health;
-            home.hasColor = homeInfo.hasColor;
-        }
-    };
-
-    updatePlayers(data.playerInfo);
-    updateTiles(data.tileInfo);
-    updateShards(data.shardInfo);
-    updateHomes(data.homeInfo);
+    updateEntities(data.playerInfo, PLAYER_LIST, updatePlayers);
+    updateEntities(data.tileInfo, TILE_LIST, updateTiles);
+    updateEntities(data.shardInfo, SHARD_LIST, updateShards);
+    updateEntities(data.homeInfo, HOME_LIST, updateHomes);
+    updateEntities(data.factionInfo, FACTION_LIST, updateFactions);
 }
 
 function drawScene(data) {
@@ -279,6 +274,14 @@ function drawScene(data) {
             ctx.closePath();
         }
     };
+
+    var drawFactions = function () {
+        for (var id in FACTION_LIST) {
+            var faction = FACTION_LIST[id];
+            ctx.font =  faction.size * 30 + "px Arial";
+            ctx.fillText(faction.name, faction.x, faction.y);
+        }
+    }
 
 
 

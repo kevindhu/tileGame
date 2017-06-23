@@ -24,36 +24,41 @@ nameButton.addEventListener("click", function () {
 
 function openUI(info) {
     var shardNamer = document.getElementById('shard_namer');
-    var homeInfo = document.getElementById('home_info');
     var action = info.action;
-    var home = HOME_LIST[info.homeId];
-
 
     if (action === "name shard") {
         shardNamer.style.display = 'block';
     }
     if (action === "home info") {
-        var homeLevel = document.getElementById('home_level');
-        var homeHealth = document.getElementById('home_health');
-        var homeFaction = document.getElementById('home_faction_name');
-        homeLevel.innerHTML = "";
-        homeHealth.innerHTML = "";
-        homeFaction.innerHTML = "";
-
-        homeLevel.innerHTML = home.level;
-        homeHealth.innerHTML = home.health;
-        homeFaction.innerHTML = home.id;
-
-        homeInfo.style.display = 'block';
-
-        var shardsList = document.getElementById('shards_list');
-        var colorPicker = document.getElementById('color_picker');
-        shardsList.innerHTML = "";
-        colorPicker.innerHTML = "";
-
-        addShardsToList(shardsList, home);
-        addColorPicker(colorPicker, home);
+        var home = HOME_LIST[info.homeId];
+        openHomeUI(home);
     }
+}
+
+
+function openHomeUI(home) {
+    var homeInfo = document.getElementById('home_info');
+    var homeLevel = document.getElementById('home_level');
+    var homeHealth = document.getElementById('home_health');
+    var homeFaction = document.getElementById('home_faction_name');
+    homeLevel.innerHTML = "";
+    homeHealth.innerHTML = "";
+    homeFaction.innerHTML = "";
+
+    homeLevel.innerHTML = home.level;
+    homeHealth.innerHTML = home.health;
+    homeFaction.innerHTML = home.id;
+
+    homeInfo.style.display = 'block';
+
+    var shardsList = document.getElementById('shards_list');
+    var colorPicker = document.getElementById('color_picker');
+    shardsList.innerHTML = "";
+    colorPicker.innerHTML = "";
+
+    addShards(shardsList, home);
+    addColorPicker(colorPicker, home);
+
 }
 
 function closeUI(action) {
@@ -73,7 +78,7 @@ function closeUI(action) {
 
 
 
-function defineMessage() {
+function sendShardName() {
     var text = document.getElementById("textInput").value;
     if (text !== null) {
         socket.emit('textInput',
@@ -87,7 +92,7 @@ function defineMessage() {
 }
 
 
-function addShardsToList(list, home) {
+function addShards(list, home) {
     for (var i = 0; i < home.shards.length; i++) {
         var entry = document.createElement('li');
         var shard = SHARD_LIST[home.shards[i]];

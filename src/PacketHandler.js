@@ -6,39 +6,42 @@ function PacketHandler(gameServer) {
     this.addPlayerPacket = [];
     this.addShardPacket = [];
     this.addHomePacket = [];
+    this.addFactionPacket = [];
     this.addUIPacket = [];
 
     this.updateHomePacket = [];
     this.updateTilesPacket = [];
     this.updateShardsPacket = [];
     this.updatePlayersPacket = [];
+    this.updateFactionPacket = [];
 
     this.deletePlayerPacket = [];
     this.deleteShardPacket = [];
     this.deleteHomePacket = [];
+    this.deleteFactionPacket = [];
     this.deleteUIPacket = [];
 }
 
 PacketHandler.prototype.sendInitPackets = function (socket) {
     var stage = socket.stage;
     if (stage === 0) {
-        socket.emit('init', this.createMainInitPacket(socket.id));
+        socket.emit('addEntities', this.createMainInitPacket(socket.id));
         socket.emit('addFactionsUI', this.createFactionsInitPacket());
     }
     if (stage === 1) {
-        socket.emit('init', this.createTileInitPacket(socket.id,
+        socket.emit('addEntities', this.createTileInitPacket(socket.id,
             [0, entityConfig.TILES / 4]));
     }
     if (stage === 2) {
-        socket.emit('init', this.createTileInitPacket(socket.id,
+        socket.emit('addEntities', this.createTileInitPacket(socket.id,
             [entityConfig.TILES / 4, entityConfig.TILES / 2]));
     }
     if (stage === 3) {
-        socket.emit('init', this.createTileInitPacket(socket.id,
+        socket.emit('addEntities', this.createTileInitPacket(socket.id,
             [entityConfig.TILES / 2, entityConfig.TILES * 3 / 4]));
     }
     if (stage === 4) {
-        socket.emit('init', this.createTileInitPacket(socket.id,
+        socket.emit('addEntities', this.createTileInitPacket(socket.id,
             [entityConfig.TILES * 3 / 4, entityConfig.TILES]));
     }
     socket.stage++;
@@ -51,6 +54,7 @@ PacketHandler.prototype.createMainInitPacket = function (id) {
         tilePacket = [],
         shardPacket = [],
         homePacket = [],
+        factionPacket = [],
         player,
         shard,
         home;
@@ -110,10 +114,22 @@ PacketHandler.prototype.createMainInitPacket = function (id) {
         })
     }
 
+    for (i in this.gameServer.FACTION_LIST) {
+        faction = this.gameServer.FACTION_LIST[i];
+        factionPacket.push({
+            id: faction.id,
+            name: faction.name,
+            x: faction.x,
+            y: faction.y,
+            size: faction.homes.length
+        });
+    }
+
     ret['tileInfo'] = tilePacket;
     ret['playerInfo'] = playerPacket;
     ret['shardInfo'] = shardPacket;
     ret['homeInfo'] = homePacket;
+    ret['factionInfo'] = factionPacket;
     ret['selfId'] = id;
 
     return ret;
@@ -201,6 +217,16 @@ PacketHandler.prototype.addPlayerPackets = function (player) {
     });
 };
 
+PacketHandler.prototype.addFactionPackets = function (faction) {
+    this.addFactionPacket.push({
+        id: faction.id,
+        name: faction.name,
+        x: faction.x,
+        y: faction.y,
+        size: faction.homes.length
+    });
+};
+
 PacketHandler.prototype.addShardPackets = function (shard) {
 	this.addShardPacket.push({
         id: shard.id,
@@ -238,8 +264,17 @@ PacketHandler.prototype.updateHomePackets = function (home) {
         );
 };
 
+PacketHandler.prototype.updateFactionPackets = function (faction) {
+    this.updateFactionPacket.push({
+        id: faction.id,
+        x: faction.x,
+        y: faction.y,
+        size: faction.homes.length
+    });
+};
+
+
 PacketHandler.prototype.updateTilesPackets = function (tile) {
-    console.log(tile.color);
 	this.updateTilesPacket.push({
             id: tile.id,
             owner: tile.owner.name,
@@ -255,7 +290,7 @@ PacketHandler.prototype.updatePlayersPackets = function (player) {
             x: player.x,
             y: player.y,
             health: player.health
-        });
+    });
 };
 
 PacketHandler.prototype.updateShardsPackets = function (shard) {
@@ -279,6 +314,10 @@ PacketHandler.prototype.deletePlayerPackets = function (player) {
 	this.deletePlayerPacket.push({id: player.id});
 };
 
+PacketHandler.prototype.deletePlayerPackets = function (faction) {
+    this.deleteFactionPacket.push({id: faction.id});
+};
+
 PacketHandler.prototype.deleteHomePackets = function (home) {
 	this.deleteHomePacket.push({id: home.id});
 };
@@ -299,7 +338,7 @@ PacketHandler.prototype.sendPackets = function () {
                 'playerInfo': this.addPlayerPacket,
                 'shardInfo': this.addShardPacket,
                 'homeInfo': this.addHomePacket,
-                'voiceInfo': this.addVoicePacket
+                'factionInfo': this.addFactionPacket
             });
 
         socket.emit('updateEntities',
@@ -307,7 +346,8 @@ PacketHandler.prototype.sendPackets = function () {
                 'playerInfo': this.updatePlayersPacket,
                 'tileInfo': this.updateTilesPacket,
                 'shardInfo': this.updateShardsPacket,
-                'homeInfo': this.updateHomePacket
+                'homeInfo': this.updateHomePacket,
+                'factionInfo': this.updateFactionPacket
             });
 
         socket.emit('addEntities',
@@ -319,7 +359,8 @@ PacketHandler.prototype.sendPackets = function () {
                 'playerInfo': this.deletePlayerPacket,
                 'shardInfo': this.deleteShardPacket,
                 'homeInfo': this.deleteHomePacket,
-                'UIInfo': this.deleteUIPacket
+                'UIInfo': this.deleteUIPacket,
+                'factionInfo': this.deleteFactionPacket
             });
         socket.emit('drawScene', {});
     }
@@ -332,19 +373,19 @@ PacketHandler.prototype.resetPackets = function () {
     this.addPlayerPacket = [];
     this.addShardPacket = [];
     this.addHomePacket = [];
+    this.addFactionPacket = [];
     this.addUIPacket = [];
-    this.addVoicePacket = [];
-    this.addVoicePacket = [];
-    this.addHomePacket = [];
 
     this.updateHomePacket = [];
     this.updateTilesPacket = [];
     this.updateShardsPacket = [];
     this.updatePlayersPacket = [];
+    this.updateFactionPacket = [];
 
     this.deletePlayerPacket = [];
     this.deleteShardPacket = [];
     this.deleteHomePacket = [];
+    this.deleteFactionPacket = [];
     this.deleteUIPacket = [];
 };
 
