@@ -1,6 +1,8 @@
 const entityConfig = require('./entityConfig');
 
-function Tile(x, y) {
+function Tile(x, y, gameServer) {
+    this.gameServer = gameServer;
+    this.packetHandler = gameServer.packetHandler;
     var randomId = Math.random();
     this.id = randomId;
     this.x = x;
@@ -23,7 +25,10 @@ function getRandomColor() {
 
 
 Tile.prototype.setColor = function (color) {
-    this.color = color;
+    if (color !== "" && color !== undefined && color !== null) {
+        this.color = color;
+        this.packetHandler.updateTilesPackets(tile);
+    }
 };
 
 
@@ -50,14 +55,14 @@ Tile.prototype.addQuadItem = function () {
     var centerY = this.y + this.length / 2;
 
     this.quadItem = {
-                cell: this,
-                bound: {
-                    minx: centerX - this.length / 2,
-                    miny: centerY - this.length / 2,
-                    maxx: centerX + this.length / 2,
-                    maxy: centerY + this.length / 2
-                }
-            };
+        cell: this,
+        bound: {
+            minx: centerX - this.length / 2,
+            miny: centerY - this.length / 2,
+            maxx: centerX + this.length / 2,
+            maxy: centerY + this.length / 2
+        }
+    };
 }
 
 

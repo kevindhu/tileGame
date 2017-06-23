@@ -33,4 +33,13 @@ Tower.prototype.addBigQuadItem = function () {
     };
 };
 
+Tower.prototype.shootShard = function (player) {
+    if (tower.getSupply() > 0) {
+        var shard = this.gameServer.HOME_SHARD_LIST[tower.getRandomShard()];
+        this.removeShard(shard);
+        shard.becomeShooting(this.randomPlayer, (player.x - tower.x) / 4, (player.y - tower.y) / 4);
+    }
+    this.packetHandler.updateHomePackets(tower);
+}
+
 module.exports = Tower;

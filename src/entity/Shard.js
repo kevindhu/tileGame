@@ -8,6 +8,7 @@ function Shard(x, y, gameServer) {
     this.id = Math.random();
     this.x = x;
     this.y = y;
+    this.type = "static";
 
     this.xVel = 0;
     this.yVel = 0;
@@ -27,15 +28,16 @@ function Shard(x, y, gameServer) {
 
 Shard.prototype.init = function () {
     this.addQuadItem();
-    this.gameServer.shardTree.insert(shard.quadItem);
-    this.gameServer.STATIC_SHARD_LIST[id] = shard;
-    this.packetHandler.addShardPackets(shard);
+    this.gameServer.shardTree.insert(thisquadItem);
+    this.gameServer.STATIC_SHARD_LIST[id] = this;
+    this.packetHandler.addShardPackets(this);
 };
 
 
-Shard.prototype.updateState = function () {
+Shard.prototype.limbo = function () {
     delete.this.gameServer.shardTree.remove(this.quadItem);
 
+    delete this.gameServer.PLAYER_SHARD_LIST[this.id];
     delete this.gameServer.SHOOTING_SHARD_LIST[this.id];
     delete this.gameServer.HOME_SHARD_LIST[this.id];
     delete this.gameServer.STATIC_SHARD_LIST[this.id];
@@ -43,28 +45,62 @@ Shard.prototype.updateState = function () {
 
 Shard.prototype.becomeStatic = function () {
     this.owner = null;
+    this.type = "static";
     this.updateQuadItem();
-    this.updateState();
+    this.limbo();
 
     this.gameServer.shardTree.insert(this.quadItem);
     this.gameServer.STATIC_SHARD_LIST[this.id] = this;
 };
 
-
-
-Shard.prototype.becomeShooting = function (xVel, yVel) {
+Shard.prototype.becomeShooting = function (player, xVel, yVel) {
+    this.owner = player;
+    this.type = "shooting";
     this.addVelocity(xVel, yVel);
-    this.updateState();
+    this.limbo();
 
     this.gameServer.shardTree.insert(this.quadItem);
     this.gameServer.SHOOTING_SHARD_LIST[this.id] = this;
 }
 
+Shard.prototype.becomePlayer = function () {
+    this.owner = this;
+    this.timer = 100;
+    this.type = "player";
+    this.updateQuadItem();
+    this.limbo();
+
+    this.gameServer.shardTree.insert(this.quadItem);
+    this.gameServer.PLAYER_SHARD_LIST[this.id] = this;
+}
+
 Shard.prototype.becomeHome = function (home) {
     this.home = home;
-    this.updateState();
+    this.type = "home";
+    this.limbo();
     this.gameServer.HOME_SHARD_LIST[this.id] = this;
 }
+
+Shard.prototype.updatePosition = function () {
+    if (this.timer > 0) {
+        this.timer -= 1;
+    }
+    this.updateQuadItem();
+
+    switch (this.type) {
+        case "shooting":
+            this.move();
+            break;
+        case "player":
+            this.follow(this.owner);
+            break;
+        case "home":
+            this.rotate();
+            break;
+    }
+    this.packetHandler.updateShardsPackets(this);
+}
+
 
 
 Shard.prototype.rotate = function () {
@@ -76,6 +112,14 @@ Shard.prototype.rotate = function () {
     }
 };
 
+Shard.prototype.follow = function (owner) {
+    this.x = owner.x ;//+ Arithmetic.getRandomInt(-5, 5);
+    this.y = owner.y ;//+ Arithmetic.getRandomInt(-5, 5);
+
+    this.gameServer.shardTree.remove(this.quadItem);
+    this.gameServer.shardTree.insert(this.quadItem);
+}
+
 Shard.prototype.addVelocity = function (x,y) {
     this.xVel = x;
     this.yVel = y;
@@ -85,7 +129,15 @@ Shard.prototype.addVelocity = function (x,y) {
 };
 
 
-Shard.prototype.updatePosition = function () {
+Shard.prototype.onDelete = function () {
+    this.limbo();
+    this.packetHandler.deleteShardPackets(this);
+}
+
+Shard.prototype.move = function () {
+    if (this.xVel !== 0) {
+        this.becomeStatic();
+    }
     if (this.xVel > -0.1 && this.xVel < 0.1) {
         this.xVel = 0;
         this.yVel = 0;
@@ -105,6 +157,9 @@ Shard.prototype.updatePosition = function () {
 
     this.xVel = lerp(this.xVel,0,0.2);
     this.yVel = lerp(this.yVel,0,0.2);
+
+    this.gameServer.shootingShardTree.remove(this.quadItem);
+    this.gameServer.shootingShardTree.insert(this.quadItem);
 };
 
 Shard.prototype.addQuadItem = function () {

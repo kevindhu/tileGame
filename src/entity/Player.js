@@ -28,32 +28,43 @@ Player.prototype.init = function () {
     this.gameServer.packetHandler.addPlayerPackets(this);
 }
 
-
-function getName(name) {
-    if (name === "") {
-        return "unnamed friend";
+Player.prototype.dropAllShards = function () {
+    for (var i = this.shards.length - 1; i >= 0; i--) {
+        var shard = this.gameServer.PLAYER_SHARD_LIST[this.shards[i]];
+        this.dropShard(shard);
     }
-    return name;
-}
-
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
+    if (this.emptyShard !== null) {
+        this.dropShard(this.emptyShard);
+        this.emptyShard = null;
     }
-    return color;
-}
-
-function onBoundary (coord) {
-    return coord <= entityConfig.BORDER_WIDTH ||
-        coord >= entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
 };
 
-function overBoundary (coord) {
-    return coord < entityConfig.BORDER_WIDTH - 1 ||
-        coord > entityConfig.WIDTH - entityConfig.BORDER_WIDTH + 1;
-};
+Player.prototype.onDelete = function () {
+    this.dropAllShards();
+    delete this.gameServer.PLAYER_LIST[this.id];
+    this.packetHandler.deletePlayerPackets(player);
+}
+
+
+Player.prototype.update = function () {
+    if (this.timer > 0) {
+        this.timer -= 1;
+    }
+    this.updatePosition();
+
+    var tile = this.gameServer.getEntityTile(player);
+    if (tile) {
+        if (tile.owner === this.faction) {
+            this.increaseHealth(0.1);
+        }
+        else if (tile.owner !== null) {
+            this.decreaseHealth(0.1);
+        }
+    }
+
+    this.packetHandler.updatePlayersPackets(this);
+}
+
 
 Player.prototype.updatePosition = function () {
     if (this.pressingDown) {
@@ -134,8 +145,7 @@ Player.prototype.addShard = function (shard) {
     else {
         this.shards.push(shard.id);
     }
-    shard.timer = 100;
-    shard.owner = this;
+    shard.becomePlayer();
     this.gameServer.PLAYER_SHARD_LIST[shard.id] = shard;
 };
 
@@ -147,7 +157,6 @@ Player.prototype.removeShard = function (shard) {
         var index = this.shards.indexOf(shard.id);
         this.shards.splice(index, 1);
     }
-    shard.owner = null;
     shard.timer = 0;
 };
 
@@ -161,6 +170,10 @@ Player.prototype.transformEmptyShard = function (name) {
 
 Player.prototype.decreaseHealth = function (amount) {
     this.health -= amount;
+    if (this.health <= 0) {
+        this.reset();
+    }
+    this.packetHandler.updatePlayersPackets(player);
 }
 
 Player.prototype.increaseHealth = function (amount) {
@@ -169,7 +182,24 @@ Player.prototype.increaseHealth = function (amount) {
     }
 };
 
+
+Player.prototype.dropRandomShard = function () {
+    var shard = this.getRandomShard();
+    this.dropShard(shard);
+};
+
+Player.prototype.dropShard = function (shard) {
+    if (shard) {
+        var shard = this.gameServer.PLAYER_SHARD_LIST[this.getRandomShard()];
+        this.removeShard(shard);
+        shard.becomeShooting(this, Arithmetic.getRandomInt(-30, 30), 
+            Arithmetic.getRandomInt(-30, 30))
+    }
+};
+
 Player.prototype.reset = function () {
+    this.dropAllShards();
+
     this.x = entityConfig.WIDTH / 2;
     this.y = entityConfig.WIDTH / 2;
     this.maxSpeed = 10;
@@ -177,5 +207,33 @@ Player.prototype.reset = function () {
     this.ySpeed = 0;
     this.health = 5;
 }
+
+
+function getName(name) {
+    if (name === "") {
+        return "unnamed friend";
+    }
+    return name;
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+
+function onBoundary (coord) {
+    return coord <= entityConfig.BORDER_WIDTH ||
+        coord >= entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
+};
+
+function overBoundary (coord) {
+    return coord < entityConfig.BORDER_WIDTH - 1 ||
+        coord > entityConfig.WIDTH - entityConfig.BORDER_WIDTH + 1;
+};
 
 module.exports = Player;

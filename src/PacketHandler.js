@@ -274,17 +274,17 @@ PacketHandler.prototype.deleteUIPackets = function (id, action) {
         });
 }
 
-PacketHandler.prototype.deletePlayerPackets = function (id) {
-	this.deletePlayerPacket.push({id: id});
+PacketHandler.prototype.deletePlayerPackets = function (player) {
+	this.deletePlayerPacket.push({id: player.id});
 };
 
-PacketHandler.prototype.deleteHomePackets = function (id) {
-	this.deleteHomePacket.push({id: id});
+PacketHandler.prototype.deleteHomePackets = function (home) {
+	this.deleteHomePacket.push({id: home.id});
 };
 
 
-PacketHandler.prototype.deleteShardPackets = function (id) {
-	this.deleteShardPacket.push({id: id});
+PacketHandler.prototype.deleteShardPackets = function (shard) {
+	this.deleteShardPacket.push({id: shard.id});
 };
 
 
