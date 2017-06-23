@@ -3,16 +3,10 @@ const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
 var lerp = require('lerp');
 
-function Player(id, name) {
+function Player(id, name, faction, gameServer) {
+    this.gameServer = gameServer;
     this.id = id;
 
-    this.pressingUp = false;
-    this.pressingDown = false;
-    this.pressingLeft = false;
-    this.pressingRight = false;
-    this.pressingSpace = false;
-    this.pressingA = false;
-    
     this.x = entityConfig.WIDTH / 2;
     this.y = entityConfig.WIDTH / 2;
     this.color = getRandomColor();
@@ -24,9 +18,14 @@ function Player(id, name) {
     this.ySpeed = 0;
     this.shards = [];
 
+    this.faction = faction;
     this.emptyShard = null;
-    this.headquarter = null;
-    this.faction = null;
+    this.init();
+}
+
+Player.prototype.init = function () {
+    this.gameServer.PLAYER_LIST[socket.id] = this;
+    this.gameServer.packetHandler.addPlayerPackets(this);
 }
 
 
@@ -46,6 +45,15 @@ function getRandomColor() {
     return color;
 }
 
+function onBoundary (coord) {
+    return coord <= entityConfig.BORDER_WIDTH ||
+        coord >= entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
+};
+
+function overBoundary (coord) {
+    return coord < entityConfig.BORDER_WIDTH - 1 ||
+        coord > entityConfig.WIDTH - entityConfig.BORDER_WIDTH + 1;
+};
 
 Player.prototype.updatePosition = function () {
     if (this.pressingDown) {
@@ -107,20 +115,10 @@ Player.prototype.updatePosition = function () {
         return coord;
     };
 
-
     this.x = checkStuck(this.x);
     this.y = checkStuck(this.y);
 };
 
-var onBoundary = function (coord) {
-    return coord <= entityConfig.BORDER_WIDTH ||
-        coord >= entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
-};
-
-var overBoundary = function (coord) {
-    return coord < entityConfig.BORDER_WIDTH - 1 ||
-        coord > entityConfig.WIDTH - entityConfig.BORDER_WIDTH + 1;
-};
 
 
 Player.prototype.getRandomShard = function () {
@@ -138,6 +136,7 @@ Player.prototype.addShard = function (shard) {
     }
     shard.timer = 100;
     shard.owner = this;
+    this.gameServer.PLAYER_SHARD_LIST[shard.id] = shard;
 };
 
 Player.prototype.removeShard = function (shard) {

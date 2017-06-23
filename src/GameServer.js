@@ -427,7 +427,7 @@ GameServer.prototype.start = function () {
 };
 
 /** SERVER ADD EVENTS **/
-GameServer.prototype.addStaticShard = function (shard) {
+GameServer.prototype.addStaticShard = function (shard) { //now is becomeStatic()
     this.STATIC_SHARD_LIST[shard.id] = shard;
     shard.owner = null;
     shard.quadItem.bound = {
@@ -439,17 +439,17 @@ GameServer.prototype.addStaticShard = function (shard) {
     this.shardTree.insert(shard.quadItem);
 };
 
-GameServer.prototype.addPlayerShard = function (player, shard) {
+GameServer.prototype.addPlayerShard = function (player, shard) { //now just player.addShard()
     player.addShard(shard);
     this.PLAYER_SHARD_LIST[shard.id] = shard;
 };
 
-GameServer.prototype.addShootingShard = function (shard, xVel, yVel) {
+GameServer.prototype.addShootingShard = function (shard, xVel, yVel) { //now becomeShooting()
     shard.addVelocity(xVel, yVel);
     this.SHOOTING_SHARD_LIST[shard.id] = shard;
 };
 
-GameServer.prototype.addHomeShard = function (home, shard) {
+GameServer.prototype.addHomeShard = function (home, shard) { //now just home.addShard()
     home.addShard(shard);
     this.HOME_SHARD_LIST[shard.id] = shard;
 
@@ -458,7 +458,7 @@ GameServer.prototype.addHomeShard = function (home, shard) {
 
 
 /** SERVER CREATION EVENTS **/
-GameServer.prototype.createPlayer = function (socket, info) {
+GameServer.prototype.createPlayer = function (socket, info) { //now just faction.addPlayer()
     var faction = this.FACTION_LIST[info.faction];
     if (!faction) {
         faction = this.createFaction(info.faction);
@@ -470,7 +470,7 @@ GameServer.prototype.createPlayer = function (socket, info) {
     return player;
 };
 
-GameServer.prototype.createEmptyShard = function () {
+GameServer.prototype.createEmptyShard = function () { //now just new Shard()
     var id = Math.random();
     var shard = new Entity.Shard(
         Arithmetic.getRandomInt(entityConfig.BORDER_WIDTH, entityConfig.WIDTH - entityConfig.BORDER_WIDTH),
@@ -485,7 +485,7 @@ GameServer.prototype.createEmptyShard = function () {
     return shard;
 };
 
-GameServer.prototype.createHeadquarters = function (faction) {
+GameServer.prototype.createHeadquarters = function (faction) { //now just faction.addHeadquarter()
     if (faction.headquarter === null) {
         var headquarter = new Entity.Headquarter(faction, faction.x, faction.y);
         var tile = this.getEntityTile(headquarter);
@@ -495,11 +495,13 @@ GameServer.prototype.createHeadquarters = function (faction) {
         headquarter.addQuadItem();
         this.homeTree.insert(headquarter.quadItem);
         this.packetHandler.addHomePackets(headquarter);
+
+
         faction.headquarter = headquarter;
     }
 };
 
-GameServer.prototype.createSentinel = function (player) {
+GameServer.prototype.createSentinel = function (player) { //now just faction.addSentinel(player)
     var tile = this.getEntityTile(player);
     if (tile !== null && tile.home === null &&
         Math.abs(tile.x + tile.length / 2 - player.x) < (tile.length / 8) &&
@@ -525,7 +527,7 @@ GameServer.prototype.createSentinel = function (player) {
     }
 };
 
-GameServer.prototype.createTower = function (player) {
+GameServer.prototype.createTower = function (player) { //now just faction.addTower(player)
     var tile = this.getEntityTile(player);
     if (tile !== null &&
         tile.home !== null &&
@@ -549,7 +551,7 @@ GameServer.prototype.createTower = function (player) {
     }
 }
 
-GameServer.prototype.createFaction = function (name) {
+GameServer.prototype.createFaction = function (name) { //now just new Faction(name)
     var tile = null;
     var coords = {};
     while (tile === null || tile.owner !== null) {
@@ -560,7 +562,7 @@ GameServer.prototype.createFaction = function (name) {
     coords['x'] = tile.x + tile.length/2;
     coords['y'] = tile.y + tile.length/2;
 
-    var faction = new Entity.Faction(name, coords);
+    var faction = new Entity.Faction(name, coords, this);
 
     this.createHeadquarters(faction);
     this.FACTION_LIST[faction.name] = faction;

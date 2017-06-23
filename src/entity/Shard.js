@@ -1,9 +1,11 @@
 const entityConfig = require('./entityConfig');
 var lerp = require('lerp');
 
-function Shard(x, y, id) {
+function Shard(x, y, gameServer) {
+    this.gameServer = gameServer;
+    this.packetHandler = gameServer.packetHandler;
     this.name = null;
-    this.id = id;
+    this.id = Math.random();
     this.x = x;
     this.y = y;
 
@@ -19,6 +21,49 @@ function Shard(x, y, id) {
 
     this.home = null;
     this.theta = 0;
+
+    this.init();
+}
+
+Shard.prototype.init = function () {
+    this.addQuadItem();
+    this.gameServer.shardTree.insert(shard.quadItem);
+    this.gameServer.STATIC_SHARD_LIST[id] = shard;
+    this.packetHandler.addShardPackets(shard);
+};
+
+
+Shard.prototype.updateState = function () {
+    delete.this.gameServer.shardTree.remove(this.quadItem);
+
+    delete this.gameServer.SHOOTING_SHARD_LIST[this.id];
+    delete this.gameServer.HOME_SHARD_LIST[this.id];
+    delete this.gameServer.STATIC_SHARD_LIST[this.id];
+};
+
+Shard.prototype.becomeStatic = function () {
+    this.owner = null;
+    this.updateQuadItem();
+    this.updateState();
+
+    this.gameServer.shardTree.insert(this.quadItem);
+    this.gameServer.STATIC_SHARD_LIST[this.id] = this;
+};
+
+
+
+Shard.prototype.becomeShooting = function (xVel, yVel) {
+    this.addVelocity(xVel, yVel);
+    this.updateState();
+
+    this.gameServer.shardTree.insert(this.quadItem);
+    this.gameServer.SHOOTING_SHARD_LIST[this.id] = this;
+}
+
+Shard.prototype.becomeHome = function (home) {
+    this.home = home;
+    this.updateState();
+    this.gameServer.HOME_SHARD_LIST[this.id] = this;
 }
 
 

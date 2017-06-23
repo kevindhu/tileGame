@@ -34,6 +34,11 @@ Tile.removeHome = function (home) {
     }
 }
 
+
+Tile.prototype.hasHome = function () {
+    return this.home;
+}
+
 Tile.prototype.setHome = function (home) {
     this.home = home;
     this.owner = home.owner;
