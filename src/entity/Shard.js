@@ -9,6 +9,7 @@ function Shard(x, y, gameServer) {
     this.x = x;
     this.y = y;
     this.type = "static";
+    this.supply = 10;
 
     this.xVel = 0;
     this.yVel = 0;
@@ -25,6 +26,7 @@ function Shard(x, y, gameServer) {
 
     this.init();
 }
+
 
 Shard.prototype.init = function () {
     this.addQuadItem();
@@ -55,9 +57,14 @@ Shard.prototype.becomeStatic = function () {
     this.gameServer.STATIC_SHARD_LIST[this.id] = this;
 };
 
-Shard.prototype.becomeShooting = function (player, xVel, yVel) {
+Shard.prototype.becomeShooting = function (player, xVel, yVel, temp) {
+    if (temp) {
+        this.type = "tempShooting";
+    }
+    else {
+        this.type = "shooting";
+    }
     this.owner = player;
-    this.type = "shooting";
     this.limbo();
     this.addVelocity(xVel, yVel);
 
@@ -91,6 +98,7 @@ Shard.prototype.updatePosition = function () {
 
     switch (this.type) {
         case "shooting":
+        case "tempShooting":
             this.move();
             break;
         case "player":
@@ -103,7 +111,9 @@ Shard.prototype.updatePosition = function () {
     this.packetHandler.updateShardsPackets(this);
 }
 
-
+Shard.prototype.useSupply = function () {
+    this.supply -= 1;
+}
 
 Shard.prototype.rotate = function () {
     if (this.home !== null) {
@@ -138,8 +148,10 @@ Shard.prototype.onDelete = function () {
 
 Shard.prototype.move = function () {
     if (this.xVel === 0) {
-        this.becomeStatic();
-        return;
+        if (this.type === "tempShooting") {
+            return this.onDelete();
+        }
+        return this.becomeStatic();
     }
     
     if (this.xVel > -0.1 && this.xVel < 0.1) {

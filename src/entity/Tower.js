@@ -2,18 +2,19 @@ const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
 var EntityFunctions = require('./EntityFunctions');
 var Home = require('./Home');
+var Shard = require('./Shard');
 
 
 function Tower(faction, x, y, gameServer) {
     Tower.super_.call(this, faction, x, y, gameServer);
-
-    this.hasColor = true;
+    this.hasColor = true; 
+    this.timer = 0;
     this.level = 0;
     this.radius = 10;
     this.health = 30;
     this.init();
     this.mainInit();
-}
+};
 
 EntityFunctions.inherits(Tower, Home);
 
@@ -37,12 +38,23 @@ Tower.prototype.addBigQuadItem = function () {
 };
 
 Tower.prototype.shootShard = function (player) {
+    if (this.timer !== 0) {
+        this.timer--;
+        return;
+    }
+    this.timer = 10;
     if (this.getSupply() > 0) {
         var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
-        this.removeShard(shard);
-        shard.becomeShooting(this.randomPlayer, (player.x - this.x) / 4, (player.y - this.y) / 4);
+        shard.useSupply();
+        if (shard.supply === 0) {
+            this.removeShard(shard);
+            shard.onDelete();
+        }
+        var shardClone = new Shard(this.x, this.y, this.gameServer);
+        shardClone.becomeShooting(this.randomPlayer, (player.x - this.x) / 4,
+         (player.y - this.y) / 4, true);
     }
     this.packetHandler.updateHomePackets(this);
-}
+};
 
 module.exports = Tower;
