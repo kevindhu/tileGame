@@ -3,6 +3,7 @@ const Arithmetic = require('./modules/Arithmetic');
 function PacketHandler(gameServer) {
     this.gameServer = gameServer;
 
+    this.addAnimationPacket = [];
     this.addPlayerPacket = [];
     this.addShardPacket = [];
     this.addHomePacket = [];
@@ -136,7 +137,15 @@ PacketHandler.prototype.createFactionsInitPacket = function () {
 
 
 
-
+PacketHandler.prototype.addShardAnimationPackets = function (shard) {
+    this.addAnimationPacket.push(
+    {  
+        id: shard.id,
+        name: shard.name,
+        x: shard.x,
+        y: shard.y
+    })
+};
 
 
 
@@ -157,7 +166,7 @@ PacketHandler.prototype.addUIPackets = function (player, home, action) {
             homeId: homeId,
             action: action
         });
-}
+};
 
 PacketHandler.prototype.addPlayerPackets = function (player, ifInit) {
     var info = {
@@ -329,7 +338,8 @@ PacketHandler.prototype.sendPackets = function () {
 
         socket.emit('addEntities',
             {
-                'UIInfo': this.addUIPacket
+                'UIInfo': this.addUIPacket,
+                'animationInfo': this.addAnimationPacket
             });
         socket.emit('deleteEntities',
             {
@@ -347,6 +357,7 @@ PacketHandler.prototype.sendPackets = function () {
 
 
 PacketHandler.prototype.resetPackets = function () {
+    this.addAnimationPacket = [];
     this.addPlayerPacket = [];
     this.addShardPacket = [];
     this.addHomePacket = [];

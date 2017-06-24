@@ -11,10 +11,14 @@ socket.on('drawScene', drawScene);
 var selfId = null;
 
 var FACTION_LIST = {};
+var FACTION_ARRAY = [];
+
 var PLAYER_LIST = {};
 var TILE_LIST = {};
 var SHARD_LIST = {};
 var HOME_LIST = {};
+
+var SHARD_ANIMATION_LIST = {};
 
 var ARROW = null;
 var serverMap = null;
@@ -77,7 +81,17 @@ var Arrow = function (x,y) {
         return this.postY - this.preY;
     }
 };
+var Animation = function (animationInfo) {
+    this.id = animationInfo.id;
+    this.name = animationInfo.name;
+    this.x =animationInfo.x;
+    this.y = animationInfo.y;
+    this.theta = 15;
+    this.timer = getRandom(10,14);
 
+    this.endX = this.x + getRandom(-100,100);
+    this.endY = this.y + getRandom(-100,100);
+};
 
 function addFactionstoUI(data) {
     var factions = document.getElementById('factions');
@@ -94,13 +108,16 @@ function addFactionstoUI(data) {
 
 
 function addEntities(data) {
-    var addEntity = function (packet, list, Entity) {
+    var addEntity = function (packet, list, Entity, array) {
         if (!packet) {
             return;
         }
         for (var i = 0; i < packet.length; i++) {
             var info = packet[i];
             list[info.id] = new Entity(info);
+            if (array) {
+                array.push(list[info.id]);
+            }
         }
     };
 
@@ -108,7 +125,8 @@ function addEntities(data) {
     addEntity(data.playerInfo, PLAYER_LIST, Player);
     addEntity(data.shardInfo, SHARD_LIST, Shard);
     addEntity(data.homeInfo, HOME_LIST, Home);
-    addEntity(data.factionInfo, FACTION_LIST, Faction);
+    addEntity(data.factionInfo, FACTION_LIST, Faction, FACTION_ARRAY);
+    addEntity(data.animationInfo, SHARD_ANIMATION_LIST, Animation);
 
     var UIPacket = data.UIInfo;
     if (UIPacket) {
@@ -125,13 +143,30 @@ function addEntities(data) {
 }
 
 
+function findWithAttr(array, attr, value) {
+    for(var i = 0; i < array.length; i += 1) {
+        if(array[i][attr] === value) {
+            return i;
+        }
+    }
+    return -1;  
+}
+
+
+
 function deleteEntities(data) {
-    var deleteEntity = function (packet, list) {
+    var deleteEntity = function (packet, list, array) {
         if (!packet) {
             return;
         }
         for (var i = 0; i < packet.length; i++) {
             var info = packet[i];
+            if (array) {
+                console.log(array);
+                var index = findWithAttr(array, "id", info.id);
+                array.splice(index,1);
+                console.log(array);
+            }
             delete list[info.id];
 
         }
@@ -140,7 +175,7 @@ function deleteEntities(data) {
     deleteEntity(data.playerInfo, PLAYER_LIST);
     deleteEntity(data.shardInfo, SHARD_LIST);
     deleteEntity(data.homeInfo, HOME_LIST);
-    deleteEntity(data.factionInfo, FACTION_LIST);
+    deleteEntity(data.factionInfo, FACTION_LIST, FACTION_ARRAY);
 
 
     var UIPacket = data.UIInfo;
@@ -150,8 +185,6 @@ function deleteEntities(data) {
             closeUI(UIInfo.action);
         }
     }
-
-
 }
 
 function updateEntities(data) {
@@ -162,6 +195,9 @@ function updateEntities(data) {
         for (var i = 0; i < packet.length; i++) {
             var entityInfo = packet[i];
             var entity = list[entityInfo.id];
+            if (!entity) {
+                return;
+            }
             callback(entity, entityInfo);
         }
     }
@@ -170,6 +206,7 @@ function updateEntities(data) {
         faction.x = factionInfo.x;
         faction.y = factionInfo.y;
         faction.size = factionInfo.size;
+        FACTION_ARRAY.sort(factionSort);
     };
     
     var updateHomes = function (home, homeInfo) {
@@ -207,9 +244,20 @@ function updateEntities(data) {
     updateEntities(data.factionInfo, FACTION_LIST, updateFactions);
 }
 
+
+var canvas2 = document.createElement("canvas"),
+ctx2 = canvas2.getContext("2d");
+canvas2.width = canvas.width;
+canvas2.height = canvas.height;
+
 function drawScene(data) {
 
     var selfPlayer = PLAYER_LIST[selfId];
+
+
+    if (!selfPlayer) {
+        return;
+    }
 
     var inBounds = function(player,x,y) {
         return x < (player.x+canvas.width/2) && x > (player.x-canvas.width/2)
@@ -217,12 +265,12 @@ function drawScene(data) {
     }
 
     var drawPlayers = function () {
-        ctx.font = "20px Arial";
-        ctx.fillStyle = "#000000";
+        ctx2.font = "20px Arial";
+        ctx2.fillStyle = "#000000";
         for (var playerId in PLAYER_LIST) {
             var player = PLAYER_LIST[playerId];
-            ctx.fillText(player.name, player.x - 4.6 * player.name.length, player.y - 10);
-            ctx.fillRect(player.x - 5 * player.health, player.y + 10, player.health * 10, 10);
+            ctx2.fillText(player.name, player.x - 4.6 * player.name.length, player.y - 10);
+            ctx2.fillRect(player.x - 5 * player.health, player.y + 10, player.health * 10, 10);
         }
     };
 
@@ -230,8 +278,8 @@ function drawScene(data) {
         for (var id in TILE_LIST) {
             var tile = TILE_LIST[id];
             if (inBounds(selfPlayer,tile.x, tile.y)) {
-                ctx.fillStyle = tile.color;
-                ctx.fillRect(tile.x, tile.y, tile.length, tile.length);
+                ctx2.fillStyle = tile.color;
+                ctx2.fillRect(tile.x, tile.y, tile.length, tile.length);
             }
         }
     };
@@ -240,49 +288,99 @@ function drawScene(data) {
         for (var id in SHARD_LIST) {
             var shard = SHARD_LIST[id];
 
-            if (selfPlayer && inBounds(selfPlayer, shard.x, shard.y)) {
-                ctx.beginPath();
-                ctx.fillStyle = "#008000";
+            if (inBounds(selfPlayer, shard.x, shard.y)) {
+                ctx2.beginPath();
+                ctx2.fillStyle = "#008000";
                 if (shard.name !== null) {
-                    ctx.font = "30px Arial";
-                    ctx.fillText(shard.name, shard.x, shard.y);
+                    ctx2.font = "30px Arial";
+                    ctx2.fillText(shard.name, shard.x, shard.y);
                 }
                 
-                ctx.arc(shard.x, shard.y, 5, 0, 2 * Math.PI, false);
-                ctx.fill();
-                ctx.closePath();
+                ctx2.arc(shard.x, shard.y, 5, 0, 2 * Math.PI, false);
+                ctx2.fill();
+                ctx2.closePath();
             }
         }
     };
 
     var drawHomes = function () {
         for (var id in HOME_LIST) {
-            ctx.beginPath();
+            ctx2.beginPath();
             var home = HOME_LIST[id];
-            ctx.fillStyle = "#003290";
-            ctx.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
-            ctx.fill();
-            ctx.fillStyle = "#000000";
+            ctx2.fillStyle = "#003290";
+            ctx2.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
+            ctx2.fill();
+            ctx2.fillStyle = "#000000";
             if (home.owner !== null) {
                 //ctx.fillText(home.name, home.x, home.y + 20);
-                ctx.fillText(home.shards.length, home.x, home.y + 40);
+                ctx2.fillText(home.shards.length, home.x, home.y + 40);
             }
-            ctx.closePath();
+            ctx2.closePath();
         }
     };
 
     var drawFactions = function () {
         for (var id in FACTION_LIST) {
             var faction = FACTION_LIST[id];
-            ctx.font = faction.size * 30 + "px Arial";
-            ctx.fillText(faction.name, faction.x, faction.y);
+            ctx2.font = faction.size * 30 + "px Arial";
+            ctx2.fillText(faction.name, faction.x, faction.y);
+        }
+    }
+
+    var drawArrow = function () {
+        if (ARROW && ARROW.postX) {
+            ctx2.beginPath();
+            ctx2.moveTo(selfPlayer.x, selfPlayer.y);
+            ctx2.lineTo(selfPlayer.x+ARROW.deltaX(), selfPlayer.y + ARROW.deltaY());
+            ctx2.stroke();
+            ctx2.closePath();
+        }
+    };
+
+    var drawAnimations = function () {
+        for (var id in SHARD_ANIMATION_LIST) {
+            var animation = SHARD_ANIMATION_LIST[id];
+            ctx2.font = 60 - animation.timer + "px Arial";
+
+
+            ctx2.save();
+            ctx2.translate(animation.x, animation.y);
+            ctx2.rotate(-Math.PI/50 * animation.theta);
+            ctx2.textAlign = "center";
+
+            ctx2.fillStyle = "rgba(0, 0, 0, " + animation.timer * 10/100 + ")";
+            ctx2.fillText(animation.name, 0, 15);
+            ctx2.restore();
+
+            ctx2.fillStyle = "#000000";
+            animation.theta = lerp(animation.theta, 0, 0.08);
+            animation.x = lerp(animation.x, animation.endX, 0.1);
+            animation.y = lerp(animation.y, animation.endY, 0.1);
+
+            animation.timer --;
+            if (animation.timer <= 0) {
+                delete SHARD_ANIMATION_LIST[id];
+            }
+
         }
     }
 
 
 
+    var translateScene = function () {
+        ctx2.setTransform(1,0,0,1,0,0);
+        if (keys[17] && keys[38] && scaleFactor < 2) {
+            scaleFactor += 0.2;
+        }
+        if (keys[17] && keys[40] && scaleFactor > 0.7) {
+            scaleFactor -= 0.2;
+        }
+        ctx2.translate(canvas.width/2, canvas.height/2);
+        ctx2.scale(scaleFactor, scaleFactor);
+        ctx2.translate(-selfPlayer.x, -selfPlayer.y);
+    };
+
     var drawMiniMap = function () {
-        var player = PLAYER_LIST[selfId];
         function hexToRGB(hex) {
             var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
             return {
@@ -293,7 +391,7 @@ function drawScene(data) {
         }
         if (mapTimer <= 0 || serverMap === null) {
             var tileLength = Math.sqrt(Object.size(TILE_LIST));
-            if (tileLength === 0 || !player) {
+            if (tileLength === 0 || !selfPlayer) {
                 return;
             }   
             var imgData = ctx.createImageData(tileLength, tileLength);
@@ -325,7 +423,6 @@ function drawScene(data) {
             tempCtx = tempCanvas.getContext("2d");
             tempCanvas.width = 500;
             tempCanvas.height = 500;
-
             tempCtx.putImageData(imgData, 0, 0);
             serverMap = tempCanvas;
             mapTimer = 25;
@@ -334,54 +431,43 @@ function drawScene(data) {
         else {
             mapTimer -= 1;
         }
-
         ctx.rotate(90*Math.PI/180);
-        ctx.scale(1/scaleFactor,-1/scaleFactor);
-        ctx.drawImage(serverMap, player.y * scaleFactor + canvas.width/4, player.x * scaleFactor - canvas.width/2 + 40);
-        ctx.scale(scaleFactor,-scaleFactor);
+        ctx.scale(1, -1);
+        ctx.drawImage(serverMap, 800, 800);
+        ctx.scale(1, -1);
         ctx.rotate(270*Math.PI/180);
+
     };
 
 
-    var translateScene = function () {
-        ctx.setTransform(1,0,0,1,0,0);
-        var player = PLAYER_LIST[selfId];
-        if (player) {
-            if (keys[17] && keys[38] && scaleFactor < 2) {
-                scaleFactor += 0.2;
-            }
-            if (keys[17] && keys[40] && scaleFactor > 0.7) {
-                scaleFactor -= 0.2;
-            }
-            ctx.translate(canvas.width/2, canvas.height/2);
-            ctx.scale(scaleFactor, scaleFactor);
-            ctx.translate(-player.x, -player.y)
+    var drawScoreBoard = function () {
+        for (var i = 0; i < FACTION_ARRAY.length; i++) {
+            var faction = FACTION_ARRAY[i];
+            ctx.font = "30px Arial";
+            ctx.fillText(faction.name, canvas.width/2, canvas.height/2 + 100 - i * 30);
         }
     };
 
-    var drawArrow = function () {
-        if (ARROW && ARROW.postX) {
-            var player = PLAYER_LIST[selfId];
-            ctx.beginPath();
-            ctx.moveTo(player.x, player.y);
-            ctx.lineTo(player.x+ARROW.deltaX(), player.y + ARROW.deltaY());
-            ctx.stroke();
-            ctx.closePath();
-        }
-    };
-
+    ctx2.clearRect(0, 0, 10000, 10000);
     ctx.clearRect(0, 0, 10000, 10000);
     drawTiles();
     drawPlayers();
     drawShards();
     drawHomes();
     drawFactions();
+    drawAnimations();
     drawArrow();
-    translateScene();
-    drawMiniMap();
 
+    translateScene();
+    ctx.drawImage(canvas2, 0, 0);
+    drawMiniMap();
+    drawScoreBoard();
 }
 
+
+function factionSort(a,b) {
+    return a.size - b.size;
+}
 
 
 function scaleImageData(imageData, scale, ctx) {
@@ -403,6 +489,10 @@ function scaleImageData(imageData, scale, ctx) {
     }
 
     return scaled;
+}
+
+function lerp(a,b,ratio) {
+    return a + ratio * (b-a);
 }
 
 
@@ -509,7 +599,9 @@ var returnId = function (keyCode) {
 
 
 
-
+function getRandom(min, max) {
+  return Math.random() * (max - min) + min;
+}
 
 Object.size = function (obj) {
     var size = 0, key;
