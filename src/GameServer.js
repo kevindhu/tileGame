@@ -5,6 +5,8 @@ const entityConfig = require('./entity/entityConfig');
 const Arithmetic = require('./modules/Arithmetic');
 
 function GameServer() {
+    this.packetHandler = new PacketHandler(this);
+
     this.TILE_LIST = {};
     this.SOCKET_LIST = {};
     this.PLAYER_LIST = {};
@@ -25,10 +27,9 @@ function GameServer() {
     this.miny = entityConfig.BORDER_WIDTH;
     this.maxx = entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
     this.maxy = entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
+
     this.tileLength = (entityConfig.WIDTH - 2 * entityConfig.BORDER_WIDTH) /
         Math.sqrt(entityConfig.TILES);
-
-    this.packetHandler = new PacketHandler(this);
 }
 
 /** SERVER ENTITY INIT METHODS **/
@@ -43,7 +44,6 @@ GameServer.prototype.initTiles = function () {
         for (var j = 0; j < Math.sqrt(entityConfig.TILES); j++) {
             var tile = new Entity.Tile(entityConfig.BORDER_WIDTH + this.tileLength * i,
                 entityConfig.BORDER_WIDTH + this.tileLength * j, this);
-
         }
     }
 };
@@ -120,17 +120,13 @@ GameServer.prototype.checkShardCollision = function (shard) {
     //shard + home collision
     this.homeTree.find(shardBound, function (home) {
         if (shard.owner && shard.owner.faction !== home.owner) {
-
-            var tile = this.getEntityTile(shard);
-            tile.alert = true;
-            this.packetHandler.updateTilesPackets(tile);
             shard.onDelete();
 
             //damage the home
             home.decreaseHealth(1);
             home.dropShard();
             var hq = home.owner.headquarter;
-            if (hq !== home && hq.supply() > 0) {
+            if (hq !== home && hq.getSupply() > 0) {
                 hq.giveShard(home);
             }
         }
@@ -152,7 +148,7 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 
 
             if (shard.owner !== null) {
-                if (shard.name === null) {
+                if (shard.name === null) {  
                     this.packetHandler.deleteUIPackets(shard.owner.id,"name shard");
                 }
                 shard.owner.removeShard(shard);
@@ -403,9 +399,6 @@ GameServer.prototype.createEmptyShard = function () {
         this
     );
 };
-
-
-
 
 
 /** MISC METHODS **/

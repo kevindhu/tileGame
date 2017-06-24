@@ -7,14 +7,12 @@ var EntityFunctions = require('./EntityFunctions');
 function Headquarter(faction, x, y, gameServer) {
     Headquarter.super_.call(this, faction, x, y, gameServer);
     this.timer = 0;
-    this.isOpen = false;
-
+    this.type = "Headquarter";
     this.level = 2;
     this.radius = 50;
-    this.health = 80;
+    this.health = 1;
     this.hasColor = false;
     this.mainInit();
-
 }
 
 EntityFunctions.inherits(Headquarter, Home);

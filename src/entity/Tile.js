@@ -37,16 +37,15 @@ Tile.prototype.setColor = function (color) {
         }
         this.packetHandler.updateTilesPackets(this);
     }
-
-
 };
 
 
-Tile.removeHome = function (home) {
-    if (this.home === home) {
-        this.home = null;
-        this.owner = null;
-    }
+Tile.prototype.removeHome = function () {
+    console.log("TILE removing home " + this.home.id);
+    this.color = "#FFFFFF";
+    this.home = null;
+    this.owner = null;
+    this.packetHandler.updateTilesPackets(this);
 }
 
 

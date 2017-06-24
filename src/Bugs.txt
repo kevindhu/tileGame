@@ -1,0 +1,3 @@
+Bugs -
+
+2. crashes on shot

@@ -1,6 +1,6 @@
 var WIDTH = 10000;
 var HEIGHT = 10000;
-var TILES_INPUT = 5000;
+var TILES_INPUT = 1000;
 var tileRoot = Math.floor(Math.sqrt(TILES_INPUT));
 var TILES = tileRoot * tileRoot;
 var SHARDS = 2000;

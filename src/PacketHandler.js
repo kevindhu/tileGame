@@ -277,8 +277,6 @@ PacketHandler.prototype.updateFactionPackets = function (faction) {
 PacketHandler.prototype.updateTilesPackets = function (tile) {
 	this.updateTilesPacket.push({
             id: tile.id,
-            owner: tile.owner.name,
-            health: tile.health,
             color: tile.color,
             alert: tile.alert
         });
@@ -314,7 +312,7 @@ PacketHandler.prototype.deletePlayerPackets = function (player) {
 	this.deletePlayerPacket.push({id: player.id});
 };
 
-PacketHandler.prototype.deletePlayerPackets = function (faction) {
+PacketHandler.prototype.deleteFactionPackets = function (faction) {
     this.deleteFactionPacket.push({id: faction.id});
 };
 

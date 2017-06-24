@@ -18,6 +18,7 @@ function Home(faction, x, y, gameServer) {
     this.y = y;
 
     this.shards = [];
+    this.tile = null;
 
     this.level = 0;
     this.hasColor = false;
@@ -28,11 +29,11 @@ function Home(faction, x, y, gameServer) {
     this.randomPlayer = this.gameServer.PLAYER_LIST[this.owner.getRandomPlayer()];
 }
 
-
 Home.prototype.mainInit = function () {
     var tile = this.gameServer.getEntityTile(this);
     if (!tile.hasHome()) {
         tile.setHome(this);
+        this.tile = tile;
         this.packetHandler.updateTilesPackets(tile);
     }
     this.gameServer.HOME_LIST[this.id] = this;
@@ -43,11 +44,13 @@ Home.prototype.mainInit = function () {
 
 Home.prototype.decreaseHealth = function (amount) {
     this.health -= amount;
+    this.tile.alert = true;
 
     if (this.health <= 0) {
         this.onDelete();
     }
     else {
+        this.packetHandler.updateTilesPackets(this.tile);
         this.packetHandler.updateHomePackets(this);
     }
 };
@@ -62,7 +65,7 @@ Home.prototype.removeShard = function (shard) {
     shard.home = null;
     var index = this.shards.indexOf(shard.id);
     this.shards.splice(index, 1);
-    
+    this.updateLevel();
     this.packetHandler.updateHomePackets(this);
 };
 
@@ -74,6 +77,8 @@ Home.prototype.onDelete = function () {
     for (var i = this.shards.length - 1; i >= 0; i--) {
         this.dropShard();
     }
+    this.owner.removeHome(this);
+    this.tile.removeHome();
 
     this.gameServer.homeTree.remove(this.quadItem);
     delete this.gameServer.HOME_LIST[this.id];
@@ -98,22 +103,36 @@ Home.prototype.giveShard = function (home) {
 }
 
 Home.prototype.addShard = function (shard) {
-    if (this.getSupply() > 0 && this.level < 1) {
+    shard.becomeHome(this);
+    this.shards.push(shard.id);
+    this.updateLevel();
+    this.packetHandler.updateHomePackets(this);
+};
+
+Home.prototype.updateLevel = function () {
+    if (this.type === "Headquarter") {
+        return;
+    }
+    if (this.getSupply() < 1) {
+        this.level = 0;
+        this.radius = 10;
+        this.health = 1;
+        this.updateHomeTree();
+    }
+    else if (this.getSupply() < 4) {
         this.level = 1;
         this.radius = 30;
         this.health = 30;
         this.updateHomeTree();
     }
-    if (this.getSupply() > 1 && this.level < 2) {
+    else if (this.getSupply() > 6) {
         this.level = 2;
         this.radius = 50;
         this.health = 80;
         this.updateHomeTree();
     }
-    shard.becomeHome(this);
-    this.shards.push(shard.id);
-    this.packetHandler.updateHomePackets(this);
 };
+
 
 Home.prototype.updateHomeTree = function () {
     this.updateQuadItem();

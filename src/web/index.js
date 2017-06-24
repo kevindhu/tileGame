@@ -131,6 +131,7 @@ function deleteEntities(data) {
         for (var i = 0; i < packet.length; i++) {
             var info = packet[i];
             delete list[info.id];
+
         }
     };
 
@@ -278,7 +279,6 @@ function drawScene(data) {
     var drawFactions = function () {
         for (var id in FACTION_LIST) {
             var faction = FACTION_LIST[id];
-            console.log(faction.name);
             ctx.font = faction.size * 30 + "px Arial";
             ctx.fillText(faction.name, faction.x, faction.y);
         }

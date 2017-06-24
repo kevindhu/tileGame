@@ -42,6 +42,7 @@ Player.prototype.dropAllShards = function () {
 
 Player.prototype.onDelete = function () {
     this.dropAllShards();
+    this.faction.removePlayer(this);
     delete this.gameServer.PLAYER_LIST[this.id];
     this.packetHandler.deletePlayerPackets(this);
 }
