@@ -269,8 +269,8 @@ function drawScene(data) {
         ctx2.fillStyle = "#000000";
         for (var playerId in PLAYER_LIST) {
             var player = PLAYER_LIST[playerId];
-            ctx2.fillText(player.name, player.x - 4.6 * player.name.length, player.y - 10);
-            ctx2.fillRect(player.x - 5 * player.health, player.y + 10, player.health * 10, 10);
+            ctx2.fillText(player.name, player.x, player.y + 30);
+            ctx2.fillRect(player.x - player.health * 10 / 2, player.y + 10, player.health * 10, 10);
         }
     };
 
@@ -312,7 +312,6 @@ function drawScene(data) {
             ctx2.fill();
             ctx2.fillStyle = "#000000";
             if (home.owner !== null) {
-                //ctx.fillText(home.name, home.x, home.y + 20);
                 ctx2.fillText(home.shards.length, home.x, home.y + 40);
             }
             ctx2.closePath();
@@ -323,6 +322,7 @@ function drawScene(data) {
         for (var id in FACTION_LIST) {
             var faction = FACTION_LIST[id];
             ctx2.font = faction.size * 30 + "px Arial";
+            ctx2.textAlign = "center";
             ctx2.fillText(faction.name, faction.x, faction.y);
         }
     }
@@ -439,12 +439,12 @@ function drawScene(data) {
 
     };
 
-
+    
     var drawScoreBoard = function () {
-        for (var i = 0; i < FACTION_ARRAY.length; i++) {
+        for (var i = FACTION_ARRAY.length - 1; i >= 0; i--) {
             var faction = FACTION_ARRAY[i];
             ctx.font = "30px Arial";
-            ctx.fillText(faction.name, canvas.width/2, canvas.height/2 + 100 - i * 30);
+            ctx.fillText(faction.name, canvas.width * 3/4, 10 + (FACTION_ARRAY.length - i) * 30);
         }
     };
 

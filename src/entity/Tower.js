@@ -77,6 +77,7 @@ Tower.prototype.shootShard = function (player) {
             shard.onDelete();
         }
         var shardClone = new Shard(this.x, this.y, this.gameServer);
+        shardClone.setName(shard.name);
         shardClone.becomeShooting(this.randomPlayer, (player.x - this.x) / 4,
          (player.y - this.y) / 4, true);
     }

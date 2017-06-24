@@ -45,13 +45,14 @@ Home.prototype.mainInit = function () {
 
 Home.prototype.decreaseHealth = function (amount) {
     this.health -= amount;
-    this.tile.alert = true;
-
+    if (this.tile) {
+        this.tile.alert = true;
+        this.packetHandler.updateTilesPackets(this.tile);
+    }
     if (this.health <= 0) {
         this.onDelete();
     }
     else {
-        this.packetHandler.updateTilesPackets(this.tile);
         this.packetHandler.updateHomePackets(this);
     }
 };

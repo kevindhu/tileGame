@@ -46,6 +46,11 @@ Shard.prototype.limbo = function () {
     delete this.gameServer.STATIC_SHARD_LIST[this.id];
 };
 
+Shard.prototype.setName = function (name) {
+    this.name = name;
+}
+
+
 Shard.prototype.becomeStatic = function () {
     this.owner = null;
     this.timer = 0;

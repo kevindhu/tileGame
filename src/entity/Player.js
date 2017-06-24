@@ -163,7 +163,7 @@ Player.prototype.removeShard = function (shard) {
 
 Player.prototype.transformEmptyShard = function (name) {
     if (this.emptyShard !== null) {
-        this.emptyShard.name = name;
+        this.emptyShard.setName(name);
         this.addShard(this.emptyShard);
         this.emptyShard = null;
     }
