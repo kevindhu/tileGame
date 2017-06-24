@@ -103,8 +103,9 @@ Faction.prototype.addTower = function (player) {
         tile.owner === player.faction &&
         player.shards.length >= 2) {
 
-        var tower = new Tower(player.faction, player.x, player.y, this.gameServer);
-
+        var tower = new Tower(player.faction, player.x, player.y, this.gameServer, tile.home);
+        tile.home.addChild(tower);
+        
         for (var i = player.shards.length - 1; i >= 0; i--) {
             var shard = this.gameServer.PLAYER_SHARD_LIST[player.shards[i]];
             player.removeShard(shard);

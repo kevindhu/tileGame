@@ -55,6 +55,8 @@ var Home = function (homeInfo) {
     this.x = homeInfo.x;
     this.y = homeInfo.y;
     this.name = homeInfo.owner;
+    this.type = homeInfo.type;
+    this.radius = homeInfo.radius;
     this.shards = homeInfo.shards;
     this.level = homeInfo.level;
     this.hasColor = homeInfo.hasColor;
@@ -173,6 +175,7 @@ function updateEntities(data) {
     var updateHomes = function (home, homeInfo) {
         home.shards = homeInfo.shards;
         home.level = homeInfo.level;
+        home.radius = homeInfo.radius;
         home.health = homeInfo.health;
         home.hasColor = homeInfo.hasColor;
     };
@@ -256,16 +259,8 @@ function drawScene(data) {
         for (var id in HOME_LIST) {
             ctx.beginPath();
             var home = HOME_LIST[id];
-            var radius = 10;
-            if (home.level === 1) {
-                radius = 30;
-            }
-            if (home.level === 2) {
-                
-                radius = 50;
-            }
             ctx.fillStyle = "#003290";
-            ctx.arc(home.x, home.y, radius, 0, 2 * Math.PI, false);
+            ctx.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
             ctx.fill();
             ctx.fillStyle = "#000000";
             if (home.owner !== null) {

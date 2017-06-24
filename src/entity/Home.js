@@ -17,6 +17,7 @@ function Home(faction, x, y, gameServer) {
     this.x = x;
     this.y = y;
 
+    this.children = [];
     this.shards = [];
     this.tile = null;
 
@@ -77,8 +78,15 @@ Home.prototype.onDelete = function () {
     for (var i = this.shards.length - 1; i >= 0; i--) {
         this.dropShard();
     }
+    for (var i = this.children.length - 1; i >= 0; i--) {
+        var tower = this.gameServer.HOME_LIST[this.children[i]];
+        tower.onDelete();
+    }
+
     this.owner.removeHome(this);
-    this.tile.removeHome();
+    if (this.tile) {
+        this.tile.removeHome();
+    }
 
     this.gameServer.homeTree.remove(this.quadItem);
     delete this.gameServer.HOME_LIST[this.id];
@@ -109,10 +117,11 @@ Home.prototype.addShard = function (shard) {
     this.packetHandler.updateHomePackets(this);
 };
 
+Home.prototype.addChild = function (home) {
+    this.children.push(home.id);
+};
+
 Home.prototype.updateLevel = function () {
-    if (this.type === "Headquarter") {
-        return;
-    }
     if (this.getSupply() < 1) {
         this.level = 0;
         this.radius = 10;

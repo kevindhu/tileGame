@@ -41,13 +41,16 @@ function openHomeUI(home) {
     var homeLevel = document.getElementById('home_level');
     var homeHealth = document.getElementById('home_health');
     var homeFaction = document.getElementById('home_faction_name');
+    var homeType = document.getElementById('home_type');
     homeLevel.innerHTML = "";
     homeHealth.innerHTML = "";
     homeFaction.innerHTML = "";
+    homeType.innerHTML = "";
 
     homeLevel.innerHTML = home.level;
     homeHealth.innerHTML = home.health;
     homeFaction.innerHTML = home.id;
+    homeType.innerHTML = home.type;
 
     homeInfo.style.display = 'block';
 

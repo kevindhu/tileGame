@@ -5,9 +5,11 @@ var Home = require('./Home');
 var Shard = require('./Shard');
 
 
-function Tower(faction, x, y, gameServer) {
+function Tower(faction, x, y, gameServer, home) {
     Tower.super_.call(this, faction, x, y, gameServer);
-    this.hasColor = true; 
+    this.parent = home;
+    this.hasColor = true;
+    this.type = "Tower"; 
     this.timer = 0;
     this.level = 0;
     this.radius = 10;
@@ -23,6 +25,29 @@ Tower.prototype.init = function () {
     this.addBigQuadItem();
     this.gameServer.towerTree.insert(this.bigQuadItem);
 }
+
+
+Tower.prototype.updateLevel = function () {
+    if (this.getSupply() < 1) {
+        this.level = 0;
+        this.radius = 10;
+        this.health = 1;
+        this.updateHomeTree();
+    }
+    else if (this.getSupply() < 4) {
+        this.level = 1;
+        this.radius = 20;
+        this.health = 5;
+        this.updateHomeTree();
+    }
+    else if (this.getSupply() > 6) {
+        this.level = 2;
+        this.radius = 30;
+        this.health = 10;
+        this.updateHomeTree();
+    }
+};
+
 
 
 Tower.prototype.addBigQuadItem = function () {
@@ -43,6 +68,7 @@ Tower.prototype.shootShard = function (player) {
         return;
     }
     this.timer = 10;
+
     if (this.getSupply() > 0) {
         var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
         shard.useSupply();

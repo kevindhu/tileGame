@@ -48,101 +48,58 @@ PacketHandler.prototype.sendInitPackets = function (socket) {
 };
 
 PacketHandler.prototype.createMainInitPacket = function (id) {
-    var i,
-        ret = {},
-        playerPacket = [],
-        tilePacket = [],
+    var playerPacket = [],
         shardPacket = [],
         homePacket = [],
         factionPacket = [],
         player,
         shard,
-        home;
+        home,
+        i;
 
     for (i in this.gameServer.PLAYER_LIST) {
         player = this.gameServer.PLAYER_LIST[i];
-        playerPacket.push({
-            id: player.id,
-            name: player.name,
-            x: player.x,
-            y: player.y,
-            health: player.health
-        })
+        playerPacket.push(this.addPlayerPackets(player,true));
     }
-
 
     for (i in this.gameServer.STATIC_SHARD_LIST) {
         shard = this.gameServer.STATIC_SHARD_LIST[i];
-        shardPacket.push({
-            name: shard.name,
-            id: shard.id,
-            x: shard.x,
-            y: shard.y
-        })
+        shardPacket.push(this.addShardPackets(shard,true));    
     }
 
     for (i in this.gameServer.PLAYER_SHARD_LIST) {
         shard = this.gameServer.PLAYER_SHARD_LIST[i];
-        shardPacket.push({
-            name: shard.name,
-            id: shard.id,
-            x: shard.x,
-            y: shard.y
-        })
+        shardPacket.push(this.addShardPackets(shard,true));  
     }
 
     for (i in this.gameServer.HOME_SHARD_LIST) {
         shard = this.gameServer.HOME_SHARD_LIST[i];
-        shardPacket.push({
-            name: shard.name,
-            id: shard.id,
-            x: shard.x,
-            y: shard.y
-        })
+        shardPacket.push(this.addShardPackets(shard,true));  
     }
 
     for (i in this.gameServer.HOME_LIST) {
         home = this.gameServer.HOME_LIST[i];
-        homePacket.push({
-            level: home.level,
-            id: home.id,
-            owner: home.owner.name,
-            x: home.x,
-            y: home.y,
-            shards: home.shards,
-            health: home.health
-        })
+        homePacket.push(this.addHomePackets(home,true));  
     }
 
     for (i in this.gameServer.FACTION_LIST) {
         faction = this.gameServer.FACTION_LIST[i];
-        factionPacket.push({
-            id: faction.id,
-            name: faction.name,
-            x: faction.x,
-            y: faction.y,
-            size: faction.homes.length
-        });
+        factionPacket.push(this.addFactionPackets(faction,true));  
     }
-
-    ret['tileInfo'] = tilePacket;
-    ret['playerInfo'] = playerPacket;
-    ret['shardInfo'] = shardPacket;
-    ret['homeInfo'] = homePacket;
-    ret['factionInfo'] = factionPacket;
-    ret['selfId'] = id;
-
-    return ret;
+    return {
+        playerInfo: playerPacket,
+        shardInfo: shardPacket,
+        homeInfo: homePacket,
+        factionInfo: factionPacket,
+        selfId: id
+    }
 };
 
 PacketHandler.prototype.createTileInitPacket = function (id, bound) {
-    var i,
-        ret = {},
-        playerPacket = [],
+    var ret = {},
         tilePacket = [],
-        shardPacket = [],
-        homePacket = [],
-        tile;
+        tile,
+        i;
 
     var size = Object.size(this.gameServer.TILE_LIST);
     var count = 0;
@@ -161,13 +118,9 @@ PacketHandler.prototype.createTileInitPacket = function (id, bound) {
         count++;
     }
 
-    ret['tileInfo'] = tilePacket;
-    ret['playerInfo'] = playerPacket;
-    ret['shardInfo'] = shardPacket;
-    ret['homeInfo'] = homePacket;
-    ret['selfId'] = id;
-
-    return ret;
+    return {
+        tileInfo: tilePacket,
+    }
 }
 
 PacketHandler.prototype.createFactionsInitPacket = function () {
@@ -199,54 +152,79 @@ PacketHandler.prototype.addUIPackets = function (player, home, action) {
 
 
 	this.addUIPacket.push(
-                {
-                    playerId: player.id,
-                    homeId: homeId,
-                    action: action
-                }
-            );
+        {
+            playerId: player.id,
+            homeId: homeId,
+            action: action
+        });
 }
 
-PacketHandler.prototype.addPlayerPackets = function (player) {
-	this.addPlayerPacket.push({
+PacketHandler.prototype.addPlayerPackets = function (player, ifInit) {
+    var info = {
         id: player.id,
         name: player.name,
         x: player.x,
         y: player.y,
         health: player.health
-    });
+    }
+    if (ifInit) {
+        return info;
+    }
+    else {
+        this.addPlayerPacket.push(info);
+    }
 };
 
-PacketHandler.prototype.addFactionPackets = function (faction) {
-    this.addFactionPacket.push({
+PacketHandler.prototype.addFactionPackets = function (faction, ifInit) {
+    var info = {
         id: faction.id,
         name: faction.name,
         x: faction.x,
         y: faction.y,
         size: faction.homes.length
-    });
+    };
+    if (ifInit) {
+        return info;
+    }
+    else {
+        this.addFactionPacket.push(info);
+    }
 };
 
-PacketHandler.prototype.addShardPackets = function (shard) {
-	this.addShardPacket.push({
+PacketHandler.prototype.addShardPackets = function (shard, ifInit) {
+	var info = {
         id: shard.id,
         x: shard.x,
         y: shard.y,
         name: null
-    });
+    };
+    if (ifInit) {
+        return info;
+    }
+    else {
+        this.addShardPacket.push(info);
+    }
 };
 
-PacketHandler.prototype.addHomePackets = function (home) {
-	this.addHomePacket.push({
+PacketHandler.prototype.addHomePackets = function (home, ifInit) {
+	var info = {
             id: home.id,
             owner: home.owner.name,
             x: home.x,
             y: home.y,
+            type: home.type,
+            radius: home.radius,
             shards: home.shards,
             level: home.level,
             hasColor: home.hasColor,
             health: home.health
-        });
+    };
+    if (ifInit) {
+        return info;
+    }
+    else {
+        this.addHomePacket.push(info);
+    }
 };
 
 
@@ -258,6 +236,7 @@ PacketHandler.prototype.updateHomePackets = function (home) {
                 id: home.id,
                 shards: home.shards,
                 level: home.level,
+                radius: home.radius,
                 hasColor: home.hasColor,
                 health: home.health
             }
