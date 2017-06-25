@@ -163,4 +163,5 @@ Faction.prototype._neighboringFaction = function (tile) {
     return false;
 }
 
+
 module.exports = Faction;

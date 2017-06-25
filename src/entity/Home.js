@@ -64,7 +64,6 @@ Home.prototype.getRandomShard = function () {
 };
 
 Home.prototype.shootShard = function (player) {
-    console.log("SHOOTING HOME SHIT");
     return;
 };
 

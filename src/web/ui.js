@@ -11,6 +11,20 @@ var playerNamer = document.getElementById("player_namer");
 
 playerNamer.style.display = "block";
 
+playerNameInput.addEventListener("keyup", function(event) {
+    event.preventDefault();
+    if (event.keyCode == 13) {
+        nameButton.click();
+    }
+});
+
+factionNameInput.addEventListener("keyup", function(event) {
+    event.preventDefault();
+    if (event.keyCode == 13) {
+        nameButton.click();
+    }
+});
+
 nameButton.addEventListener("click", function () {
     canvas.style.visibility = "visible";
     socket.emit("newPlayer",

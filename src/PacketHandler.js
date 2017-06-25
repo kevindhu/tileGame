@@ -26,114 +26,69 @@ function PacketHandler(gameServer) {
 PacketHandler.prototype.sendInitPackets = function (socket) {
     var stage = socket.stage;
     if (stage === 0) {
-        socket.emit('addEntities', this.createMainInitPacket(socket.id));
-        socket.emit('addFactionsUI', this.createFactionsInitPacket());
+        socket.emit('addFactionsUI', this.addFactionsUIPacket());
+        socket.emit('addEntities', this.createInitPacket(stage, socket.id));
     }
-    if (stage === 1) {
-        socket.emit('addEntities', this.createTileInitPacket(socket.id,
-            [0, entityConfig.TILES / 4]));
+    else {
+        socket.emit('addEntities', this.createInitPacket(stage));
     }
-    if (stage === 2) {
-        socket.emit('addEntities', this.createTileInitPacket(socket.id,
-            [entityConfig.TILES / 4, entityConfig.TILES / 2]));
-    }
-    if (stage === 3) {
-        socket.emit('addEntities', this.createTileInitPacket(socket.id,
-            [entityConfig.TILES / 2, entityConfig.TILES * 3 / 4]));
-    }
-    if (stage === 4) {
-        socket.emit('addEntities', this.createTileInitPacket(socket.id,
-            [entityConfig.TILES * 3 / 4, entityConfig.TILES]));
-    }
-    socket.stage++;
+    socket.stage ++;
 };
 
-PacketHandler.prototype.createMainInitPacket = function (id) {
+
+PacketHandler.prototype.createInitPacket = function (stage,id) { //four total stages
     var playerPacket = [],
         shardPacket = [],
         homePacket = [],
         factionPacket = [],
+        tilePacket = [],
         player,
         shard,
         home,
         i;
 
-    for (i in this.gameServer.PLAYER_LIST) {
-        player = this.gameServer.PLAYER_LIST[i];
-        playerPacket.push(this.addPlayerPackets(player,true));
-    }
 
-    for (i in this.gameServer.STATIC_SHARD_LIST) {
-        shard = this.gameServer.STATIC_SHARD_LIST[i];
-        shardPacket.push(this.addShardPackets(shard,true));    
-    }
+    var populate = function (packet,list, call, stage) {
+        var size = Object.size(list);
+        count = 0;
+        bound = [size * stage/4 - 5, size * (stage + 1)/4 + 5]
+        for (i in list) {
+            if (count >= bound[0] && count < bound[1]) { // delta of 5 for overlap
+                entity = list[i];
+                packet.push(call(entity,true));
+            }
+            count ++;
+        }
+    };
 
-    for (i in this.gameServer.PLAYER_SHARD_LIST) {
-        shard = this.gameServer.PLAYER_SHARD_LIST[i];
-        shardPacket.push(this.addShardPackets(shard,true));  
-    }
+    populate(playerPacket,this.gameServer.PLAYER_LIST, this.addPlayerPackets, stage);
 
-    for (i in this.gameServer.HOME_SHARD_LIST) {
-        shard = this.gameServer.HOME_SHARD_LIST[i];
-        shardPacket.push(this.addShardPackets(shard,true));  
-    }
+    populate(shardPacket,this.gameServer.HOME_SHARD_LIST, this.addShardPackets, stage);
+    populate(shardPacket,this.gameServer.PLAYER_SHARD_LIST, this.addShardPackets, stage);
+    populate(shardPacket,this.gameServer.STATIC_SHARD_LIST, this.addShardPackets, stage);
 
-    for (i in this.gameServer.HOME_LIST) {
-        home = this.gameServer.HOME_LIST[i];
-        homePacket.push(this.addHomePackets(home,true));  
-    }
+    populate(tilePacket, this.gameServer.TILE_LIST, this.addTilePackets, stage);
+    populate(homePacket,this.gameServer.HOME_LIST, this.addHomePackets, stage);
+    populate(factionPacket,this.gameServer.FACTION_LIST, this.addFactionPackets, stage);
 
-    for (i in this.gameServer.FACTION_LIST) {
-        faction = this.gameServer.FACTION_LIST[i];
-        factionPacket.push(this.addFactionPackets(faction,true));  
-    }
     return {
         playerInfo: playerPacket,
         shardInfo: shardPacket,
         homeInfo: homePacket,
         factionInfo: factionPacket,
+        tileInfo: tilePacket,
         selfId: id
     }
+
 };
 
-PacketHandler.prototype.createTileInitPacket = function (id, bound) {
-    var ret = {},
-        tilePacket = [],
-        tile,
-        i;
-
-    var size = Object.size(this.gameServer.TILE_LIST);
-    var count = 0;
-    for (i in this.gameServer.TILE_LIST) {
-        if (count >= bound[0] && count < bound[1]) {
-            tile = this.gameServer.TILE_LIST[i];
-            tilePacket.push({
-                id: tile.id,
-                x: tile.x,
-                y: tile.y,
-                color: tile.color,
-                length: tile.length,
-                alert: tile.alert
-            });
-        }
-        count++;
-    }
-
-    return {
-        tileInfo: tilePacket,
-    }
-}
-
-PacketHandler.prototype.createFactionsInitPacket = function () {
-    var ret = {};
+PacketHandler.prototype.addFactionsUIPacket = function () {
     var factionsPacket = [];
     for (var i in this.gameServer.FACTION_LIST) {
         factionsPacket.push(i);
     }
-    ret['factions'] = factionsPacket;
-    return ret;
+    return {factions: factionsPacket};
 };
-
 
 
 
@@ -146,7 +101,6 @@ PacketHandler.prototype.addShardAnimationPackets = function (shard) {
         y: shard.y
     })
 };
-
 
 
 
@@ -214,6 +168,18 @@ PacketHandler.prototype.addShardPackets = function (shard, ifInit) {
         this.addShardPacket.push(info);
     }
 };
+
+PacketHandler.prototype.addTilePackets = function (tile, ifInit) {
+    return {
+        id: tile.id,
+        x: tile.x,
+        y: tile.y,
+        color: tile.color,
+        length: tile.length,
+        alert: tile.alert
+    };
+}
+
 
 PacketHandler.prototype.addHomePackets = function (home, ifInit) {
 	var info = {

@@ -8,6 +8,7 @@ function GameServer() {
     this.packetHandler = new PacketHandler(this);
 
     this.TILE_LIST = {};
+    this.INIT_SOCKET_LIST = {};
     this.SOCKET_LIST = {};
     this.PLAYER_LIST = {};
     this.FACTION_LIST = {};
@@ -143,9 +144,11 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 
     //player + static/player shard collision
     this.shardTree.find(playerBound, function (shard) {
-        if (player !== shard.owner && shard.timer === 0 &&
-         player.emptyShard === null) {
-
+        if (player !== shard.owner && shard.timer === 0) {
+            if (player.emptyShard !== null) {
+                player.transformEmptyShard("NOT NAMED BITCH");
+                this.packetHandler.deleteUIPackets(player.id,"name shard");
+            }
 
             if (shard.owner !== null) {
                 if (shard.name === null) {  
@@ -212,18 +215,24 @@ GameServer.prototype.checkCollisions = function () {
 };
 
 GameServer.prototype.updatePlayers = function () {
-    for (var index in this.PLAYER_LIST) {
-        var player = this.PLAYER_LIST[index];
+    for (var id in this.PLAYER_LIST) {
+        var player = this.PLAYER_LIST[id];
         player.update();
+    }
+};
 
-        //TODO: GHETTO CODE - PLEASE CHANGE SOON
-        var socket = this.SOCKET_LIST[player.id];
+GameServer.prototype.initNewClients = function () {
+    for (var id in this.INIT_SOCKET_LIST) {
+        var socket = this.INIT_SOCKET_LIST[id];
         if (socket.timer !== 0) {
             socket.timer -= 1;
         }
         else if (socket.stage !== 5) {
             this.packetHandler.sendInitPackets(socket);
-            socket.timer = 20;
+            socket.timer = 10;
+        }
+        else {
+            delete this.INIT_SOCKET_LIST[id];
         }
     }
 };
@@ -250,6 +259,7 @@ GameServer.prototype.updateShards = function () {
 };
 
 GameServer.prototype.update = function () {
+    this.initNewClients();
     this.updatePlayers();
     this.updateShards();
     this.packetHandler.sendPackets();
@@ -282,12 +292,14 @@ GameServer.prototype.start = function () {
         var player; 
 
         socket.id = Math.random();
+        socket.timer = 0;
+        socket.stage = 0;
+
         this.SOCKET_LIST[socket.id] = socket;
+        this.INIT_SOCKET_LIST[socket.id] = socket;
+
         console.log("Client #" + socket.id + " has joined the server");
 
-        socket.stage = 0;
-        socket.timer = 20;
-        this.packetHandler.sendInitPackets(socket);
         socket.on('newPlayer', function (data) {
             player = this.createPlayer(socket, data);
         }.bind(this));
@@ -372,6 +384,7 @@ GameServer.prototype.start = function () {
                 player.onDelete();
             }
             delete this.SOCKET_LIST[socket.id];
+            delete this.INIT_SOCKET_LIST[socket.id];
         }.bind(this));
     }.bind(this));
 
@@ -383,6 +396,14 @@ GameServer.prototype.start = function () {
 
 /** SERVER CREATION EVENTS **/
 GameServer.prototype.createPlayer = function (socket, info) {
+    var checkName = function (name) {
+        if (name === null || name === "") {
+            return "default faction"
+        }
+        return name;
+    };
+    
+    info.faction = checkName(info.faction);
     var faction = this.FACTION_LIST[info.faction];
     if (!faction) {
         faction = new Entity.Faction(info.faction, this);

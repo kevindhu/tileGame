@@ -115,7 +115,7 @@ function addEntities(data) {
         for (var i = 0; i < packet.length; i++) {
             var info = packet[i];
             list[info.id] = new Entity(info);
-            if (array) {
+            if (array && findWithAttr(array, "id", info.id) === -1) {
                 array.push(list[info.id]);
             }
         }
@@ -162,10 +162,8 @@ function deleteEntities(data) {
         for (var i = 0; i < packet.length; i++) {
             var info = packet[i];
             if (array) {
-                console.log(array);
                 var index = findWithAttr(array, "id", info.id);
                 array.splice(index,1);
-                console.log(array);
             }
             delete list[info.id];
 
@@ -591,6 +589,9 @@ var returnId = function (keyCode) {
             break;
         case 88:
             id = 'X';
+            break;
+        case 13:
+            id = 'enter';
             break;
     }
     return id;
