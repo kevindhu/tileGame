@@ -63,6 +63,11 @@ Home.prototype.getRandomShard = function () {
     return this.shards[randomIndex];
 };
 
+Home.prototype.shootShard = function (player) {
+    console.log("SHOOTING HOME SHIT");
+    return;
+};
+
 Home.prototype.removeShard = function (shard) {
     shard.home = null;
     var index = this.shards.indexOf(shard.id);

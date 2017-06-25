@@ -103,7 +103,7 @@ function addShards(list, home) {
 
         (function (_id) {
             entry.addEventListener("click", function () {
-                socket.emit("removeHomeShard", {id: _id});
+                //socket.emit("removeHomeShard", {id: _id});
             });
         })(entry.id);
 

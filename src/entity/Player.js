@@ -10,7 +10,6 @@ function Player(id, name, faction, gameServer) {
 
     this.x = entityConfig.WIDTH / 2;
     this.y = entityConfig.WIDTH / 2;
-    this.color = getRandomColor();
     this.name = getName(name);
     this.health = 5;
     this.maxSpeed = 10;
@@ -60,6 +59,7 @@ Player.prototype.update = function () {
             this.increaseHealth(0.1);
         }
         else if (tile.owner !== null) {
+            tile.home.shootShard(this);
             this.decreaseHealth(0.1);
         }
     }
@@ -216,14 +216,6 @@ function getName(name) {
     return name;
 }
 
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
 
 
 function onBoundary (coord) {

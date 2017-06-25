@@ -264,36 +264,36 @@ PacketHandler.prototype.updateFactionPackets = function (faction) {
 
 PacketHandler.prototype.updateTilesPackets = function (tile) {
 	this.updateTilesPacket.push({
-            id: tile.id,
-            color: tile.color,
-            alert: tile.alert
-        });
+        id: tile.id,
+        color: tile.color,
+        alert: tile.alert
+    });
 };
 
 PacketHandler.prototype.updatePlayersPackets = function (player) {
 	this.updatePlayersPacket.push({
-            id: player.id,
-            x: player.x,
-            y: player.y,
-            health: player.health
+        id: player.id,
+        x: player.x,
+        y: player.y,
+        health: player.health
     });
 };
 
 PacketHandler.prototype.updateShardsPackets = function (shard) {
 	this.updateShardsPacket.push({
-            name: shard.name,
-            id: shard.id,
-            x: shard.x,
-            y: shard.y
-        });
+        name: shard.name,
+        id: shard.id,
+        x: shard.x,
+        y: shard.y
+    });
 }
 
 
 PacketHandler.prototype.deleteUIPackets = function (id, action) {
 	this.deleteUIPacket.push({
-            id: id,
-            action: action
-        });
+        id: id,
+        action: action
+    });
 }
 
 PacketHandler.prototype.deletePlayerPackets = function (player) {

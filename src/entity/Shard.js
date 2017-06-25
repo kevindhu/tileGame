@@ -11,18 +11,19 @@ function Shard(x, y, gameServer) {
     this.type = "static";
     this.supply = 10;
 
+    this.owner = null;
+    this.home = null;
+
     this.xVel = 0;
     this.yVel = 0;
-    this.xSwitched = false;
-    this.ySwitched = false;
 
     this.value = 0;
-    this.owner = null;
-    this.radius = entityConfig.SHARD_WIDTH;
     this.timer = 0;
-
-    this.home = null;
     this.theta = 0;
+    
+    this.xSwitched = false;
+    this.ySwitched = false;
+    this.radius = entityConfig.SHARD_WIDTH;
 
     this.init();
 }
