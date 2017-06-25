@@ -14,7 +14,7 @@ playerNamer.style.display = "block";
 playerNameInput.addEventListener("keyup", function(event) {
     event.preventDefault();
     if (event.keyCode == 13) {
-        nameButton.click();
+        factionNameInput.focus();
     }
 });
 
