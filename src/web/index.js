@@ -166,7 +166,6 @@ function deleteEntities(data) {
                 array.splice(index,1);
             }
             delete list[info.id];
-
         }
     };
 
@@ -177,13 +176,16 @@ function deleteEntities(data) {
 
 
     var UIPacket = data.UIInfo;
-    for (var i = 0; i < UIPacket.length; i++) {
-        var UIInfo = UIPacket[i];
-        if (selfId === UIInfo.id) {
-            closeUI(UIInfo.action);
+    if (UIPacket) {
+        for (var i = 0; i < UIPacket.length; i++) {
+            var UIInfo = UIPacket[i];
+            if (selfId === UIInfo.id) {
+                closeUI(UIInfo.action);
+            }
         }
     }
 }
+
 
 function updateEntities(data) {
     function updateEntities(packet, list, callback) {
@@ -293,7 +295,6 @@ function drawScene(data) {
                     ctx2.font = "30px Arial";
                     ctx2.fillText(shard.name, shard.x, shard.y);
                 }
-                
                 ctx2.arc(shard.x, shard.y, 5, 0, 2 * Math.PI, false);
                 ctx2.fill();
                 ctx2.closePath();
@@ -345,7 +346,6 @@ function drawScene(data) {
             ctx2.translate(animation.x, animation.y);
             ctx2.rotate(-Math.PI/50 * animation.theta);
             ctx2.textAlign = "center";
-
             ctx2.fillStyle = "rgba(0, 0, 0, " + animation.timer * 10/100 + ")";
             ctx2.fillText(animation.name, 0, 15);
             ctx2.restore();
@@ -448,12 +448,12 @@ function drawScene(data) {
 
     ctx2.clearRect(0, 0, 10000, 10000);
     ctx.clearRect(0, 0, 10000, 10000);
-    drawTiles();
+    //drawTiles();
     drawPlayers();
     drawShards();
     drawHomes();
     drawFactions();
-    drawAnimations();
+    //drawAnimations();
     drawArrow();
 
     translateScene();

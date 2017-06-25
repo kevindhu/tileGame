@@ -47,7 +47,6 @@ PacketHandler.prototype.createInitPacket = function (stage,id) { //four total st
         home,
         i;
 
-
     var populate = function (packet,list, call, stage) {
         var size = Object.size(list);
         count = 0;
@@ -79,9 +78,10 @@ PacketHandler.prototype.createInitPacket = function (stage,id) { //four total st
         tileInfo: tilePacket,
         selfId: id
     }
-
 };
 
+
+//TODO: optimize this with addUIPacket to make it cleaner
 PacketHandler.prototype.addFactionsUIPacket = function () {
     var factionsPacket = [];
     for (var i in this.gameServer.FACTION_LIST) {
@@ -101,7 +101,6 @@ PacketHandler.prototype.addShardAnimationPackets = function (shard) {
         y: shard.y
     })
 };
-
 
 
 PacketHandler.prototype.addUIPackets = function (player, home, action) {
@@ -203,8 +202,6 @@ PacketHandler.prototype.addHomePackets = function (home, ifInit) {
 };
 
 
-
-
 PacketHandler.prototype.updateHomePackets = function (home) {
 	this.updateHomePacket.push(
             {
@@ -226,7 +223,6 @@ PacketHandler.prototype.updateFactionPackets = function (faction) {
         size: faction.homes.length
     });
 };
-
 
 PacketHandler.prototype.updateTilesPackets = function (tile) {
 	this.updateTilesPacket.push({
@@ -254,7 +250,6 @@ PacketHandler.prototype.updateShardsPackets = function (shard) {
     });
 }
 
-
 PacketHandler.prototype.deleteUIPackets = function (id, action) {
 	this.deleteUIPacket.push({
         id: id,
@@ -281,7 +276,6 @@ PacketHandler.prototype.deleteShardPackets = function (shard) {
 
 
 PacketHandler.prototype.sendPackets = function () {
-
     for (var index in this.gameServer.SOCKET_LIST) {
         var socket = this.gameServer.SOCKET_LIST[index];
 
@@ -301,7 +295,10 @@ PacketHandler.prototype.sendPackets = function () {
                 'homeInfo': this.updateHomePacket,
                 'factionInfo': this.updateFactionPacket
             });
-
+        socket.emit('deleteEntities', 
+            {
+                'UIInfo': this.deleteUIPacket
+            });
         socket.emit('addEntities',
             {
                 'UIInfo': this.addUIPacket,
@@ -312,7 +309,6 @@ PacketHandler.prototype.sendPackets = function () {
                 'playerInfo': this.deletePlayerPacket,
                 'shardInfo': this.deleteShardPacket,
                 'homeInfo': this.deleteHomePacket,
-                'UIInfo': this.deleteUIPacket,
                 'factionInfo': this.deleteFactionPacket
             });
         socket.emit('drawScene', {});

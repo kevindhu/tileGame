@@ -7,7 +7,7 @@ var Shard = require('./Shard');
 
 function Tower(faction, x, y, gameServer, home) {
     Tower.super_.call(this, faction, x, y, gameServer);
-    this.parent = home;
+    this.parent = home.id;
     this.hasColor = true;
     this.type = "Tower"; 
     this.timer = 0;

@@ -3,40 +3,35 @@ const Arithmetic = require('../modules/Arithmetic');
 var EntityFunctions = require('./EntityFunctions');
 
 function Home(faction, x, y, gameServer) {
-    if (!gameServer) {
-        throw "forgot the gameServer dumbass";
-    }
-
     this.gameServer = gameServer;
     this.packetHandler = gameServer.packetHandler;
 
     this.id = Math.random();
-    this.owner = faction;
-    this.name = faction.name;
 
     this.x = x;
     this.y = y;
+    
+    this.owner = faction.name;
+    this.tile = null;
 
     this.children = [];
     this.shards = [];
-    this.tile = null;
 
     this.level = 0;
-    this.hasColor = false;
-
     this.radius = 10;
     this.health = 1;
-
-    this.randomPlayer = this.gameServer.PLAYER_LIST[this.owner.getRandomPlayer()];
+    this.hasColor = false;
+    this.randomPlayer = this.gameServer.PLAYER_LIST[faction.getRandomPlayer()];
 }
 
 Home.prototype.mainInit = function () {
     var tile = this.gameServer.getEntityTile(this);
     if (!tile.hasHome()) {
         tile.setHome(this);
-        this.tile = tile;
+        this.tile = tile.id;
         this.packetHandler.updateTilesPackets(tile);
     }
+    console.log("ADDING " + this.id + " TO THE HOME LIST");
     this.gameServer.HOME_LIST[this.id] = this;
     this.addQuadItem();
     this.gameServer.homeTree.insert(this.quadItem);
@@ -46,8 +41,9 @@ Home.prototype.mainInit = function () {
 Home.prototype.decreaseHealth = function (amount) {
     this.health -= amount;
     if (this.tile) {
-        this.tile.alert = true;
-        this.packetHandler.updateTilesPackets(this.tile);
+        var tile = this.gameServer.TILE_LIST[this.tile];
+        tile.alert = true;
+        this.packetHandler.updateTilesPackets(tile);
     }
     if (this.health <= 0) {
         this.onDelete();
@@ -87,10 +83,10 @@ Home.prototype.onDelete = function () {
         var tower = this.gameServer.HOME_LIST[this.children[i]];
         tower.onDelete();
     }
-
-    this.owner.removeHome(this);
+    var owner = this.gameServer.FACTION_LIST[this.owner];
+    owner.removeHome(this);
     if (this.tile) {
-        this.tile.removeHome();
+        this.gameServer.TILE_LIST[this.tile].removeHome();
     }
 
     this.gameServer.homeTree.remove(this.quadItem);

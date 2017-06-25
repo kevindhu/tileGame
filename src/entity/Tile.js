@@ -3,15 +3,17 @@ const entityConfig = require('./entityConfig');
 function Tile(x, y, gameServer) {
     this.gameServer = gameServer;
     this.packetHandler = gameServer.packetHandler;
-    var randomId = Math.random();
-    this.id = randomId;
+    
+    this.id = Math.random();
     this.x = x;
     this.y = y;
+
     this.home = null;
     this.owner = null;
+
     this.color = "#FFFFFF"; //getRandomColor(); 
     this.length = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
-    this.alert = false;
+    this.alert = false; 
     this.init();
 }
 
@@ -41,7 +43,6 @@ Tile.prototype.setColor = function (color) {
 
 
 Tile.prototype.removeHome = function () {
-    console.log("TILE removing home " + this.home.id);
     this.color = "#FFFFFF";
     this.home = null;
     this.owner = null;
@@ -54,7 +55,7 @@ Tile.prototype.hasHome = function () {
 }
 
 Tile.prototype.setHome = function (home) {
-    this.home = home;
+    this.home = home.id;
     this.owner = home.owner;
 };
 

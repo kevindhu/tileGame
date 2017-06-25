@@ -60,7 +60,7 @@ Faction.prototype.addPlayer = function (id, playerName) {
 Faction.prototype.addHeadquarter = function () {
     if (!this.headquarter) {
         var headquarter = new Headquarter(this, this.x, this.y, this.gameServer);
-        this.headquarter = headquarter;
+        this.headquarter = headquarter.id;
         this.homes.push(headquarter.id);
         this.updateCoords();
     }
@@ -76,8 +76,7 @@ Faction.prototype.addSentinel = function (player) {
         player.shards.length >= 2) {
 
         if (this._neighboringFaction(tile)) {
-
-            var sentinel = new Sentinel(player.faction, tile.x + tile.length/2, 
+            var sentinel = new Sentinel(this, tile.x + tile.length/2, 
                 tile.y + tile.length/2, this.gameServer);
 
             for (var i = player.shards.length - 1; i >= 0; i--) {
@@ -103,8 +102,10 @@ Faction.prototype.addTower = function (player) {
         tile.owner === player.faction &&
         player.shards.length >= 2) {
 
-        var tower = new Tower(player.faction, player.x, player.y, this.gameServer, tile.home);
-        tile.home.addChild(tower);
+        var home = this.gameServer.HOME_LIST[tile.home];
+        var tower = new Tower(this, player.x, player.y, this.gameServer, home);
+        
+        home.addChild(tower);
         
         for (var i = player.shards.length - 1; i >= 0; i--) {
             var shard = this.gameServer.PLAYER_SHARD_LIST[player.shards[i]];
@@ -155,7 +156,7 @@ Faction.prototype._neighboringFaction = function (tile) {
             coords['x'] = tile.x + tile.length * i;
             coords['y'] = tile.y + tile.length * j;
             var check = this.gameServer.getEntityTile(coords);
-            if (check && check.owner === this) {
+            if (check && check.owner === this.name) {
                 return true;
             }
         }

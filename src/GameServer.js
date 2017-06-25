@@ -107,7 +107,6 @@ GameServer.prototype.getEntityTile = function (entity) {
         ret = tile;
     }.bind(this));
     return ret;
-
 };
 
 GameServer.prototype.checkShardCollision = function (shard) {
@@ -122,14 +121,15 @@ GameServer.prototype.checkShardCollision = function (shard) {
     this.homeTree.find(shardBound, function (home) {
         if (shard.owner && shard.owner.faction !== home.owner) {
             shard.onDelete();
-
             //damage the home
-            home.decreaseHealth(1);
-            home.dropShard();
-            var hq = home.owner.headquarter;
+            var faction = this.FACTION_LIST[home.owner];
+            var hq = this.HOME_LIST[faction.headquarter];
             if (hq !== home && hq.getSupply() > 0) {
                 hq.giveShard(home);
             }
+
+            home.decreaseHealth(1);
+            home.dropShard();
         }
     }.bind(this));
 };
@@ -146,10 +146,10 @@ GameServer.prototype.checkPlayerCollision = function (player) {
     this.shardTree.find(playerBound, function (shard) {
         if (player !== shard.owner && shard.timer === 0) {
             if (player.emptyShard !== null) {
-                player.transformEmptyShard("NOT NAMED BITCH");
+                player.transformEmptyShard("unnamed");
                 this.packetHandler.deleteUIPackets(player.id,"name shard");
             }
-
+            //if shard already owned
             if (shard.owner !== null) {
                 if (shard.name === null) {  
                     this.packetHandler.deleteUIPackets(shard.owner.id,"name shard");
@@ -340,12 +340,14 @@ GameServer.prototype.start = function () {
                     break;
                 case "Z":
                     if (data.state) {
-                        player.faction.addSentinel(player);
+                        var faction = this.FACTION_LIST[player.faction];
+                        faction.addSentinel(player);
                     }
                     break;
                 case "X":
                     if (data.state) {
-                        player.faction.addTower(player);
+                        var faction = this.FACTION_LIST[player.faction];
+                        faction.addTower(player);
                     }
             }
         }.bind(this));
@@ -420,7 +422,6 @@ GameServer.prototype.createEmptyShard = function () {
         this
     );
 };
-
 
 /** MISC METHODS **/
 Object.size = function (obj) {
