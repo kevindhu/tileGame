@@ -37,16 +37,37 @@ nameButton.addEventListener("click", function () {
 
 
 function openUI(info) {
-    var shardNamer = document.getElementById('shard_namer');
     var action = info.action;
 
     if (action === "name shard") {
-        shardNamer.style.display = 'block';
+        openShardNamerUI();
     }
     if (action === "home info") {
         var home = HOME_LIST[info.homeId];
         openHomeUI(home);
     }
+}
+
+function openShardNamerUI() {
+    var shardNamer = document.getElementById('shard_namer');
+    var textInput = document.getElementById("textInput");
+    var nameShardButton = document.getElementById("nameShardButton");
+    var focusEvent = function(event) {
+        event.preventDefault();
+        if (event.keyCode == 13) {
+            textInput.focus();
+            document.removeEventListener("keyup", focusEvent);
+        }
+    }
+    document.addEventListener("keyup", focusEvent);
+    textInput.addEventListener("keyup", function(event) {
+        event.preventDefault();
+        if (event.keyCode == 13) {
+            nameShardButton.click();
+        }
+    });
+
+    shardNamer.style.display = 'block';
 }
 
 
