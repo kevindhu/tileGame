@@ -141,7 +141,7 @@ GameServer.prototype.checkPlayerCollision = function (player) {
         maxy: player.y + entityConfig.SHARD_WIDTH
     };
 
-    //player + static shard collision
+    //player + static/player shard collision
     this.shardTree.find(playerBound, function (shard) {
         if (player !== shard.owner && shard.timer === 0 &&
          player.emptyShard === null) {

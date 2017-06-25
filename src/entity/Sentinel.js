@@ -25,7 +25,7 @@ Sentinel.prototype.shootShard = function (player) {
         this.timer--;
         return;
     }
-    this.timer = 100;
+    this.timer = 150;
     if (this.getSupply() > 0) {
         var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
         shard.useSupply();

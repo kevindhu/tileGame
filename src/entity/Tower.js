@@ -67,7 +67,7 @@ Tower.prototype.shootShard = function (player) {
         this.timer--;
         return;
     }
-    this.timer = 10;
+    this.timer = 20;
 
     if (this.getSupply() > 0) {
         var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];

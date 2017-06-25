@@ -29,13 +29,12 @@ Player.prototype.init = function () {
 }
 
 Player.prototype.dropAllShards = function () {
+    if (this.emptyShard !== null) {
+        this.dropShard(this.emptyShard);
+    }
     for (var i = this.shards.length - 1; i >= 0; i--) {
         var shard = this.gameServer.PLAYER_SHARD_LIST[this.shards[i]];
         this.dropShard(shard);
-    }
-    if (this.emptyShard !== null) {
-        this.dropShard(this.emptyShard);
-        this.emptyShard = null;
     }
 };
 
@@ -64,6 +63,11 @@ Player.prototype.update = function () {
         }
     }
     this.packetHandler.updatePlayersPackets(this);
+}
+
+
+Player.prototype.updateMaxSpeed = function () {
+    this.maxSpeed = 10 * Math.pow(0.9,this.shards.length);
 }
 
 
@@ -140,13 +144,13 @@ Player.prototype.getRandomShard = function () {
 
 
 Player.prototype.addShard = function (shard) {
+    this.increaseHealth(1);
     if (shard.name === null) {
         this.emptyShard = shard;
     }
-    else {
-        this.shards.push(shard.id);
-    }
+    this.shards.push(shard.id);
     shard.becomePlayer(this);
+    this.updateMaxSpeed();
     this.gameServer.PLAYER_SHARD_LIST[shard.id] = shard;
 };
 
@@ -154,23 +158,27 @@ Player.prototype.removeShard = function (shard) {
     if (shard === this.emptyShard) {
         this.emptyShard = null;
     }
-    else {
-        var index = this.shards.indexOf(shard.id);
-        this.shards.splice(index, 1);
-    }
+    var index = this.shards.indexOf(shard.id);
+    this.shards.splice(index, 1);
+    this.updateMaxSpeed();
     shard.timer = 0;
 };
 
 Player.prototype.transformEmptyShard = function (name) {
     if (this.emptyShard !== null) {
         this.emptyShard.setName(name);
-        this.addShard(this.emptyShard);
         this.emptyShard = null;
     }
 };
 
 Player.prototype.decreaseHealth = function (amount) {
-    this.health -= amount;
+    if (this.shards.length > 0) {
+        var filteredAmount = amount/this.shards.length;
+    }
+    else {
+        filteredAmount = amount;
+    }
+    this.health -= filteredAmount;
     if (this.health <= 0) {
         this.reset();
     }
