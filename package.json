@@ -1,13 +1,13 @@
 {
   "name": "tileGame",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "author": "",
+  "description": "Simple tile game for funzies",
+  "main": "app.js",
+  "author": "lemondoo",
   "license": "ISC",
   "scripts": {
-    "deploy": "gcloud app deploy",
-    "start": "node ./src/app.js"
+  	"start": "node ./src/app.js",
+    "deploy": "gcloud app deploy"
   },
   "engines": {
   	"node": "4.1.x"
