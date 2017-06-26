@@ -43,7 +43,7 @@ GameServer.prototype.initTiles = function () {
     });
     for (var i = 0; i < Math.sqrt(entityConfig.TILES); i++) {
         for (var j = 0; j < Math.sqrt(entityConfig.TILES); j++) {
-            var tile = new Entity.Tile(entityConfig.BORDER_WIDTH + this.tileLength * i,
+            new Entity.Tile(entityConfig.BORDER_WIDTH + this.tileLength * i,
                 entityConfig.BORDER_WIDTH + this.tileLength * j, this);
         }
     }
@@ -276,7 +276,7 @@ GameServer.prototype.start = function () {
         res.sendFile(__dirname + '/web/index.html');
     });
     app.use('/', express.static(__dirname + '/web'));
-    server.listen(2000); //port number for listening
+    server.listen(2000);
     console.log('Started Server!');
 
     /** INIT SERVER OBJECTS **/
@@ -305,7 +305,7 @@ GameServer.prototype.start = function () {
         }.bind(this));
 
         socket.on('newColor', function (data) {
-            home = this.HOME_LIST[data.home];
+            var home = this.HOME_LIST[data.home];
             if (home.level < 2 && home.hasColor === true) { //prevent cheating
                 return;
             }
@@ -319,6 +319,7 @@ GameServer.prototype.start = function () {
         }.bind(this));
 
         socket.on('keyEvent', function x(data) {
+            var faction;
             if (!player) {
                 return;
             }
@@ -340,13 +341,13 @@ GameServer.prototype.start = function () {
                     break;
                 case "Z":
                     if (data.state) {
-                        var faction = this.FACTION_LIST[player.faction];
+                        faction = this.FACTION_LIST[player.faction];
                         faction.addSentinel(player);
                     }
                     break;
                 case "X":
                     if (data.state) {
-                        var faction = this.FACTION_LIST[player.faction];
+                        faction = this.FACTION_LIST[player.faction];
                         faction.addTower(player);
                     }
             }
@@ -411,12 +412,11 @@ GameServer.prototype.createPlayer = function (socket, info) {
         faction = new Entity.Faction(info.faction, this);
     }
 
-    var player = faction.addPlayer(socket.id, info.name);
-    return player;
+    return faction.addPlayer(socket.id, info.name);
 };
 
 GameServer.prototype.createEmptyShard = function () {
-    var shard = new Entity.Shard(
+    return new Entity.Shard(
         Arithmetic.getRandomInt(entityConfig.BORDER_WIDTH, entityConfig.WIDTH - entityConfig.BORDER_WIDTH),
         Arithmetic.getRandomInt(entityConfig.BORDER_WIDTH, entityConfig.WIDTH - entityConfig.BORDER_WIDTH),
         this

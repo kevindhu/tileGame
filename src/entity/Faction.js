@@ -20,7 +20,7 @@ Faction.prototype.init = function () {
     this.addHeadquarter();
     this.gameServer.FACTION_LIST[this.name] = this;
     this.packetHandler.addFactionPackets(this);
-}
+};
 
 Faction.prototype.getInitCoords= function () {
     var tile = null;
@@ -32,7 +32,7 @@ Faction.prototype.getInitCoords= function () {
     }
     this.x = tile.x + tile.length/2;
     this.y = tile.y + tile.length/2;
-}
+};
 
 Faction.prototype.updateCoords = function () {
     var avgCoords = [0, 0];
@@ -45,7 +45,7 @@ Faction.prototype.updateCoords = function () {
     this.y = avgCoords[1]/this.homes.length;
 
     this.packetHandler.updateFactionPackets(this);
-}
+};
 
 
 
@@ -69,7 +69,6 @@ Faction.prototype.addHeadquarter = function () {
 
 Faction.prototype.addSentinel = function (player) {
     var tile = this.gameServer.getEntityTile(player);
-    //TODO: clean this conditional by not having absolute value shit
     if (tile !== null && tile.home === null &&
         Math.abs(tile.x + tile.length/2 - player.x) < (tile.length / 8) &&
         Math.abs(tile.y + tile.length/2 - player.y) < (tile.length / 8) &&

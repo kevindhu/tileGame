@@ -471,7 +471,7 @@ function drawScene(data) {
     ctx2.clearRect(0, 0, 10000, 10000);
     ctx3.clearRect(0,0, 500, 500);
 
-    //drawTiles();
+    drawTiles();
     drawPlayers();
     drawShards();
     drawHomes();
