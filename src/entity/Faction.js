@@ -64,7 +64,7 @@ Faction.prototype.addHeadquarter = function () {
         this.homes.push(headquarter.id);
         this.updateCoords();
     }
-}
+};
 
 
 Faction.prototype.addSentinel = function (player) {
@@ -149,7 +149,7 @@ Faction.prototype.getRandomPlayer = function () {
 
 
 Faction.prototype._neighboringFaction = function (tile) {
-    coords = {};
+    var coords = {};
     for (var i = -1; i<=1; i++) {
         for (var j = -1; j<=1; j++) {
             coords['x'] = tile.x + tile.length * i;
@@ -161,7 +161,7 @@ Faction.prototype._neighboringFaction = function (tile) {
         }
     }
     return false;
-}
+};
 
 
 module.exports = Faction;

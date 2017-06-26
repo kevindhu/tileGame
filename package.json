@@ -6,16 +6,17 @@
   "author": "lemondoo",
   "license": "ISC",
   "scripts": {
-  	"start": "node ./src/app.js",
+    "start": "node ./src/app.js",
     "deploy": "gcloud app deploy"
   },
   "engines": {
-  	"node": "4.1.x"
+    "node": "4.1.x"
   },
   "dependencies": {
-    "random-word": "^2.0.0",
-    "lerp": "1.0.3",
+    "@google-cloud/storage": "^1.1.1",
     "express": "4.15.3",
+    "lerp": "1.0.3",
+    "random-word": "^2.0.0",
     "socket.io": "2.0.3"
   },
   "devDependencies": {

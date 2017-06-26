@@ -19,7 +19,6 @@ EntityFunctions.inherits(Headquarter, Home);
 
 
 Headquarter.prototype.updateLevel = function () {
-	return;
 };
 
 module.exports = Headquarter;
