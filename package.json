@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "scripts": {
-    "deploy": "gcloud app deploy",
-    "start": "node ./src/app.js",
-  },
   "author": "",
   "license": "ISC",
+  "scripts": {
+    "deploy": "gcloud app deploy",
+    "start": "node ./src/app.js"
+  },
   "dependencies": {
     "random-word": "^2.0.0",
     "lerp": "1.0.3",
