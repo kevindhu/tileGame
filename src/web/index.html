@@ -1,31 +1,31 @@
 <head>
-
+<meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 </head>
 
 <body>
-    <ul id="player_namer" class='toc-odd level-1'>
-        <p>NAME:</p>
-        <input type="text" name="name" id="playerNameInput" autofocus="autofocus">
-        <input type="text" id="factionNameInput" list="factions" placeholder="choose your faction!">
+    <ul id="player_namer" class='Namer'>
+        <p> -- tileGame -- </p>
+        <input type="text" name="name" id="playerNameInput" autofocus="autofocus" placeholder="choose your name">
+        <input type="text" id="factionNameInput" list="factions" placeholder="choose your faction">
         <datalist id="factions"></datalist>
 
         <button type="button" id="nameSubmit">Submit</button>
     </ul>
 
+    <canvas id="draftCanvas" width="1300" height="700"></canvas>
+    <canvas id="bigCanvas" width="1300" height="700"></canvas>
+    <canvas id="c3" width="500" height="500"></canvas>
+    <canvas id="c4" width="500" height="500"></canvas>
 
-    <canvas id="bigCanvas" width="1000" height="1000" style="border:1px solid #000000;"></canvas>
 
 
-
-    <ul id="shard_namer" class='toc-odd level-1'>
-        <li>
-            <a>Name the shard: </a>
-            <input type="text" id="textInput" size="30" />
-            <input type="button" value="Send" onclick="sendShardName();" id="nameShardButton" />
-        </li>
+    <ul id="shard_namer" class='Info'>
+        <p>Name the shard: </p>
+        <input type="text" id="textInput" size="30" />
+        <input type="button" value="Send" onclick="sendShardName();" id="nameShardButton" />
     </ul>
 
-    <ul id="home_info" class='toc-odd level-1'>
+    <ul id="home_info" class='Namer'>
         <li id = "info_main">
             <a>BUILDING INFO: </a> <br>
             <a> ------------------</a> <br>
@@ -33,7 +33,7 @@
             <a> LEVEL : </a><a id = "home_level"></a> <br>
             <a> HEALTH : </a><a id = "home_health"></a> <br>
             <a> FACTION : </a><a id = "home_faction_name"></a> <br>
-            <ol id="shards_list" style = "height:100px;width:100px;overflow:auto;"></ol>
+            <ol id="shards_list"></ol>
             <input type="button" value="Close" onclick="closeUI('home info');" />
         </li>
 

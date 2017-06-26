@@ -1,5 +1,23 @@
 var canvas = document.getElementById("bigCanvas");
+var c2 = document.getElementById("draftCanvas");
+var c3 = document.getElementById("c3");
+var c4 = document.getElementById("c4");
+
+c2.style.display = "none";
+c3.style.display = "none";
+c4.style.display = "none";
+
+//canvas.width = window.innerWidth;
+//canvas.height = window.innerHeight;
+c2.width = window.innerWidth;
+c2.height = window.innerHeight;
+
 var ctx = canvas.getContext("2d");
+var ctx2 = c2.getContext("2d");
+var ctx3 = c3.getContext("2d");
+var ctx4 = c4.getContext("2d");
+
+
 var socket = io();
 
 socket.on('addFactionsUI', addFactionstoUI)
@@ -22,6 +40,7 @@ var SHARD_ANIMATION_LIST = {};
 
 var ARROW = null;
 var serverMap = null;
+var tileTimer = 0;
 var mapTimer = 0;
 
 
@@ -244,14 +263,14 @@ function updateEntities(data) {
     updateEntities(data.factionInfo, FACTION_LIST, updateFactions);
 }
 
+//canvas.height = window.innerHeight;
+//canvas.width = window.innerWidth;
 
-var canvas2 = document.createElement("canvas"),
-ctx2 = canvas2.getContext("2d");
-canvas2.width = canvas.width;
-canvas2.height = canvas.height;
+
+c2.width = canvas.width;
+c2.height = canvas.height;
 
 function drawScene(data) {
-
     var selfPlayer = PLAYER_LIST[selfId];
 
 
@@ -260,8 +279,8 @@ function drawScene(data) {
     }
 
     var inBounds = function(player,x,y) {
-        return x < (player.x+canvas.width/2) && x > (player.x-canvas.width/2)
-        && y < (player.y+canvas.width/2) && y > (player.y-canvas.width/2);
+        return x < (player.x+canvas.width) && x > (player.x-5/4*canvas.width)
+        && y < (player.y+canvas.width) && y > (player.y-5/4*canvas.width);
     }
 
     var drawPlayers = function () {
@@ -281,8 +300,10 @@ function drawScene(data) {
                 ctx2.fillStyle = tile.color;
                 ctx2.fillRect(tile.x, tile.y, tile.length, tile.length);
             }
-        }
+        };
     };
+
+
 
     var drawShards = function () {
         for (var id in SHARD_LIST) {
@@ -388,6 +409,7 @@ function drawScene(data) {
             }
         }
         if (mapTimer <= 0 || serverMap === null) {
+            size = 0;
             var tileLength = Math.sqrt(Object.size(TILE_LIST));
             if (tileLength === 0 || !selfPlayer) {
                 return;
@@ -415,26 +437,25 @@ function drawScene(data) {
                 imgData.data[i+3]=255;
                 i += 4;
             }
-            imgData = scaleImageData(imgData,3,ctx);
+            imgData = scaleImageData(imgData,2,ctx);
 
-            var tempCanvas = document.createElement("canvas"),
-            tempCtx = tempCanvas.getContext("2d");
-            tempCanvas.width = 500;
-            tempCanvas.height = 500;
-            tempCtx.putImageData(imgData, 0, 0);
-            serverMap = tempCanvas;
+            ctx3.putImageData(imgData, 0, 0);
+
+            ctx4.rotate(90*Math.PI/180);
+            ctx4.scale(1, -1);
+            ctx4.drawImage(c3, 0, 0);
+            ctx4.scale(1, -1);
+            ctx4.rotate(270*Math.PI/180);
+
+            serverMap = c4;
             mapTimer = 25;
         }
 
         else {
             mapTimer -= 1;
         }
-        ctx.rotate(90*Math.PI/180);
-        ctx.scale(1, -1);
-        ctx.drawImage(serverMap, 800, 800);
-        ctx.scale(1, -1);
-        ctx.rotate(270*Math.PI/180);
 
+        ctx.drawImage(serverMap, 100, 400);
     };
 
     
@@ -446,18 +467,20 @@ function drawScene(data) {
         }
     };
 
-    ctx2.clearRect(0, 0, 10000, 10000);
     ctx.clearRect(0, 0, 10000, 10000);
+    ctx2.clearRect(0, 0, 10000, 10000);
+    ctx3.clearRect(0,0, 500, 500);
+
     //drawTiles();
     drawPlayers();
     drawShards();
     drawHomes();
     drawFactions();
-    //drawAnimations();
+    drawAnimations();
     drawArrow();
 
     translateScene();
-    ctx.drawImage(canvas2, 0, 0);
+    ctx.drawImage(c2, 0, 0);
     drawMiniMap();
     drawScoreBoard();
 }

@@ -9,6 +9,9 @@ var factionNameInput = document.getElementById("factionNameInput");
 var playerNamer = document.getElementById("player_namer");
 
 
+document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+document.body.scroll = "no";
+
 playerNamer.style.display = "block";
 
 playerNameInput.addEventListener("keyup", function(event) {
@@ -160,8 +163,14 @@ function addColorPicker(colorPicker, home) {
         return;
     }
 
+    var prompt = document.createElement("a");
     var colorInput = document.createElement("input");
     var colorSubmitButton = document.createElement('button');
+
+    colorSubmitButton.innerHTML = "submit";
+    prompt.appendChild(document.createTextNode("CHOOSE YOUR COLOR"));
+
+    colorPicker.appendChild(prompt);
     colorPicker.appendChild(colorInput);
     colorPicker.appendChild(colorSubmitButton);
     

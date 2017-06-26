@@ -1,28 +1,118 @@
-.sel-box{
-    position:relative;
-}
 a{
     text-decoration:none;
 }
-#select{
-    display:block;
-    width:235px;
-    height:20px;
-    border:1px solid #999;
-    padding:5px;
+
+ul {
+    list-style-type: none;
 }
-.toc-odd{
+
+
+
+.Namer{
+    width: 400;
+    height: 300;
+    background:white;
+}
+
+
+.Namer p {
+    font-size:30pt;
+    text-align:center;
+}
+
+#bigCanvas {
+    position: absolute;
+}
+
+#shard_namer {
+    display: none;
+    position: absolute;
+    background: white;
+}
+
+#shard_namer button {
+    height: 80;
+    width: 400;
+    margin-left:0px;
+}
+
+#shard_namer input {
+    position: relative;
+    margin : 10 auto;
+    width:200px;
+    height:60px;
+    font-size:20pt;
+    background: #FFFFFF;
+}
+
+
+
+#player_namer {
+    width:500px;
+    height:500px;
     position:absolute;
-    top:32px;
-    background:#f1f1f1;
-    width:250px;
-    display:none;
+    left:50%;
+    margin-left:-300px;
+    top:50%;
+    margin-top:-300px;
 }
-.toc-odd li{
-    padding:5px 10px;
-    border-bottom:1px solid #999;
+
+#player_namer input {
+    font-size:30pt;
+    height: 80;
+    width: 400;
+    background: #FFFFFF;
+    margin: 10px;
 }
-button {
-    border: 2px outset #aaa;
+
+#player_namer button {
+    border: 2px;
     border-radius: 4px;
+    height: 80;
+    width: 400;
+    margin-left:10px;
+}
+
+
+.Namer {
+    width: 400;
+    height:500;
+}
+
+
+#home_info {
+    background: grey;
+    display: none;
+    position:relative;
+}
+
+#home_info a{
+    font-size:20pt; 
+}
+
+#home_info input{
+    height: 70;
+    width: 300;
+}
+
+#home_info ol {
+    height:100px;
+    width:100px;
+    overflow:auto;
+}
+
+#color_picker button {
+    height:100px;
+    width:100px;
+}
+
+#color_picker input {
+    font-size:20pt; 
+    height:70px;
+    width:400px;
+}
+
+#bigCanvas {
+    width:100%;
+    height:100%;
 }
