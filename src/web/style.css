@@ -87,12 +87,12 @@ ul {
 }
 
 #home_info a{
-    font-size:20pt; 
+    font-size:15pt; 
 }
 
 #home_info input{
-    height: 70;
-    width: 300;
+    height: 60;
+    width: 200;
 }
 
 #home_info ol {

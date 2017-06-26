@@ -1,4 +1,3 @@
-const randomWord = require('random-word');
 const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
 var lerp = require('lerp');
@@ -210,9 +209,9 @@ Player.prototype.dropShard = function (shard) {
 
 Player.prototype.reset = function () {
     this.dropAllShards();
-
-    this.x = entityConfig.WIDTH / 2;
-    this.y = entityConfig.WIDTH / 2;
+    var faction = this.gameServer.FACTION_LIST[this.faction];
+    this.x = faction.x;
+    this.y = faction.y;
     this.maxSpeed = 10;
     this.xSpeed = 0;
     this.ySpeed = 0;

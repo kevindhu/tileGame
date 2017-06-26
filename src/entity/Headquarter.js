@@ -10,7 +10,7 @@ function Headquarter(faction, x, y, gameServer) {
     this.type = "Headquarter";
     this.level = 2;
     this.radius = 50;
-    this.health = 1;
+    this.health = 1000;
     this.hasColor = false;
     this.mainInit();
 }

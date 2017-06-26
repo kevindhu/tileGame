@@ -37,6 +37,7 @@ PacketHandler.prototype.sendInitPackets = function (socket) {
 
 
 PacketHandler.prototype.createInitPacket = function (stage,id) { //four total stages
+    console.log("INITIATING STAGE " + stage)
     var playerPacket = [],
         shardPacket = [],
         homePacket = [],
