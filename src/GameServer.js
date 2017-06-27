@@ -3,6 +3,7 @@ var QuadNode = require('./modules/QuadNode');
 var PacketHandler = require('./PacketHandler');
 const entityConfig = require('./entity/entityConfig');
 const Arithmetic = require('./modules/Arithmetic');
+const PORT = process.env.PORT || 2000;
 
 function GameServer() {
     this.packetHandler = new PacketHandler(this);
@@ -276,7 +277,8 @@ GameServer.prototype.start = function () {
         res.sendFile(__dirname + '/web/index.html');
     });
     app.use('/', express.static(__dirname + '/web'));
-    server.listen(2000);
+
+    server.listen(PORT);
     console.log('Started Server!');
 
     /** INIT SERVER OBJECTS **/
