@@ -9,6 +9,7 @@ function PacketHandler(gameServer) {
     this.addHomePacket = [];
     this.addFactionPacket = [];
     this.addUIPacket = [];
+    this.addBracketPacket = [];
 
     this.updateHomePacket = [];
     this.updateTilesPacket = [];
@@ -100,6 +101,14 @@ PacketHandler.prototype.addShardAnimationPackets = function (shard) {
         name: shard.name,
         x: shard.x,
         y: shard.y
+    })
+};
+
+PacketHandler.prototype.addBracketPackets = function (player, tile) {
+    console.log(tile.id);
+    this.addBracketPacket.push({
+        playerId: player.id,
+        tileId: tile.id
     })
 };
 
@@ -285,7 +294,8 @@ PacketHandler.prototype.sendPackets = function () {
                 'playerInfo': this.addPlayerPacket,
                 'shardInfo': this.addShardPacket,
                 'homeInfo': this.addHomePacket,
-                'factionInfo': this.addFactionPacket
+                'factionInfo': this.addFactionPacket,
+                'bracketInfo': this.addBracketPacket
             });
 
         socket.emit('updateEntities',
@@ -326,6 +336,7 @@ PacketHandler.prototype.resetPackets = function () {
     this.addHomePacket = [];
     this.addFactionPacket = [];
     this.addUIPacket = [];
+    this.addBracketPacket = [];
 
     this.updateHomePacket = [];
     this.updateTilesPacket = [];

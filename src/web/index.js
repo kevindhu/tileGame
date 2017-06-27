@@ -39,6 +39,7 @@ var HOME_LIST = {};
 var SHARD_ANIMATION_LIST = {};
 
 var ARROW = null;
+var BRACKET = null;
 var serverMap = null;
 var tileTimer = 0;
 var mapTimer = 0;
@@ -94,12 +95,21 @@ var Arrow = function (x,y) {
     this.postY = null;
     this.deltaX = function() {
         return this.postX - this.preX;
-    }
-
+    };
     this.deltaY = function() {
         return this.postY - this.preY;
     }
 };
+
+var Bracket = function (bracketInfo) {
+    var tile = TILE_LIST[bracketInfo.tileId];
+    console.log(bracketInfo.tileId);
+    this.x = tile.x;
+    this.y = tile.y;
+    this.length = tile.length;
+};
+
+
 var Animation = function (animationInfo) {
     this.id = animationInfo.id;
     this.name = animationInfo.name;
@@ -146,6 +156,16 @@ function addEntities(data) {
     addEntity(data.homeInfo, HOME_LIST, Home);
     addEntity(data.factionInfo, FACTION_LIST, Faction, FACTION_ARRAY);
     addEntity(data.animationInfo, SHARD_ANIMATION_LIST, Animation);
+
+    var bracketPacket = data.bracketInfo;
+    if (bracketPacket) {
+        for (var i = 0; i < bracketPacket.length; i++) {
+            var bracketInfo = bracketPacket[i];
+            if (selfId === bracketInfo.playerId) {
+                BRACKET = new Bracket(bracketInfo);
+            }
+        }
+    }
 
     var UIPacket = data.UIInfo;
     if (UIPacket) {
@@ -298,12 +318,21 @@ function drawScene(data) {
             var tile = TILE_LIST[id];
             if (inBounds(selfPlayer,tile.x, tile.y)) {
                 if (!tile.color) {
-                    tile.color = "#FFFFFF";
+                    tile.color = {
+                        r: Math.round(getRandom(210,214)),
+                        g: Math.round(getRandom(210,214)),
+                        b: Math.round(getRandom(200,212))
+                    };
                 }
-                ctx2.fillStyle = tile.color;
+
+                ctx2.fillStyle = "rgb(" +
+                    tile.color.r + "," +
+                    tile.color.g + "," +
+                    tile.color.b +
+                    ")";
                 ctx2.fillRect(tile.x, tile.y, tile.length, tile.length);
             }
-        };
+        }
     };
 
 
@@ -353,7 +382,14 @@ function drawScene(data) {
             ctx2.textAlign = "center";
             ctx2.fillText(faction.name, faction.x, faction.y);
         }
-    }
+    };
+
+    var drawBracket = function () {
+        if (BRACKET) {
+            ctx2.fillStyle = "rgba(100,211,211,0.6)";
+            ctx2.fillRect(BRACKET.x, BRACKET.y, BRACKET.length, BRACKET.length);
+        }
+    };
 
     var drawArrow = function () {
         if (ARROW && ARROW.postX) {
@@ -419,7 +455,6 @@ function drawScene(data) {
             }
         }
         if (mapTimer <= 0 || serverMap === null) {
-            size = 0;
             var tileLength = Math.sqrt(Object.size(TILE_LIST));
             if (tileLength === 0 || !selfPlayer) {
                 return;
@@ -431,9 +466,12 @@ function drawScene(data) {
 
 
             for (var id in TILE_LIST) {
+                var tileRGB = {};
                 tile = TILE_LIST[id];
-                if (tile.alert || tile && inBounds(selfPlayer,tile.x, tile.y)) {
-                    tileRGB = hexToRGB(tile.color);
+                if (tile.color && tile.alert || inBounds(selfPlayer,tile.x, tile.y)) {
+                    tileRGB.r = tile.color.r;
+                    tileRGB.g = tile.color.g;
+                    tileRGB.b = tile.color.b;
                 }
                 else {
                     tileRGB.r = 0;
@@ -487,6 +525,8 @@ function drawScene(data) {
     drawHomes();
     drawFactions();
     drawAnimations();
+
+    drawBracket();
     drawArrow();
 
     translateScene();

@@ -63,9 +63,10 @@ Player.prototype.update = function () {
             home.shootShard(this);
             this.decreaseHealth(0.1);
         }
+        this.packetHandler.addBracketPackets(this, tile);
     }
     this.packetHandler.updatePlayersPackets(this);
-}
+};
 
 
 Player.prototype.updateMaxSpeed = function () {
