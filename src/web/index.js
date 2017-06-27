@@ -297,6 +297,9 @@ function drawScene(data) {
         for (var id in TILE_LIST) {
             var tile = TILE_LIST[id];
             if (inBounds(selfPlayer,tile.x, tile.y)) {
+                if (!tile.color) {
+                    tile.color = "#FFFFFF";
+                }
                 ctx2.fillStyle = tile.color;
                 ctx2.fillRect(tile.x, tile.y, tile.length, tile.length);
             }
@@ -325,12 +328,17 @@ function drawScene(data) {
 
     var drawHomes = function () {
         for (var id in HOME_LIST) {
-            ctx2.beginPath();
             var home = HOME_LIST[id];
+
+            ctx2.beginPath();
             ctx2.fillStyle = "#003290";
+            ctx2.strokeStyle = "rgba(0,30,1, 0.1)";
+            ctx2.lineWidth = 20;
+
             ctx2.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
             ctx2.fill();
-            ctx2.fillStyle = "#000000";
+            ctx2.stroke();
+
             if (home.owner !== null) {
                 ctx2.fillText(home.shards.length, home.x, home.y + 40);
             }
@@ -351,6 +359,8 @@ function drawScene(data) {
         if (ARROW && ARROW.postX) {
             ctx2.beginPath();
             ctx2.moveTo(selfPlayer.x, selfPlayer.y);
+            ctx2.strokeStyle = "#521522";
+            ctx2.lineWidth = 10;
             ctx2.lineTo(selfPlayer.x+ARROW.deltaX(), selfPlayer.y + ARROW.deltaY());
             ctx2.stroke();
             ctx2.closePath();

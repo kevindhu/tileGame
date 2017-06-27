@@ -13,7 +13,7 @@ function Tower(faction, x, y, gameServer, home) {
     this.timer = 0;
     this.level = 0;
     this.radius = 10;
-    this.health = 30;
+    this.health = 2;
     this.init();
     this.mainInit();
 };
@@ -24,14 +24,14 @@ EntityFunctions.inherits(Tower, Home);
 Tower.prototype.init = function () {
     this.addBigQuadItem();
     this.gameServer.towerTree.insert(this.bigQuadItem);
-}
+};
 
 
 Tower.prototype.updateLevel = function () {
     if (this.getSupply() < 1) {
         this.level = 0;
         this.radius = 10;
-        this.health = 1;
+        this.health = 2;
         this.updateHomeTree();
     }
     else if (this.getSupply() < 4) {
