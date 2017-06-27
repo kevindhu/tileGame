@@ -103,7 +103,6 @@ var Arrow = function (x,y) {
 
 var Bracket = function (bracketInfo) {
     var tile = TILE_LIST[bracketInfo.tileId];
-    console.log(bracketInfo.tileId);
     this.x = tile.x;
     this.y = tile.y;
     this.length = tile.length;
@@ -330,6 +329,7 @@ function drawScene(data) {
                     tile.color.g + "," +
                     tile.color.b +
                     ")";
+                console.log(tile.length);
                 ctx2.fillRect(tile.x, tile.y, tile.length, tile.length);
             }
         }
@@ -515,8 +515,8 @@ function drawScene(data) {
         }
     };
 
-    ctx.clearRect(0, 0, 10000, 10000);
-    ctx2.clearRect(0, 0, 10000, 10000);
+    ctx.clearRect(0, 0, 11000, 11000);
+    ctx2.clearRect(0, 0, 11000, 11000);
     ctx3.clearRect(0,0, 500, 500);
 
     drawTiles();

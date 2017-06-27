@@ -5,7 +5,7 @@ var tileRoot = Math.floor(Math.sqrt(TILES_INPUT));
 var TILES = tileRoot * tileRoot;
 var SHARDS = 2000;
 var SHARD_WIDTH = 10;
-var BORDER_WIDTH = 100;
+var BORDER_WIDTH = 1000;
 
 module.exports = {
     WIDTH: WIDTH,

@@ -12,7 +12,7 @@ function Tile(x, y, gameServer) {
     this.owner = null;
 
     this.color = null; //getRandomColor();
-    this.length = entityConfig.WIDTH / Math.sqrt(entityConfig.TILES);
+    this.length = (entityConfig.WIDTH - entityConfig.BORDER_WIDTH * 2) / Math.sqrt(entityConfig.TILES);
     this.alert = false; 
     this.init();
 }
