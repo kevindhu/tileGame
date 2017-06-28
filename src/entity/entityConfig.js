@@ -1,7 +1,7 @@
-var WIDTH;
-var TILES_INPUT;
-var SHARDS;
-var BORDER_WIDTH;
+var WIDTH = 0;
+var TILES_INPUT = 0;
+var SHARDS = 0;
+var BORDER_WIDTH = 0;
 
 
 var medium = function () {

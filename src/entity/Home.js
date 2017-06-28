@@ -35,7 +35,7 @@ Home.prototype.mainInit = function () {
     this.addQuadItem();
     this.gameServer.homeTree.insert(this.quadItem);
     this.packetHandler.addHomePackets(this);
-}
+};
 
 Home.prototype.decreaseHealth = function (amount) {
     this.health -= amount;
@@ -100,14 +100,18 @@ Home.prototype.dropShard = function () {
     if (shard) {
         this.removeShard(shard);
         shard.becomeShooting(this.randomPlayer, Arithmetic.getRandomInt(-30, 30),
-            Arithmetic.getRandomInt(-30, 30))
+            Arithmetic.getRandomInt(-30, 30));
     }
     this.packetHandler.removeHomeAnimationPackets(this);
 };
 
 Home.prototype.giveShard = function (home) {
+    console.log("GIVING SHARD");
     var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
     this.removeShard(shard);
+    shard.becomeShooting(this.randomPlayer, home.x - this.x/4,
+        home.y - this.y/4);
+
     //TODO: change to animation!
     home.addShard(shard);
 };
@@ -162,7 +166,7 @@ Home.prototype.addQuadItem = function () {
             maxy: this.y + this.radius
         }
     };
-}
+};
 
 Home.prototype.updateQuadItem = function () {
     this.quadItem.bound = {
@@ -171,7 +175,7 @@ Home.prototype.updateQuadItem = function () {
             maxx: this.x + this.radius,
             maxy: this.y + this.radius
     };
-}
+};
 
 
 module.exports = Home;
