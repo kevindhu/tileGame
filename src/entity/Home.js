@@ -13,6 +13,7 @@ function Home(faction, x, y, gameServer) {
     
     this.owner = faction.name;
     this.tile = null;
+    this.neighbors = [];
 
     this.children = [];
     this.shards = [];
@@ -31,11 +32,34 @@ Home.prototype.mainInit = function () {
         this.tile = tile.id;
         this.packetHandler.updateTilesPackets(tile);
     }
+    this.addNeighbors();
     this.gameServer.HOME_LIST[this.id] = this;
     this.addQuadItem();
     this.gameServer.homeTree.insert(this.quadItem);
     this.packetHandler.addHomePackets(this);
 };
+
+
+Home.prototype.addNeighbors = function () {
+    var coords = {};
+    var tile = this.gameServer.TILE_LIST[this.tile];
+    var check;
+
+    for (var i = -1; i <= 1; i++) {
+        for (var j = -1; j <= 1; j++) {
+            coords['x'] = tile.x + tile.length / 2 + tile.length * i;
+            coords['y'] = tile.y + tile.length / 2 + tile.length * j;
+
+            check = this.gameServer.getEntityTile(coords);
+            if (check && check.owner === this.name) {
+                this.neighbors.push(check.home);
+
+                //TODO: do the same for the other side??
+            }
+        }
+    }
+};
+
 
 Home.prototype.decreaseHealth = function (amount) {
     var faction = this.gameServer.FACTION_LIST[this.owner];

@@ -226,7 +226,8 @@ PacketHandler.prototype.addHomePackets = function (home, ifInit) {
             shards: home.shards,
             level: home.level,
             hasColor: home.hasColor,
-            health: home.health
+            health: home.health,
+            neighbors: home.neighbors
     };
     if (ifInit) {
         return info;
@@ -246,7 +247,8 @@ PacketHandler.prototype.updateHomePackets = function (home) {
                 level: home.level,
                 radius: home.radius,
                 hasColor: home.hasColor,
-                health: home.health
+                health: home.health,
+                neighbors: home.neighbors
             }
         );
 };

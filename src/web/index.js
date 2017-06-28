@@ -83,6 +83,7 @@ var Home = function (homeInfo) {
     this.level = homeInfo.level;
     this.hasColor = homeInfo.hasColor;
     this.health = homeInfo.health;
+    this.neighbors = homeInfo.neighbors;
 };
 
 
@@ -262,6 +263,7 @@ function updateEntities(data) {
         home.radius = homeInfo.radius;
         home.health = homeInfo.health;
         home.hasColor = homeInfo.hasColor;
+        home.neighbors = homeInfo.neighbors;
     };
 
     var updateShards = function (shard, shardInfo) {
@@ -379,6 +381,18 @@ function drawScene(data) {
             if (home.owner !== null) {
                 ctx2.fillText(home.shards.length, home.x, home.y + 40);
             }
+            if (home.neighbors) {
+                for (var i = 0; i<home.neighbors.length; i++) {
+                    var neighbor = HOME_LIST[home.neighbors[i]];
+                    ctx2.moveTo(home.x, home.y);
+                    ctx2.strokeStyle = "#521522";
+                    ctx2.lineWidth = 10;
+                    ctx2.lineTo(neighbor.x, neighbor.y);
+                    ctx2.stroke();
+                }
+            }
+
+
             ctx2.closePath();
         }
     };
