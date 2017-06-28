@@ -236,6 +236,7 @@ PacketHandler.prototype.addHomePackets = function (home, ifInit) {
 
 
 PacketHandler.prototype.updateHomePackets = function (home) {
+    console.log("HEALTH: " + home.health);
 	this.updateHomePacket.push(
             {
                 id: home.id,
@@ -306,6 +307,7 @@ PacketHandler.prototype.deleteFactionPackets = function (faction) {
 };
 
 PacketHandler.prototype.deleteHomePackets = function (home) {
+    console.log("DELETING HOME" + home.id);
 	this.deleteHomePacket.push({id: home.id});
 };
 

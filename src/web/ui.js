@@ -16,14 +16,14 @@ playerNamer.style.display = "block";
 
 playerNameInput.addEventListener("keyup", function(event) {
     event.preventDefault();
-    if (event.keyCode == 13) {
+    if (event.keyCode === 13) {
         factionNameInput.focus();
     }
 });
 
 factionNameInput.addEventListener("keyup", function(event) {
     event.preventDefault();
-    if (event.keyCode == 13) {
+    if (event.keyCode === 13) {
         nameButton.click();
     }
 });
@@ -57,15 +57,15 @@ function openShardNamerUI() {
     var nameShardButton = document.getElementById("nameShardButton");
     var focusEvent = function(event) {
         event.preventDefault();
-        if (event.keyCode == 13) {
+        if (event.keyCode === 13) {
             textInput.focus();
             document.removeEventListener("keyup", focusEvent);
         }
-    }
+    };
     document.addEventListener("keyup", focusEvent);
     textInput.addEventListener("keyup", function(event) {
         event.preventDefault();
-        if (event.keyCode == 13) {
+        if (event.keyCode === 13) {
             nameShardButton.click();
         }
     });

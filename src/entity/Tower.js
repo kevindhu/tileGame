@@ -35,15 +35,19 @@ Tower.prototype.updateLevel = function () {
         this.updateHomeTree();
     }
     else if (this.getSupply() < 4) {
+        if (this.level < 1) {
+            this.health = 5;
+        }
         this.level = 1;
-        this.radius = 20;
-        this.health = 5;
+        this.radius = 30;
         this.updateHomeTree();
     }
-    else if (this.getSupply() > 6) {
-        this.level = 2;
-        this.radius = 30;
-        this.health = 10;
+    else if (this.getSupply() > 6 && this.level < 2) {
+        if (this.level < 1) {
+            this.health = 10;
+        }
+        this.radius = 50;
+        this.health = 80;
         this.updateHomeTree();
     }
 };

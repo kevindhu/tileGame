@@ -126,12 +126,6 @@ GameServer.prototype.checkShardCollision = function (shard) {
             else {
                 shard.onDelete();
                 home.decreaseHealth(1);
-                home.dropShard();
-                var faction = this.FACTION_LIST[home.owner];
-                var hq = this.HOME_LIST[faction.headquarter];
-                if (hq !== home && hq.getSupply() > 0) {
-                    hq.giveShard(home);
-                }
             }
 
         }

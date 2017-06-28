@@ -25,7 +25,7 @@ var large  = function () {
     BORDER_WIDTH = 1000;
 };
 
-medium();
+small();
 
 
 var tileRoot = Math.floor(Math.sqrt(TILES_INPUT));

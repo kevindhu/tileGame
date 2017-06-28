@@ -413,11 +413,14 @@ function drawScene(data) {
 
     var drawAnimations = function () {
         for (var id in ANIMATION_LIST) {
+            var home;
             var animation = ANIMATION_LIST[id];
 
             if (animation.type === "addShard") {
-                var home = HOME_LIST[animation.id];
-
+                home = HOME_LIST[animation.id];
+                if (!home) {
+                    return;
+                }
                 ctx2.beginPath();
                 ctx2.lineWidth = 3*animation.timer;
                 ctx2.strokeStyle = "#012CCC";
@@ -427,7 +430,10 @@ function drawScene(data) {
             }
 
             if (animation.type === "removeShard") {
-                var home = HOME_LIST[animation.id];
+                home = HOME_LIST[animation.id];
+                if (!home) {
+                    return;
+                }
                 ctx2.beginPath();
                 ctx2.lineWidth = 15 - animation.timer;
                 ctx2.strokeStyle = "rgba(255, 0, 0, " + animation.timer * 10 / 100 + ")";

@@ -155,7 +155,7 @@ Faction.prototype.isNeighboringFaction = function (tile) {
             return true;
         }
     }
-    
+
     for (var j = -1; j <= 1; j++) {
         coords['x'] = tile.x + tile.length / 2;
         coords['y'] = tile.y + tile.length / 2 + tile.length * j;

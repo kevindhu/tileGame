@@ -38,17 +38,25 @@ Home.prototype.mainInit = function () {
 };
 
 Home.prototype.decreaseHealth = function (amount) {
+    var faction = this.gameServer.FACTION_LIST[this.owner];
+    var hq = this.gameServer.HOME_LIST[faction.headquarter];
+
     this.health -= amount;
     if (this.tile) {
         var tile = this.gameServer.TILE_LIST[this.tile];
         tile.alert = true;
         this.packetHandler.updateTilesPackets(tile);
     }
+
+    if (amount >= 1) {
+        this.dropShard();
+        if (hq !== this && hq.getSupply() > 0) { //if hq is healthy enough
+            hq.giveShard(this);
+        }
+    }
+
     if (this.health <= 0) {
         this.onDelete();
-    }
-    else {
-        this.packetHandler.updateHomePackets(this);
     }
 };
 
@@ -75,7 +83,7 @@ Home.prototype.getSupply = function () {
 };
 
 Home.prototype.onDelete = function () {
-    console.log("DETETE");
+    console.log("DELETE: " + this.id);
     for (var i = this.shards.length - 1; i >= 0; i--) {
         this.dropShard();
     }
@@ -83,8 +91,8 @@ Home.prototype.onDelete = function () {
         var tower = this.gameServer.HOME_LIST[this.children[i]];
         tower.onDelete();
     }
-    var owner = this.gameServer.FACTION_LIST[this.owner];
-    owner.removeHome(this);
+    var faction = this.gameServer.FACTION_LIST[this.owner];
+    faction.removeHome(this);
     if (this.tile) {
         this.gameServer.TILE_LIST[this.tile].removeHome();
     }
@@ -106,14 +114,10 @@ Home.prototype.dropShard = function () {
 };
 
 Home.prototype.giveShard = function (home) {
-    console.log("GIVING SHARD");
     var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
     this.removeShard(shard);
-    shard.becomeShooting(this.randomPlayer, home.x - this.x/4,
-        home.y - this.y/4);
-
-    //TODO: change to animation!
-    home.addShard(shard);
+    shard.becomeShooting(this.randomPlayer, home.x - this.x/10,
+        home.y - this.y/10);
 };
 
 Home.prototype.addShard = function (shard) {
@@ -129,20 +133,26 @@ Home.prototype.addChild = function (home) {
 };
 
 Home.prototype.updateLevel = function () {
-    if (this.getSupply() < 1) {
+    if (this.getSupply() < 2) {
+        if (this.level !== 0) {
+            this.health = 1;
+        }
         this.level = 0;
         this.radius = 10;
-        this.health = 1;
         this.updateHomeTree();
     }
     else if (this.getSupply() < 4) {
+        if (this.level < 1) {
+            this.health = 1;
+        }
         this.level = 1;
         this.radius = 30;
-        this.health = 30;
         this.updateHomeTree();
     }
-    else if (this.getSupply() > 6) {
-        this.level = 2;
+    else if (this.getSupply() > 6 && this.level < 2) {
+        if (this.level < 1) {
+            this.health = 10;
+        }
         this.radius = 50;
         this.health = 80;
         this.updateHomeTree();
