@@ -49,9 +49,9 @@ Home.prototype.addNeighbors = function () {
         for (var j = -1; j <= 1; j++) {
             coords['x'] = tile.x + tile.length / 2 + tile.length * i;
             coords['y'] = tile.y + tile.length / 2 + tile.length * j;
-
             check = this.gameServer.getEntityTile(coords);
-            if (check && check.owner === this.name) {
+            //console.log(check);
+            if (check && check.owner === this.owner) {
                 this.neighbors.push(check.home);
 
                 //TODO: do the same for the other side??

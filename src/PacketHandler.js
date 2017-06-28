@@ -212,7 +212,7 @@ PacketHandler.prototype.addTilePackets = function (tile, ifInit) {
         length: tile.length,
         alert: tile.alert
     };
-}
+};
 
 
 PacketHandler.prototype.addHomePackets = function (home, ifInit) {
@@ -239,7 +239,6 @@ PacketHandler.prototype.addHomePackets = function (home, ifInit) {
 
 
 PacketHandler.prototype.updateHomePackets = function (home) {
-    console.log("HEALTH: " + home.health);
 	this.updateHomePacket.push(
             {
                 id: home.id,

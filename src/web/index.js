@@ -365,13 +365,29 @@ function drawScene(data) {
         }
     };
 
+    var drawConnectors = function () {
+        for (var id in HOME_LIST) {
+            var home = HOME_LIST[id];
+            if (home.neighbors) {
+                for (var i = 0; i < home.neighbors.length; i++) {
+                    var neighbor = HOME_LIST[home.neighbors[i]];
+                    ctx2.moveTo(home.x, home.y);
+                    ctx2.strokeStyle = "#912381";
+                    ctx2.lineWidth = 10;
+                    ctx2.lineTo(neighbor.x, neighbor.y);
+                    ctx2.stroke();
+                }
+            }
+        }
+    }
+
     var drawHomes = function () {
         for (var id in HOME_LIST) {
             var home = HOME_LIST[id];
 
             ctx2.beginPath();
             ctx2.fillStyle = "#003290";
-            ctx2.strokeStyle = "rgba(0,30,1, 0.1)";
+            ctx2.strokeStyle = "rgba(255,30, 1, 0.1)";
             ctx2.lineWidth = 20;
 
             ctx2.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
@@ -381,18 +397,6 @@ function drawScene(data) {
             if (home.owner !== null) {
                 ctx2.fillText(home.shards.length, home.x, home.y + 40);
             }
-            if (home.neighbors) {
-                for (var i = 0; i<home.neighbors.length; i++) {
-                    var neighbor = HOME_LIST[home.neighbors[i]];
-                    ctx2.moveTo(home.x, home.y);
-                    ctx2.strokeStyle = "#521522";
-                    ctx2.lineWidth = 10;
-                    ctx2.lineTo(neighbor.x, neighbor.y);
-                    ctx2.stroke();
-                }
-            }
-
-
             ctx2.closePath();
         }
     };
@@ -438,7 +442,7 @@ function drawScene(data) {
                 ctx2.beginPath();
                 ctx2.lineWidth = 3*animation.timer;
                 ctx2.strokeStyle = "#012CCC";
-                ctx2.arc(home.x, home.y, home.radius, 0, animation.timer/1.2, false);
+                ctx2.arc(home.x, home.y, home.radius, 0, animation.timer/1.2, true);
                 ctx2.stroke();
                 ctx2.closePath();
             }
@@ -562,6 +566,7 @@ function drawScene(data) {
     drawTiles();
     drawPlayers();
     drawShards();
+    drawConnectors();
     drawHomes();
     drawFactions();
     drawAnimations();
