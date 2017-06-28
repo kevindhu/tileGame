@@ -7,7 +7,6 @@ const PORT = process.env.PORT || 2000;
 
 function GameServer() {
     this.packetHandler = new PacketHandler(this);
-
     this.TILE_LIST = {};
     this.INIT_SOCKET_LIST = {};
     this.SOCKET_LIST = {};
@@ -120,17 +119,21 @@ GameServer.prototype.checkShardCollision = function (shard) {
 
     //shard + home collision
     this.homeTree.find(shardBound, function (home) {
-        if (shard.owner && shard.owner.faction !== home.owner) {
-            shard.onDelete();
-            //damage the home
-            var faction = this.FACTION_LIST[home.owner];
-            var hq = this.HOME_LIST[faction.headquarter];
-            if (hq !== home && hq.getSupply() > 0) {
-                hq.giveShard(home);
+        if (shard.owner) {
+            if (shard.owner.faction === home.owner) {
+                home.addShard(shard);
+            }
+            else {
+                shard.onDelete();
+                home.decreaseHealth(1);
+                home.dropShard();
+                var faction = this.FACTION_LIST[home.owner];
+                var hq = this.HOME_LIST[faction.headquarter];
+                if (hq !== home && hq.getSupply() > 0) {
+                    hq.giveShard(home);
+                }
             }
 
-            home.decreaseHealth(1);
-            home.dropShard();
         }
     }.bind(this));
 };
@@ -148,17 +151,14 @@ GameServer.prototype.checkPlayerCollision = function (player) {
         if (player !== shard.owner && shard.timer === 0) {
             if (player.emptyShard !== null) {
                 player.transformEmptyShard("unnamed");
-                this.packetHandler.deleteUIPackets(player.id,"name shard");
+                this.packetHandler.deleteUIPackets(player,"name shard");
             }
             //if shard already owned
             if (shard.owner !== null) {
-                if (shard.name === null) {  
-                    this.packetHandler.deleteUIPackets(shard.owner.id,"name shard");
-                }
                 shard.owner.removeShard(shard);
             }
             if (shard.name === null) {
-                this.packetHandler.deleteUIPackets(player.id,"home info");
+                this.packetHandler.deleteUIPackets(player,"home info");
                 this.packetHandler.addUIPackets(player, null, "name shard");
             }
             player.addShard(shard);
@@ -407,7 +407,7 @@ GameServer.prototype.createPlayer = function (socket, info) {
         }
         return name;
     };
-    
+
     info.faction = checkName(info.faction);
     var faction = this.FACTION_LIST[info.faction];
     if (!faction) {

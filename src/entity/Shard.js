@@ -149,7 +149,7 @@ Shard.prototype.addVelocity = function (x,y) {
 
 Shard.prototype.onDelete = function () {
     this.limbo();
-    this.packetHandler.addShardAnimationPackets(this);
+    this.packetHandler.addShardAnimationPackets(this, "shardDeath");
     this.packetHandler.deleteShardPackets(this);
 }
 

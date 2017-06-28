@@ -48,12 +48,14 @@ Player.prototype.onDelete = function () {
 
 
 Player.prototype.update = function () {
+    var tile = this.gameServer.getEntityTile(this);
+    var faction = this.gameServer.FACTION_LIST[this.faction];
+
     if (this.timer > 0) {
         this.timer -= 1;
     }
     this.updatePosition();
 
-    var tile = this.gameServer.getEntityTile(this);
     if (tile) {
         if (tile.owner === this.faction) {
             this.increaseHealth(0.1);
@@ -63,7 +65,9 @@ Player.prototype.update = function () {
             home.shootShard(this);
             this.decreaseHealth(0.1);
         }
-        this.packetHandler.addBracketPackets(this, tile);
+        else if (this.shards.length > 1 && faction.isNeighboringFaction(tile)) {
+            this.packetHandler.addBracketPackets(this, tile);
+        }
     }
     this.packetHandler.updatePlayersPackets(this);
 };
@@ -159,12 +163,14 @@ Player.prototype.addShard = function (shard) {
 
 Player.prototype.removeShard = function (shard) {
     if (shard.id === this.emptyShard) {
+        this.packetHandler.deleteUIPackets(this,"name shard");
         this.emptyShard = null;
     }
     var index = this.shards.indexOf(shard.id);
     this.shards.splice(index, 1);
     this.updateMaxSpeed();
     shard.timer = 0;
+    this.packetHandler.deleteBracketPackets(this);
 };
 
 Player.prototype.transformEmptyShard = function (name) {

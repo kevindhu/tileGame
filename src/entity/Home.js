@@ -31,7 +31,6 @@ Home.prototype.mainInit = function () {
         this.tile = tile.id;
         this.packetHandler.updateTilesPackets(tile);
     }
-    console.log("ADDING " + this.id + " TO THE HOME LIST");
     this.gameServer.HOME_LIST[this.id] = this;
     this.addQuadItem();
     this.gameServer.homeTree.insert(this.quadItem);
@@ -76,6 +75,7 @@ Home.prototype.getSupply = function () {
 };
 
 Home.prototype.onDelete = function () {
+    console.log("DETETE");
     for (var i = this.shards.length - 1; i >= 0; i--) {
         this.dropShard();
     }
@@ -96,25 +96,27 @@ Home.prototype.onDelete = function () {
 
 
 Home.prototype.dropShard = function () {
-    var shard = this.getRandomShard();
+    var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
     if (shard) {
-        var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
         this.removeShard(shard);
-        shard.becomeShooting(this.randomPlayer, Arithmetic.getRandomInt(-30, 30), 
+        shard.becomeShooting(this.randomPlayer, Arithmetic.getRandomInt(-30, 30),
             Arithmetic.getRandomInt(-30, 30))
     }
+    this.packetHandler.removeHomeAnimationPackets(this);
 };
 
 Home.prototype.giveShard = function (home) {
     var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
     this.removeShard(shard);
+    //TODO: change to animation!
     home.addShard(shard);
-}
+};
 
 Home.prototype.addShard = function (shard) {
     shard.becomeHome(this);
     this.shards.push(shard.id);
     this.updateLevel();
+    this.packetHandler.addHomeAnimationPackets(this);
     this.packetHandler.updateHomePackets(this);
 };
 

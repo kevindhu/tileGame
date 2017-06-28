@@ -7,8 +7,6 @@ c2.style.display = "none";
 c3.style.display = "none";
 c4.style.display = "none";
 
-//canvas.width = window.innerWidth;
-//canvas.height = window.innerHeight;
 c2.width = window.innerWidth;
 c2.height = window.innerHeight;
 
@@ -36,7 +34,7 @@ var TILE_LIST = {};
 var SHARD_LIST = {};
 var HOME_LIST = {};
 
-var SHARD_ANIMATION_LIST = {};
+var ANIMATION_LIST = {};
 
 var ARROW = null;
 var BRACKET = null;
@@ -110,9 +108,10 @@ var Bracket = function (bracketInfo) {
 
 
 var Animation = function (animationInfo) {
+    this.type = animationInfo.type;
     this.id = animationInfo.id;
     this.name = animationInfo.name;
-    this.x =animationInfo.x;
+    this.x = animationInfo.x;
     this.y = animationInfo.y;
     this.theta = 15;
     this.timer = getRandom(10,14);
@@ -154,7 +153,7 @@ function addEntities(data) {
     addEntity(data.shardInfo, SHARD_LIST, Shard);
     addEntity(data.homeInfo, HOME_LIST, Home);
     addEntity(data.factionInfo, FACTION_LIST, Faction, FACTION_ARRAY);
-    addEntity(data.animationInfo, SHARD_ANIMATION_LIST, Animation);
+    addEntity(data.animationInfo, ANIMATION_LIST, Animation);
 
     var bracketPacket = data.bracketInfo;
     if (bracketPacket) {
@@ -211,6 +210,16 @@ function deleteEntities(data) {
     deleteEntity(data.shardInfo, SHARD_LIST);
     deleteEntity(data.homeInfo, HOME_LIST);
     deleteEntity(data.factionInfo, FACTION_LIST, FACTION_ARRAY);
+
+    var bracketPacket = data.bracketInfo;
+    if (bracketPacket) {
+        for (var i = 0; i < bracketPacket.length; i++) {
+            var bracketInfo = bracketPacket[i];
+            if (selfId === bracketInfo.id) {
+                BRACKET = null;
+            }
+        }
+    }
 
 
     var UIPacket = data.UIInfo;
@@ -300,7 +309,7 @@ function drawScene(data) {
     var inBounds = function(player,x,y) {
         return x < (player.x+canvas.width) && x > (player.x-5/4*canvas.width)
         && y < (player.y+canvas.width) && y > (player.y-5/4*canvas.width);
-    }
+    };
 
     var drawPlayers = function () {
         ctx2.font = "20px Arial";
@@ -329,7 +338,6 @@ function drawScene(data) {
                     tile.color.g + "," +
                     tile.color.b +
                     ")";
-                console.log(tile.length);
                 ctx2.fillRect(tile.x, tile.y, tile.length, tile.length);
             }
         }
@@ -404,31 +412,51 @@ function drawScene(data) {
     };
 
     var drawAnimations = function () {
-        for (var id in SHARD_ANIMATION_LIST) {
-            var animation = SHARD_ANIMATION_LIST[id];
-            ctx2.font = 60 - animation.timer + "px Arial";
+        for (var id in ANIMATION_LIST) {
+            var animation = ANIMATION_LIST[id];
 
+            if (animation.type === "addShard") {
+                var home = HOME_LIST[animation.id];
 
-            ctx2.save();
-            ctx2.translate(animation.x, animation.y);
-            ctx2.rotate(-Math.PI/50 * animation.theta);
-            ctx2.textAlign = "center";
-            ctx2.fillStyle = "rgba(0, 0, 0, " + animation.timer * 10/100 + ")";
-            ctx2.fillText(animation.name, 0, 15);
-            ctx2.restore();
-
-            ctx2.fillStyle = "#000000";
-            animation.theta = lerp(animation.theta, 0, 0.08);
-            animation.x = lerp(animation.x, animation.endX, 0.1);
-            animation.y = lerp(animation.y, animation.endY, 0.1);
-
-            animation.timer --;
-            if (animation.timer <= 0) {
-                delete SHARD_ANIMATION_LIST[id];
+                ctx2.beginPath();
+                ctx2.lineWidth = 3*animation.timer;
+                ctx2.strokeStyle = "#012CCC";
+                ctx2.arc(home.x, home.y, home.radius, 0, animation.timer/1.2, false);
+                ctx2.stroke();
+                ctx2.closePath();
             }
 
+            if (animation.type === "removeShard") {
+                var home = HOME_LIST[animation.id];
+                ctx2.beginPath();
+                ctx2.lineWidth = 15 - animation.timer;
+                ctx2.strokeStyle = "rgba(255, 0, 0, " + animation.timer * 10 / 100 + ")";
+                ctx2.arc(home.x, home.y, home.radius, 0, 2*Math.PI, false);
+                ctx2.stroke();
+                ctx2.closePath();
+            }
+
+            if (animation.type === "shardDeath") {
+                ctx2.font = 60 - animation.timer + "px Arial";
+                ctx2.save();
+                ctx2.translate(animation.x, animation.y);
+                ctx2.rotate(-Math.PI / 50 * animation.theta);
+                ctx2.textAlign = "center";
+                ctx2.fillStyle = "rgba(0, 0, 0, " + animation.timer * 10 / 100 + ")";
+                ctx2.fillText(animation.name, 0, 15);
+                ctx2.restore();
+
+                ctx2.fillStyle = "#000000";
+                animation.theta = lerp(animation.theta, 0, 0.08);
+                animation.x = lerp(animation.x, animation.endX, 0.1);
+                animation.y = lerp(animation.y, animation.endY, 0.1);
+            }
+            animation.timer--;
+            if (animation.timer <= 0) {
+                delete ANIMATION_LIST[id];
+            }
         }
-    }
+    };
 
 
 

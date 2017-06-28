@@ -22,12 +22,12 @@ Faction.prototype.init = function () {
     this.packetHandler.addFactionPackets(this);
 };
 
-Faction.prototype.getInitCoords= function () {
+Faction.prototype.getInitCoords = function () {
     var tile = null;
     var coords = {};
     while (tile === null || tile.owner !== null) {
-        coords['x'] = Arithmetic.getRandomInt(250,1000);
-        coords['y'] = Arithmetic.getRandomInt(250,1000);
+        coords['x'] = Arithmetic.getRandomInt(entityConfig.BORDER_WIDTH,entityConfig.WIDTH-entityConfig.BORDER_WIDTH);
+        coords['y'] = Arithmetic.getRandomInt(entityConfig.BORDER_WIDTH,entityConfig.WIDTH-entityConfig.BORDER_WIDTH);
         tile = this.gameServer.getEntityTile(coords);
     }
     this.x = tile.x + tile.length/2;
@@ -69,12 +69,12 @@ Faction.prototype.addHeadquarter = function () {
 
 Faction.prototype.addSentinel = function (player) {
     var tile = this.gameServer.getEntityTile(player);
-    if (tile !== null && tile.home === null &&
-        Math.abs(tile.x + tile.length/2 - player.x) < (tile.length / 8) &&
-        Math.abs(tile.y + tile.length/2 - player.y) < (tile.length / 8) &&
+    if (tile !== null && !tile.home &&
+        Math.abs(tile.x + tile.length/2 - player.x) < (tile.length ) &&
+        Math.abs(tile.y + tile.length/2 - player.y) < (tile.length ) &&
         player.shards.length >= 2) {
 
-        if (this._neighboringFaction(tile)) {
+        if (this.isNeighboringFaction(tile)) {
             var sentinel = new Sentinel(this, tile.x + tile.length/2, 
                 tile.y + tile.length/2, this.gameServer);
 
@@ -148,7 +148,7 @@ Faction.prototype.getRandomPlayer = function () {
 };
 
 
-Faction.prototype._neighboringFaction = function (tile) {
+Faction.prototype.isNeighboringFaction = function (tile) {
     var coords = {};
     for (var i = -1; i<=1; i++) {
         for (var j = -1; j<=1; j++) {
