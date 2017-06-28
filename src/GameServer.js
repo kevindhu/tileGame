@@ -218,13 +218,16 @@ GameServer.prototype.updatePlayers = function () {
 
 GameServer.prototype.initNewClients = function () {
     for (var id in this.INIT_SOCKET_LIST) {
-        var socket = this.INIT_SOCKET_LIST[id];
+        var socket = this.SOCKET_LIST[id];
+        if (!socket) {
+            delete this.INIT_SOCKET_LIST[id];
+        }
         if (socket.timer !== 0) {
             socket.timer -= 1;
         }
-        else if (socket.stage !== 5) {
+        else if (socket.stage <= entityConfig.STAGES) {
             this.packetHandler.sendInitPackets(socket);
-            socket.timer = 10;
+            socket.timer = 3;
         }
         else {
             delete this.INIT_SOCKET_LIST[id];

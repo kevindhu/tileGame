@@ -480,14 +480,6 @@ function drawScene(data) {
     };
 
     var drawMiniMap = function () {
-        function hexToRGB(hex) {
-            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            }
-        }
         if (mapTimer <= 0 || serverMap === null) {
             var tileLength = Math.sqrt(Object.size(TILE_LIST));
             if (tileLength === 0 || !selfPlayer) {
@@ -495,12 +487,12 @@ function drawScene(data) {
             }   
             var imgData = ctx.createImageData(tileLength, tileLength);
             var tile;
-            var tileRGB = {};
+            var tileRGB;
             var i = 0;
 
 
             for (var id in TILE_LIST) {
-                var tileRGB = {};
+                tileRGB = {};
                 tile = TILE_LIST[id];
                 if (tile.color && tile.alert || inBounds(selfPlayer,tile.x, tile.y)) {
                     tileRGB.r = tile.color.r;

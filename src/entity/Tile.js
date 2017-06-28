@@ -47,12 +47,12 @@ Tile.prototype.removeHome = function () {
     this.home = null;
     this.owner = null;
     this.packetHandler.updateTilesPackets(this);
-}
+};
 
 
 Tile.prototype.hasHome = function () {
     return this.home;
-}
+};
 
 Tile.prototype.setHome = function (home) {
     this.home = home.id;

@@ -38,7 +38,8 @@ PacketHandler.prototype.sendInitPackets = function (socket) {
 };
 
 
-PacketHandler.prototype.createInitPacket = function (stage,id) { //four total stages
+PacketHandler.prototype.createInitPacket = function (stage,id) {
+    console.log("COMMENCING STAGE: " + stage);
     var playerPacket = [],
         shardPacket = [],
         homePacket = [],
@@ -51,11 +52,12 @@ PacketHandler.prototype.createInitPacket = function (stage,id) { //four total st
 
     var populate = function (packet,list, call, stage) {
         var size = Object.size(list);
-        count = 0;
-        bound = [size * stage/4 - 5, size * (stage + 1)/4 + 5]
+        var count = 0;
+        var bound = [size * stage/entityConfig.STAGES - 5,
+            size * (stage + 1)/entityConfig.STAGES + 5];
         for (i in list) {
             if (count >= bound[0] && count < bound[1]) { // delta of 5 for overlap
-                entity = list[i];
+                var entity = list[i];
                 packet.push(call(entity,true));
             }
             count ++;
