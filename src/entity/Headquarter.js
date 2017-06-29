@@ -18,6 +18,8 @@ function Headquarter(faction, x, y, gameServer) {
 EntityFunctions.inherits(Headquarter, Home);
 
 
+
+
 Headquarter.prototype.updateLevel = function () {
 };
 

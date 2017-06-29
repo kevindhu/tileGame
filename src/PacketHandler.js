@@ -218,7 +218,7 @@ PacketHandler.prototype.addTilePackets = function (tile, ifInit) {
 PacketHandler.prototype.addHomePackets = function (home, ifInit) {
 	var info = {
             id: home.id,
-            owner: home.owner.name,
+            owner: home.faction.name,
             x: home.x,
             y: home.y,
             type: home.type,

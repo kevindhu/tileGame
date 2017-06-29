@@ -15,7 +15,7 @@ var medium = function () {
 
 var small = function () {
     WIDTH = 1000;
-    TILES_INPUT = 100;
+    TILES_INPUT = 40;
     SHARDS = 35;
     BORDER_WIDTH = 100;
     STAGES = 2;
@@ -38,7 +38,7 @@ var superLarge  = function () {
     STAGES = 20;
 };
 
-medium();
+small();
 
 
 var tileRoot = Math.floor(Math.sqrt(TILES_INPUT));

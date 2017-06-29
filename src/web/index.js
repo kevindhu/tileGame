@@ -117,8 +117,10 @@ var Animation = function (animationInfo) {
     this.theta = 15;
     this.timer = getRandom(10,14);
 
-    this.endX = this.x + getRandom(-100,100);
-    this.endY = this.y + getRandom(-100,100);
+    if (this.x) {
+        this.endX = this.x + getRandom(-100, 100);
+        this.endY = this.y + getRandom(-100, 100);
+    }
 };
 
 function addFactionstoUI(data) {
@@ -155,6 +157,7 @@ function addEntities(data) {
     addEntity(data.homeInfo, HOME_LIST, Home);
     addEntity(data.factionInfo, FACTION_LIST, Faction, FACTION_ARRAY);
     addEntity(data.animationInfo, ANIMATION_LIST, Animation);
+
 
     var bracketPacket = data.bracketInfo;
     if (bracketPacket) {
@@ -379,14 +382,18 @@ function drawScene(data) {
                 }
             }
         }
-    }
+    };
 
     var drawHomes = function () {
         for (var id in HOME_LIST) {
             var home = HOME_LIST[id];
 
             ctx2.beginPath();
-            ctx2.fillStyle = "#003290";
+            if (home.neighbors.length >= 4) {
+                ctx2.fillStyle = "#4169e1";
+            } else {
+                ctx2.fillStyle = "#003290";
+            }
             ctx2.strokeStyle = "rgba(255,30, 1, 0.1)";
             ctx2.lineWidth = 20;
 
@@ -433,7 +440,6 @@ function drawScene(data) {
         for (var id in ANIMATION_LIST) {
             var home;
             var animation = ANIMATION_LIST[id];
-
             if (animation.type === "addShard") {
                 home = HOME_LIST[animation.id];
                 if (!home) {
@@ -450,6 +456,7 @@ function drawScene(data) {
             if (animation.type === "removeShard") {
                 home = HOME_LIST[animation.id];
                 if (!home) {
+                    delete ANIMATION_LIST[id];
                     return;
                 }
                 ctx2.beginPath();
@@ -475,6 +482,7 @@ function drawScene(data) {
                 animation.x = lerp(animation.x, animation.endX, 0.1);
                 animation.y = lerp(animation.y, animation.endY, 0.1);
             }
+
             animation.timer--;
             if (animation.timer <= 0) {
                 delete ANIMATION_LIST[id];

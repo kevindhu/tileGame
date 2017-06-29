@@ -9,7 +9,7 @@ function Tile(x, y, gameServer) {
     this.y = y;
 
     this.home = null;
-    this.owner = null;
+    this.faction = null;
 
     this.color = null;
     this.length = (entityConfig.WIDTH - entityConfig.BORDER_WIDTH * 2) / Math.sqrt(entityConfig.TILES);
@@ -45,7 +45,7 @@ Tile.prototype.setColor = function (color) {
 Tile.prototype.removeHome = function () {
     this.color = "#FFFFFF";
     this.home = null;
-    this.owner = null;
+    this.faction = null;
     this.packetHandler.updateTilesPackets(this);
 };
 
@@ -56,7 +56,7 @@ Tile.prototype.hasHome = function () {
 
 Tile.prototype.setHome = function (home) {
     this.home = home.id;
-    this.owner = home.owner;
+    this.faction = home.faction;
 };
 
 

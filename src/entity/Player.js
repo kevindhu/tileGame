@@ -57,10 +57,10 @@ Player.prototype.update = function () {
     this.updatePosition();
 
     if (tile) {
-        if (tile.owner === this.faction) {
+        if (tile.faction === this.faction) {
             this.increaseHealth(0.1);
         }
-        else if (tile.owner !== null) {
+        else if (tile.faction !== null) {
             var home = this.gameServer.HOME_LIST[tile.home];
             home.shootShard(this);
             this.decreaseHealth(0.1);

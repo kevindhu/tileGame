@@ -49,7 +49,7 @@ Shard.prototype.limbo = function () {
 
 Shard.prototype.setName = function (name) {
     this.name = name;
-}
+};
 
 
 Shard.prototype.becomeStatic = function () {
@@ -70,16 +70,16 @@ Shard.prototype.becomeShooting = function (player, xVel, yVel, temp) {
     else {
         this.type = "shooting";
     }
-    this.owner = player;
     this.limbo();
+    this.owner = player.id;
     this.addVelocity(xVel, yVel);
 
     this.gameServer.shootingShardTree.insert(this.quadItem);
     this.gameServer.SHOOTING_SHARD_LIST[this.id] = this;
-}
+};
 
 Shard.prototype.becomePlayer = function (player) {
-    this.owner = player;
+    this.owner = player.id;
     this.timer = 100;
     this.type = "player";
     this.updateQuadItem();
@@ -87,14 +87,14 @@ Shard.prototype.becomePlayer = function (player) {
 
     this.gameServer.shardTree.insert(this.quadItem);
     this.gameServer.PLAYER_SHARD_LIST[this.id] = this;
-}
+};
 
 Shard.prototype.becomeHome = function (home) {
     this.home = home;
     this.type = "home";
     this.limbo();
     this.gameServer.HOME_SHARD_LIST[this.id] = this;
-}
+};
 
 Shard.prototype.updatePosition = function () {
     if (this.timer > 0) {
@@ -108,18 +108,19 @@ Shard.prototype.updatePosition = function () {
             this.move();
             break;
         case "player":
-            this.follow(this.owner);
+            var player = this.gameServer.PLAYER_LIST[this.owner];
+            this.follow(player);
             break;
         case "home":
             this.rotate();
             break;
     }
     this.packetHandler.updateShardsPackets(this);
-}
+};
 
 Shard.prototype.useSupply = function () {
     this.supply -= 1;
-}
+};
 
 Shard.prototype.rotate = function () {
     if (this.home !== null) {
@@ -136,7 +137,7 @@ Shard.prototype.follow = function (owner) {
 
     this.gameServer.shardTree.remove(this.quadItem);
     this.gameServer.shardTree.insert(this.quadItem);
-}
+};
 
 Shard.prototype.addVelocity = function (x,y) {
     this.xVel = x;
@@ -151,7 +152,7 @@ Shard.prototype.onDelete = function () {
     this.limbo();
     this.packetHandler.addShardAnimationPackets(this, "shardDeath");
     this.packetHandler.deleteShardPackets(this);
-}
+};
 
 Shard.prototype.move = function () {
     if (this.xVel === 0) {

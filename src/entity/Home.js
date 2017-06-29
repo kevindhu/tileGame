@@ -10,8 +10,8 @@ function Home(faction, x, y, gameServer) {
 
     this.x = x;
     this.y = y;
-    
-    this.owner = faction.name;
+
+    this.faction = faction.name;
     this.tile = null;
     this.neighbors = [];
 
@@ -32,7 +32,9 @@ Home.prototype.mainInit = function () {
         this.tile = tile.id;
         this.packetHandler.updateTilesPackets(tile);
     }
-    this.addNeighbors();
+    if (this.type !== "Tower") {
+        this.addAllNeighbors();
+    }
     this.gameServer.HOME_LIST[this.id] = this;
     this.addQuadItem();
     this.gameServer.homeTree.insert(this.quadItem);
@@ -40,30 +42,58 @@ Home.prototype.mainInit = function () {
 };
 
 
-Home.prototype.addNeighbors = function () {
+Home.prototype.addAllNeighbors = function () {
     var coords = {};
     var tile = this.gameServer.TILE_LIST[this.tile];
     var check;
 
     for (var i = -1; i <= 1; i++) {
         for (var j = -1; j <= 1; j++) {
-            coords['x'] = tile.x + tile.length / 2 + tile.length * i;
-            coords['y'] = tile.y + tile.length / 2 + tile.length * j;
-            check = this.gameServer.getEntityTile(coords);
-            //console.log(check);
-            if (check && check.owner === this.owner) {
-                this.neighbors.push(check.home);
-
-                //TODO: do the same for the other side??
+            if (!(i === 0 && j === 0)) {
+                coords['x'] = tile.x + tile.length / 2 + tile.length * i;
+                coords['y'] = tile.y + tile.length / 2 + tile.length * j;
+                check = this.gameServer.getEntityTile(coords);
+                if (check && check.faction === this.faction) {
+                    this.neighbors.push(check.home);
+                    var neighbor = this.gameServer.HOME_LIST[check.home];
+                    neighbor.addNeighbor(this);
+                }
             }
         }
     }
 };
 
+Home.prototype.removeAllNeighbors = function () {
+    var neighbor;
+    for (var i = this.neighbors.length - 1; i >= 0; i--) {
+        neighbor = this.gameServer.HOME_LIST[this.neighbors[i]];
+        neighbor.removeNeighbor(this);
+    }
+};
+
+Home.prototype.addNeighbor = function (home) {
+    this.neighbors.push(home.id);
+    this.packetHandler.updateHomePackets(this);
+};
+
+
+Home.prototype.removeNeighbor = function (home) {
+    var index = this.neighbors.indexOf(home.id);
+    this.neighbors.splice(index, 1);
+    this.updateLevel();
+    this.packetHandler.updateHomePackets(this);
+};
+
 
 Home.prototype.decreaseHealth = function (amount) {
-    var faction = this.gameServer.FACTION_LIST[this.owner];
+    var faction = this.gameServer.FACTION_LIST[this.faction];
     var hq = this.gameServer.HOME_LIST[faction.headquarter];
+
+    if (this.neighbors.length === 4) {
+        var neighbor = this.gameServer.HOME_LIST[this.neighbors[Math.floor(Arithmetic.getRandomInt(0, 3))]];
+        neighbor.decreaseHealth(1);
+        return;
+    }
 
     this.health -= amount;
     if (this.tile) {
@@ -74,24 +104,32 @@ Home.prototype.decreaseHealth = function (amount) {
 
     if (amount >= 1) {
         this.dropShard();
-        if (hq !== this && hq.getSupply() > 0) { //if hq is healthy enough
-            hq.giveShard(this);
-        }
+        hq.giveShard(this);
     }
 
     if (this.health <= 0) {
         this.onDelete();
     }
+    else {
+        this.packetHandler.updateHomePackets(this);
+    }
 };
 
 
-Home.prototype.getRandomShard = function () {   
-    var randomIndex = Arithmetic.getRandomInt(0,this.shards.length-1);
+Home.prototype.getRandomShard = function () {
+    var randomIndex = Arithmetic.getRandomInt(0, this.shards.length - 1);
     return this.shards[randomIndex];
 };
 
+Home.prototype.getRandomPlayer = function () {
+    if (!this.randomPlayer) {
+        var faction = this.gameServer.FACTION_LIST[this.faction];
+        this.randomPlayer = this.gameServer.PLAYER_LIST[faction.getRandomPlayer()];
+    }
+    return this.randomPlayer;
+};
+
 Home.prototype.shootShard = function (player) {
-    return;
 };
 
 Home.prototype.removeShard = function (shard) {
@@ -107,7 +145,6 @@ Home.prototype.getSupply = function () {
 };
 
 Home.prototype.onDelete = function () {
-    console.log("DELETE: " + this.id);
     for (var i = this.shards.length - 1; i >= 0; i--) {
         this.dropShard();
     }
@@ -115,7 +152,8 @@ Home.prototype.onDelete = function () {
         var tower = this.gameServer.HOME_LIST[this.children[i]];
         tower.onDelete();
     }
-    var faction = this.gameServer.FACTION_LIST[this.owner];
+    this.removeAllNeighbors();
+    var faction = this.gameServer.FACTION_LIST[this.faction];
     faction.removeHome(this);
     if (this.tile) {
         this.gameServer.TILE_LIST[this.tile].removeHome();
@@ -131,17 +169,19 @@ Home.prototype.dropShard = function () {
     var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
     if (shard) {
         this.removeShard(shard);
-        shard.becomeShooting(this.randomPlayer, Arithmetic.getRandomInt(-30, 30),
+        shard.becomeShooting(this.getRandomPlayer(), Arithmetic.getRandomInt(-30, 30),
             Arithmetic.getRandomInt(-30, 30));
     }
     this.packetHandler.removeHomeAnimationPackets(this);
 };
 
 Home.prototype.giveShard = function (home) {
-    var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
-    this.removeShard(shard);
-    shard.becomeShooting(this.randomPlayer, home.x - this.x/10,
-        home.y - this.y/10);
+    if (this !== home && this.getSupply() > 0) {
+        var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
+        this.removeShard(shard);
+        shard.becomeShooting(this.getRandomPlayer(), home.x - this.x / 10,
+            home.y - this.y / 10);
+    }
 };
 
 Home.prototype.addShard = function (shard) {
@@ -204,10 +244,10 @@ Home.prototype.addQuadItem = function () {
 
 Home.prototype.updateQuadItem = function () {
     this.quadItem.bound = {
-            minx: this.x - this.radius,
-            miny: this.y - this.radius,
-            maxx: this.x + this.radius,
-            maxy: this.y + this.radius
+        minx: this.x - this.radius,
+        miny: this.y - this.radius,
+        maxx: this.x + this.radius,
+        maxy: this.y + this.radius
     };
 };
 

@@ -25,7 +25,7 @@ Faction.prototype.init = function () {
 Faction.prototype.getInitCoords = function () {
     var tile = null;
     var coords = {};
-    while (tile === null || tile.owner !== null) {
+    while (tile === null || tile.faction !== null) {
         coords['x'] = Arithmetic.getRandomInt(entityConfig.BORDER_WIDTH, entityConfig.WIDTH - entityConfig.BORDER_WIDTH);
         coords['y'] = Arithmetic.getRandomInt(entityConfig.BORDER_WIDTH, entityConfig.WIDTH - entityConfig.BORDER_WIDTH);
         tile = this.gameServer.getEntityTile(coords);
@@ -96,7 +96,7 @@ Faction.prototype.addTower = function (player) {
     var tile = this.gameServer.getEntityTile(player);
     if (tile !== null &&
         tile.home !== null &&
-        tile.owner === player.faction &&
+        tile.faction === player.faction &&
         player.shards.length >= 2) {
 
         var home = this.gameServer.HOME_LIST[tile.home];
@@ -151,7 +151,7 @@ Faction.prototype.isNeighboringFaction = function (tile) {
         coords['x'] = tile.x + tile.length / 2 + tile.length * i;
         coords['y'] = tile.y + tile.length / 2;
         check = this.gameServer.getEntityTile(coords);
-        if (check && check.owner === this.name) {
+        if (check && check.faction === this.name) {
             return true;
         }
 
@@ -160,7 +160,7 @@ Faction.prototype.isNeighboringFaction = function (tile) {
         coords['x'] = tile.x + tile.length / 2;
         coords['y'] = tile.y + tile.length / 2 + tile.length * j;
         check = this.gameServer.getEntityTile(coords);
-        if (check && check.owner === this.name) {
+        if (check && check.faction === this.name) {
             return true;
         }
     }

@@ -4,7 +4,6 @@ var EntityFunctions = require('./EntityFunctions');
 var Home = require('./Home');
 var Shard = require('./Shard');
 
-
 function Tower(faction, x, y, gameServer, home) {
     Tower.super_.call(this, faction, x, y, gameServer);
     this.parent = home.id;
@@ -16,7 +15,7 @@ function Tower(faction, x, y, gameServer, home) {
     this.health = 2;
     this.init();
     this.mainInit();
-};
+}
 
 EntityFunctions.inherits(Tower, Home);
 
@@ -82,7 +81,7 @@ Tower.prototype.shootShard = function (player) {
         }
         var shardClone = new Shard(this.x, this.y, this.gameServer);
         shardClone.setName(shard.name);
-        shardClone.becomeShooting(this.randomPlayer, (player.x - this.x) / 4,
+        shardClone.becomeShooting(this.getRandomPlayer(), (player.x - this.x) / 4,
          (player.y - this.y) / 4, true);
     }
     this.packetHandler.updateHomePackets(this);

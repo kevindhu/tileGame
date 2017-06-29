@@ -20,7 +20,6 @@ function Sentinel(faction, x, y, gameServer) {
 EntityFunctions.inherits(Sentinel, Home);
 
 Sentinel.prototype.shootShard = function (player) {
-	console.log(this.timer);
     if (this.timer !== 0) {
         this.timer--;
         return;
@@ -35,7 +34,7 @@ Sentinel.prototype.shootShard = function (player) {
         }
         var shardClone = new Shard(this.x, this.y, this.gameServer);
         shardClone.setName(shard.name);
-        shardClone.becomeShooting(this.randomPlayer, (player.x - this.x) / 4,
+        shardClone.becomeShooting(this.getRandomPlayer(), (player.x - this.x) / 4,
          (player.y - this.y) / 4, true);
     }
     this.packetHandler.updateHomePackets(this);
