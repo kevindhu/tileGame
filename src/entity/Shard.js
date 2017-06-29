@@ -20,7 +20,8 @@ function Shard(x, y, gameServer) {
     this.value = 0;
     this.timer = 0;
     this.theta = 0;
-    
+
+    this.visible = true;
     this.xSwitched = false;
     this.ySwitched = false;
     this.radius = entityConfig.SHARD_WIDTH;
@@ -53,6 +54,7 @@ Shard.prototype.setName = function (name) {
 
 
 Shard.prototype.becomeStatic = function () {
+    this.visible = true;
     this.owner = null;
     this.timer = 0;
     this.type = "static";
@@ -70,6 +72,7 @@ Shard.prototype.becomeShooting = function (player, xVel, yVel, temp) {
     else {
         this.type = "shooting";
     }
+    this.visible = true;
     this.limbo();
     this.owner = player.id;
     this.addVelocity(xVel, yVel);
@@ -79,6 +82,7 @@ Shard.prototype.becomeShooting = function (player, xVel, yVel, temp) {
 };
 
 Shard.prototype.becomePlayer = function (player) {
+    this.visible = true;
     this.owner = player.id;
     this.timer = 100;
     this.type = "player";
@@ -90,6 +94,7 @@ Shard.prototype.becomePlayer = function (player) {
 };
 
 Shard.prototype.becomeHome = function (home) {
+    this.visible = false;
     this.home = home;
     this.type = "home";
     this.limbo();
@@ -112,7 +117,7 @@ Shard.prototype.updatePosition = function () {
             this.follow(player);
             break;
         case "home":
-            this.rotate();
+            //this.rotate();
             break;
     }
     this.packetHandler.updateShardsPackets(this);

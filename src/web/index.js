@@ -71,6 +71,7 @@ var Shard = function (shardInfo) {
     this.x = shardInfo.x;
     this.y = shardInfo.y;
     this.name = shardInfo.name;
+    this.visible = shardInfo.visible;
 };
 var Home = function (homeInfo) {
     this.id = homeInfo.id;
@@ -272,6 +273,7 @@ function updateEntities(data) {
     var updateShards = function (shard, shardInfo) {
         shard.x = shardInfo.x;
         shard.y = shardInfo.y;
+        shard.visible = shardInfo.visible,
         shard.name = shardInfo.name;
     };
 
@@ -354,7 +356,7 @@ function drawScene(data) {
         for (var id in SHARD_LIST) {
             var shard = SHARD_LIST[id];
 
-            if (inBounds(selfPlayer, shard.x, shard.y)) {
+            if (inBounds(selfPlayer, shard.x, shard.y) && shard.visible) {
                 ctx2.beginPath();
                 ctx2.fillStyle = "#008000";
                 if (shard.name !== null) {

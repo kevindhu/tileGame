@@ -76,6 +76,12 @@ Home.prototype.addNeighbor = function (home) {
     this.packetHandler.updateHomePackets(this);
 };
 
+Home.prototype.removeChild = function (home) {
+    var index = this.children.indexOf(home.id);
+    this.children.splice(index, 1);
+};
+
+
 
 Home.prototype.removeNeighbor = function (home) {
     var index = this.neighbors.indexOf(home.id);

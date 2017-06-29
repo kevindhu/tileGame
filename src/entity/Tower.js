@@ -87,4 +87,13 @@ Tower.prototype.shootShard = function (player) {
     this.packetHandler.updateHomePackets(this);
 };
 
+Tower.prototype.onDelete = function () {
+    Tower.super_.prototype.onDelete.apply(this);
+    var parent = this.gameServer.HOME_LIST[this.parent];
+    parent.removeChild(this);
+};
+
+
+
+
 module.exports = Tower;

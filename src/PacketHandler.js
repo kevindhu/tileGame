@@ -193,7 +193,8 @@ PacketHandler.prototype.addShardPackets = function (shard, ifInit) {
         id: shard.id,
         x: shard.x,
         y: shard.y,
-        name: null
+        name: null,
+        visible: true
     };
     if (ifInit) {
         return info;
@@ -283,7 +284,8 @@ PacketHandler.prototype.updateShardsPackets = function (shard) {
         name: shard.name,
         id: shard.id,
         x: shard.x,
-        y: shard.y
+        y: shard.y,
+        visible: shard.visible
     });
 }
 

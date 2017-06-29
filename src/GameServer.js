@@ -120,13 +120,15 @@ GameServer.prototype.checkShardCollision = function (shard) {
     //shard + home collision
     this.homeTree.find(shardBound, function (home) {
         console.log("CHECKING SHARD COLLISION WITH HOME");
-        var owner = this.gameServer.PLAYER_LIST[shard.owner];
-        if (owner.faction === home.faction && home.getRandomPlayer() !== owner) {
-            home.addShard(shard);
+        var owner = this.PLAYER_LIST[shard.owner];
+        if (home.getRandomPlayer() === owner) {
+            return;
         }
-        else {
+        if (owner.faction !== home.faction) {
             shard.onDelete();
             home.decreaseHealth(1);
+        } else {
+            home.addShard(shard);
         }
     }.bind(this));
 };
@@ -148,7 +150,7 @@ GameServer.prototype.checkPlayerCollision = function (player) {
             }
             //if shard already owned
             if (shard.owner !== null) {
-                var oldOwner = this.gameServer.PLAYER_LIST[shard.owner];
+                var oldOwner = this.PLAYER_LIST[shard.owner];
                 oldOwner.removeShard(shard);
             }
             if (shard.name === null) {
@@ -161,8 +163,8 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 
     //player + shooting shard collision
     this.shootingShardTree.find(playerBound, function (shard) {
-        var playerCheck = this.gameServer.PLAYER_LIST[shard.owner];
-        if (shard.owner && player.faction !== playerCheck.faction) {
+        var playerCheck = this.PLAYER_LIST[shard.owner];
+        if (playerCheck && shard.owner && player.faction !== playerCheck.faction) {
             shard.onDelete();
             player.decreaseHealth(1);
         }
@@ -192,7 +194,7 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 
     //player + tower collision
     this.towerTree.find(playerBound, function (tower) {
-        if (player.faction !== tower.owner) {
+        if (player.faction !== tower.faction) {
             //tower shoots at player
             tower.shootShard(player);
         }
@@ -311,7 +313,7 @@ GameServer.prototype.start = function () {
             }
 
             var tile = this.getEntityTile(home);
-            if (tile.owner) {
+            if (tile.faction) {
                 tile.setColor(data.color);
                 home.hasColor = true;
                 this.packetHandler.updateHomePackets(home);
