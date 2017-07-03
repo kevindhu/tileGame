@@ -8,9 +8,6 @@
 
 tileGame requires some version of Node.js
 
-If you are using Maven or Gradle, see the [Build Tools](#build-tools) section.
-Otherwise, see the instructions below.
-
 1. Go to the root directory.
 2. To install, run:
 ```
