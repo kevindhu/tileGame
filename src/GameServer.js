@@ -19,6 +19,7 @@ function GameServer() {
     this.PLAYER_SHARD_LIST = {};
     this.HOME_SHARD_LIST = {};
 
+    this.controllerTree = null;
     this.shardTree = null;
     this.homeTree = null;
     this.tileTree = null;
@@ -47,6 +48,15 @@ GameServer.prototype.initTiles = function () {
                 entityConfig.BORDER_WIDTH + this.tileLength * j, this);
         }
     }
+};
+
+GameServer.prototype.initControllers = function () {
+    this.controllerTree = new QuadNode({
+        minx: this.minx,
+        miny: this.miny,
+        maxx: this.maxx,
+        maxy: this.maxy
+    });
 };
 
 GameServer.prototype.initShards = function () {
@@ -195,7 +205,7 @@ GameServer.prototype.checkControllerCollision = function (controller) {
                     else {
                         controller.timer = 15;
                     }
-                    this.packetHandler.addUIPackets(player, home, "home info");
+                    this.packetHandler.addUIPackets(controller, home, "home info");
                 }
             }
         }.bind(this));
@@ -281,6 +291,7 @@ GameServer.prototype.start = function () {
     /** INIT SERVER OBJECTS **/
     this.initTiles();
     this.initShards();
+    this.initControllers();
     this.initHomes();
     this.initTowers();
 

@@ -48,13 +48,11 @@ Faction.prototype.updateCoords = function () {
     this.packetHandler.updateFactionPackets(this);
 };
 
-
 Faction.prototype.addPlayer = function (id, playerName) {
     var player = new Player(id, playerName, this, this.gameServer);
     this.controllers.push(player.id);
     return player;
 };
-
 
 
 Faction.prototype.addBot = function (player) {
@@ -71,7 +69,6 @@ Faction.prototype.addHeadquarter = function () {
         this.updateCoords();
     }
 };
-
 
 Faction.prototype.addSentinel = function (player) {
     var tile = this.gameServer.getEntityTile(player);
@@ -156,7 +153,6 @@ Faction.prototype.isNeighboringFaction = function (tile) {
         if (check && check.faction === this.name) {
             return true;
         }
-
     }
     for (var j = -1; j <= 1; j++) {
         coords['x'] = tile.x + tile.length / 2;

@@ -17,15 +17,13 @@ function Player(id, name, faction, gameServer) {
 EntityFunctions.inherits(Player, Controller);
 
 
-
 Player.prototype.onDelete = function () {
     this.dropAllShards();
     Player.super_.prototype.onDelete.apply(this);
 };
 
-
-
-
+Player.prototype.shootShard = function (controller) {
+};
 
 Player.prototype.update = function () {
     var tile = this.gameServer.getEntityTile(this);
@@ -42,12 +40,12 @@ Player.prototype.update = function () {
 
 
 Player.prototype.updateMaxSpeed = function () {
-    this.maxSpeed = 10 * Math.pow(0.9,this.shards.length);
+    this.maxSpeed = 10 * Math.pow(0.9, this.shards.length);
 };
 
 
 Player.prototype.getRandomShard = function () {
-    var randomIndex = Arithmetic.getRandomInt(0,this.shards.length-1);
+    var randomIndex = Arithmetic.getRandomInt(0, this.shards.length - 1);
     return this.shards[randomIndex];
 };
 
@@ -65,7 +63,7 @@ Player.prototype.addShard = function (shard) {
 
 Player.prototype.removeShard = function (shard) {
     if (shard.id === this.emptyShard) {
-        this.packetHandler.deleteUIPackets(this,"name shard");
+        this.packetHandler.deleteUIPackets(this, "name shard");
         this.emptyShard = null;
     }
     var index = this.shards.indexOf(shard.id);
@@ -84,7 +82,7 @@ Player.prototype.transformEmptyShard = function (name) {
 
 Player.prototype.decreaseHealth = function (amount) {
     if (this.shards.length > 0) {
-        var filteredAmount = amount/this.shards.length;
+        var filteredAmount = amount / this.shards.length;
     }
     else {
         filteredAmount = amount;
@@ -136,8 +134,9 @@ Player.prototype.onDeath = function () {
 Player.prototype.reset = function () {
     this.dropAllShards();
     var faction = this.gameServer.FACTION_LIST[this.faction];
-    this.x = faction.x;
-    this.y = faction.y;
+    var headquarter = this.gameServer.HOME_LIST[faction.headquarter];
+    this.x = headquarter.x;
+    this.y = headquarter.y;
     this.maxSpeed = 10;
     this.xSpeed = 0;
     this.ySpeed = 0;
@@ -153,13 +152,12 @@ function getName(name) {
 }
 
 
-
-function onBoundary (coord) {
+function onBoundary(coord) {
     return coord <= entityConfig.BORDER_WIDTH ||
         coord >= entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
 }
 
-function overBoundary (coord) {
+function overBoundary(coord) {
     return coord < entityConfig.BORDER_WIDTH - 1 ||
         coord > entityConfig.WIDTH - entityConfig.BORDER_WIDTH + 1;
 }

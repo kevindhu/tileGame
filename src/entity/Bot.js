@@ -3,6 +3,7 @@ const Arithmetic = require('../modules/Arithmetic');
 var lerp = require('lerp');
 var EntityFunctions = require('./EntityFunctions');
 var Controller = require('./Controller');
+var Shard = require('./Shard');
 
 function Bot(id, name, faction, gameServer, player) {
     Bot.super_.call(this, id, faction, gameServer);
@@ -11,11 +12,11 @@ function Bot(id, name, faction, gameServer, player) {
     this.owner = player.id;
     this.emptyShard = null;
     this.type = "Bot";
+    this.timer = 0;
     this.init();
 }
 
 EntityFunctions.inherits(Bot, Controller);
-
 
 
 Bot.prototype.update = function () {
@@ -48,7 +49,6 @@ Bot.prototype.updateControls = function () {
 };
 
 
-
 Bot.prototype.updatePosition = function () {
     this.updateControls();
     Bot.super_.prototype.updatePosition.apply(this);
@@ -60,7 +60,7 @@ Bot.prototype.onDeath = function () {
 
 
 Bot.prototype.getRandomShard = function () {
-    var randomIndex = Arithmetic.getRandomInt(0,this.shards.length-1);
+    var randomIndex = Arithmetic.getRandomInt(0, this.shards.length - 1);
     return this.shards[randomIndex];
 };
 
@@ -76,6 +76,20 @@ Bot.prototype.addShard = function (shard) {
 };
 
 
+Bot.prototype.shootShard = function (player) {
+    if (this.timer !== 0) {
+        this.timer--;
+        return;
+    }
+    this.timer = 20;
+
+    var shardClone = new Shard(this.x, this.y, this.gameServer);
+    shardClone.setName("ass");
+    shardClone.becomeHomeShooting(this, (player.x - this.x) / 4,
+        (player.y - this.y) / 4, true);
+
+    this.packetHandler.updateHomePackets(this);
+};
 
 
 function getName(name) {
@@ -83,7 +97,7 @@ function getName(name) {
         return "unnamed bot";
     }
     return name;
-}
+};
 
 
 module.exports = Bot;

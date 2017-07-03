@@ -201,7 +201,7 @@ Home.prototype.updateLevel = function () {
         }
         this.level = 0;
         this.radius = 10;
-        this.updateHomeTree();
+        this.updateQuadItem();
     }
     else if (this.getSupply() < 4) {
         if (this.level < 1) {
@@ -209,7 +209,7 @@ Home.prototype.updateLevel = function () {
         }
         this.level = 1;
         this.radius = 30;
-        this.updateHomeTree();
+        this.updateQuadItem();
     }
     else if (this.getSupply() > 6 && this.level < 2) {
         if (this.level < 1) {
@@ -217,16 +217,11 @@ Home.prototype.updateLevel = function () {
         }
         this.radius = 50;
         this.health = 80;
-        this.updateHomeTree();
+        this.updateQuadItem();
     }
 };
 
 
-Home.prototype.updateHomeTree = function () {
-    this.updateQuadItem();
-    this.gameServer.homeTree.remove(this.quadItem);
-    this.gameServer.homeTree.insert(this.quadItem);
-};
 
 Home.prototype.addQuadItem = function () {
     this.quadItem = {
@@ -247,6 +242,8 @@ Home.prototype.updateQuadItem = function () {
         maxx: this.x + this.radius,
         maxy: this.y + this.radius
     };
+    this.gameServer.homeTree.remove(this.quadItem);
+    this.gameServer.homeTree.insert(this.quadItem);
 };
 
 

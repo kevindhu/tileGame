@@ -111,8 +111,8 @@ Shard.prototype.becomeShooting = function (xVel, yVel, temp) {
 };
 
 
-Shard.prototype.becomePlayerShooting = function (player,xVel,yVel,temp) {
-    this.becomeShooting(xVel,yVel, temp);
+Shard.prototype.becomePlayerShooting = function (player, xVel, yVel, temp) {
+    this.becomeShooting(xVel, yVel, temp);
     this.setOwner(player);
 };
 
@@ -121,7 +121,6 @@ Shard.prototype.becomeHomeShooting = function (home, xVel, yVel, temp) {
     var faction = this.gameServer.FACTION_LIST[home.faction];
     this.setFaction(faction);
 };
-
 
 
 Shard.prototype.becomePlayer = function (player) {
@@ -172,26 +171,16 @@ Shard.prototype.useSupply = function () {
     this.supply -= 1;
 };
 
-Shard.prototype.rotate = function () {
-    if (this.home !== null) {
-        var home = this.gameServer.HOME_LIST[this.home];
-
-        var radius = home.radius;
-        this.x = home.x + radius * Math.cos(this.theta);
-        this.y = home.y + radius * Math.sin(this.theta);
-        this.theta += Math.PI / 50;
-    }
-};
 
 Shard.prototype.follow = function (owner) {
-    this.x = owner.x ;//+ Arithmetic.getRandomInt(-5, 5);
-    this.y = owner.y ;//+ Arithmetic.getRandomInt(-5, 5);
+    this.x = owner.x;//+ Arithmetic.getRandomInt(-5, 5);
+    this.y = owner.y;//+ Arithmetic.getRandomInt(-5, 5);
 
     this.gameServer.shardTree.remove(this.quadItem);
     this.gameServer.shardTree.insert(this.quadItem);
 };
 
-Shard.prototype.addVelocity = function (x,y) {
+Shard.prototype.addVelocity = function (x, y) {
     this.xVel = x;
     this.yVel = y;
 
@@ -213,7 +202,7 @@ Shard.prototype.move = function () {
         }
         return this.becomeStatic();
     }
-    
+
     if (this.xVel > -0.1 && this.xVel < 0.1) {
         this.xVel = 0;
         this.yVel = 0;
@@ -231,8 +220,8 @@ Shard.prototype.move = function () {
     this.x += this.xVel;
     this.y += this.yVel;
 
-    this.xVel = lerp(this.xVel,0,0.2);
-    this.yVel = lerp(this.yVel,0,0.2);
+    this.xVel = lerp(this.xVel, 0, 0.2);
+    this.yVel = lerp(this.yVel, 0, 0.2);
 
     this.gameServer.shootingShardTree.remove(this.quadItem);
     this.gameServer.shootingShardTree.insert(this.quadItem);
@@ -259,9 +248,21 @@ Shard.prototype.updateQuadItem = function () {
     };
 };
 
+Shard.prototype.rotate = function () { //DEPRECATED
+    if (this.home !== null) {
+        var home = this.gameServer.HOME_LIST[this.home];
+
+        var radius = home.radius;
+        this.x = home.x + radius * Math.cos(this.theta);
+        this.y = home.y + radius * Math.sin(this.theta);
+        this.theta += Math.PI / 50;
+    }
+};
+
 
 var onBoundary = function (coord) {
     return coord <= entityConfig.BORDER_WIDTH || coord >= entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
 };
+
 
 module.exports = Shard;

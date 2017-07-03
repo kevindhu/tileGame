@@ -9,6 +9,8 @@ function Controller(id, faction, gameServer) {
 
     this.faction = faction.name;
 
+    this.radius = 50;
+
     this.x = faction.x;
     this.y = faction.y;
     this.health = 5;
@@ -24,12 +26,14 @@ function Controller(id, faction, gameServer) {
 }
 
 Controller.prototype.init = function () {
+    this.addQuadItem();
     this.gameServer.CONTROLLER_LIST[this.id] = this;
     this.gameServer.packetHandler.addControllerPackets(this);
 };
 
 
 Controller.prototype.onDelete = function () {
+    this.gameServer.controllerTree.remove(this.quadItem);
     this.gameServer.FACTION_LIST[this.faction].removeController(this);
     delete this.gameServer.CONTROLLER_LIST[this.id];
     this.packetHandler.deleteControllerPackets(this);
@@ -38,11 +42,12 @@ Controller.prototype.onDelete = function () {
 
 Controller.prototype.update = function () {
     var tile = this.gameServer.getEntityTile(this);
-
     if (this.timer > 0) {
         this.timer -= 1;
     }
     this.updatePosition();
+    this.updateQuadItem();
+    this.checkCollisions();
 
     if (tile) {
         if (tile.faction === this.faction) {
@@ -54,12 +59,44 @@ Controller.prototype.update = function () {
             this.decreaseHealth(0.1);
         }
     }
+
     this.packetHandler.updateControllersPackets(this);
 };
 
 
+Controller.prototype.checkCollisions = function () {
+    this.gameServer.controllerTree.find(this.quadItem.bound, function (controller) {
+        if (this.type === "Bot" && controller.faction !== this.faction) {
+            this.shootShard(controller);
+        }
+    }.bind(this))
+};
 
 
+Controller.prototype.addQuadItem = function () {
+    this.quadItem = {
+        cell: this,
+        bound: {
+            minx: this.x - this.radius,
+            miny: this.y - this.radius,
+            maxx: this.x + this.radius,
+            maxy: this.y + this.radius
+        }
+    };
+    this.gameServer.controllerTree.insert(this.quadItem);
+};
+
+
+Controller.prototype.updateQuadItem = function () {
+    this.quadItem.bound = {
+        minx: this.x - this.radius,
+        miny: this.y - this.radius,
+        maxx: this.x + this.radius,
+        maxy: this.y + this.radius
+    };
+    this.gameServer.controllerTree.remove(this.quadItem);
+    this.gameServer.controllerTree.insert(this.quadItem);
+};
 
 Controller.prototype.decreaseHealth = function (amount) {
     this.health -=amount;
@@ -73,7 +110,6 @@ Controller.prototype.increaseHealth = function (amount) {
         this.health += amount;
     }
 };
-
 
 Controller.prototype.updatePosition = function () {
     if (this.pressingDown) {
