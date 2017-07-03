@@ -2,6 +2,7 @@ const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
 var Player = require('./Player');
 var Bot = require('./Bot');
+var SuperBot = require("./SuperBot");
 var Headquarter = require('./Headquarter');
 var Tower = require('./Tower');
 var Sentinel = require('./Sentinel');
@@ -57,6 +58,12 @@ Faction.prototype.addPlayer = function (id, playerName) {
 
 Faction.prototype.addBot = function (player) {
     var bot = new Bot(Math.random(), "shitBot", this, this.gameServer, player);
+    this.controllers.push(bot.id);
+    return bot;
+};
+
+Faction.prototype.addSuperBot = function (player) {
+    var bot = new SuperBot(Math.random(), "SUPAHBot", this, this.gameServer, player);
     this.controllers.push(bot.id);
     return bot;
 };
@@ -146,6 +153,10 @@ Faction.prototype.onDelete = function () {
 Faction.prototype.isNeighboringFaction = function (tile) {
     var check;
     var coords = {};
+
+    if (tile.faction === this.faction) { //not neighbor, but is part of the faction
+        return false;
+    }
     for (var i = -1; i <= 1; i++) {
         coords['x'] = tile.x + tile.length / 2 + tile.length * i;
         coords['y'] = tile.y + tile.length / 2;

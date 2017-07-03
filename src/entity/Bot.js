@@ -26,13 +26,15 @@ Bot.prototype.update = function () {
 
 Bot.prototype.updateControls = function () {
     var player = this.gameServer.CONTROLLER_LIST[this.owner];
-    if (!player) {
-        return;
-    }
+
     this.pressingUp = false;
     this.pressingDown = false;
     this.pressingLeft = false;
     this.pressingRight = false;
+
+    if (!player) {
+        return;
+    }
 
     if (player.x < this.x) {
         this.pressingLeft = true;

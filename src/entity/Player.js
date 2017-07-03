@@ -30,7 +30,7 @@ Player.prototype.update = function () {
     var faction = this.gameServer.FACTION_LIST[this.faction];
 
     if (tile) {
-        if (this.shards.length > 1 && faction.isNeighboringFaction(tile)) {
+        if (this.shards.length > 1 && faction.isNeighboringFaction(tile) && !tile.faction) {
             this.packetHandler.addBracketPackets(this, tile);
         }
     }
@@ -135,8 +135,14 @@ Player.prototype.reset = function () {
     this.dropAllShards();
     var faction = this.gameServer.FACTION_LIST[this.faction];
     var headquarter = this.gameServer.HOME_LIST[faction.headquarter];
-    this.x = headquarter.x;
-    this.y = headquarter.y;
+    if (headquarter) {
+        this.x = headquarter.x;
+        this.y = headquarter.y;
+    }
+    else {
+        this.x = entityConfig.WIDTH/2;
+        this.y = entityConfig.WIDTH/2;
+    }
     this.maxSpeed = 10;
     this.xSpeed = 0;
     this.ySpeed = 0;

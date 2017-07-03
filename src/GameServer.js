@@ -364,6 +364,11 @@ GameServer.prototype.start = function () {
                         faction.addBot(player);
                     }
                     break;
+                case "C":
+                    if (data.state) {
+                        faction.addSuperBot(player);
+                    }
+                    break;
             }
         }.bind(this));
 
