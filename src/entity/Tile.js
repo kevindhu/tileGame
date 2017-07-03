@@ -26,24 +26,15 @@ Tile.prototype.init = function () {
 
 
 Tile.prototype.setColor = function (color) {
-    var isValidHex = function (color) {
-        return /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(color);
-    };
-    
-    if (color !== "" && color !== undefined && color !== null) {
-        if (isValidHex(color)) {
-            this.color = color;
-        }
-        else {
-            this.color = "#FFFFFF";
-        }
+    if (color !== undefined && color !== null) {
+        this.color = color;
         this.packetHandler.updateTilesPackets(this);
     }
 };
 
 
 Tile.prototype.removeHome = function () {
-    this.color = "#FFFFFF";
+    this.color = null;
     this.home = null;
     this.faction = null;
     this.packetHandler.updateTilesPackets(this);

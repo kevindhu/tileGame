@@ -10,7 +10,7 @@ function GameServer() {
     this.TILE_LIST = {};
     this.INIT_SOCKET_LIST = {};
     this.SOCKET_LIST = {};
-    this.PLAYER_LIST = {};
+    this.CONTROLLER_LIST = {};
     this.FACTION_LIST = {};
     this.HOME_LIST = {};
 
@@ -119,16 +119,14 @@ GameServer.prototype.checkShardCollision = function (shard) {
 
     //shard + home collision
     this.homeTree.find(shardBound, function (home) {
-        console.log("CHECKING SHARD COLLISION WITH HOME");
-        var owner = this.PLAYER_LIST[shard.owner];
-        if (home.getRandomPlayer() === owner) {
-            return;
+        if (home.faction === shard.faction) {
+            if (shard.owner) { //is shot by player
+                home.addShard(shard);
+            }
         }
-        if (owner.faction !== home.faction) {
+        else if (shard.faction) { //not the same faction
             shard.onDelete();
             home.decreaseHealth(1);
-        } else {
-            home.addShard(shard);
         }
     }.bind(this));
 };
@@ -143,14 +141,14 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 
     //player + static/player shard collision
     this.shardTree.find(playerBound, function (shard) {
-        if (player.id !== shard.owner && shard.timer <= 0) {
+        if (player.faction !== shard.faction && shard.timer <= 0) {
             if (player.emptyShard !== null) {
                 player.transformEmptyShard("unnamed");
                 this.packetHandler.deleteUIPackets(player, "name shard");
             }
             //if shard already owned
             if (shard.owner !== null) {
-                var oldOwner = this.PLAYER_LIST[shard.owner];
+                var oldOwner = this.CONTROLLER_LIST[shard.owner];
                 oldOwner.removeShard(shard);
             }
             if (shard.name === null) {
@@ -163,8 +161,7 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 
     //player + shooting shard collision
     this.shootingShardTree.find(playerBound, function (shard) {
-        var playerCheck = this.PLAYER_LIST[shard.owner];
-        if (playerCheck && shard.owner && player.faction !== playerCheck.faction) {
+        if (player.faction !== shard.faction) {
             shard.onDelete();
             player.decreaseHealth(1);
         }
@@ -191,7 +188,6 @@ GameServer.prototype.checkPlayerCollision = function (player) {
         }
     }.bind(this));
 
-
     //player + tower collision
     this.towerTree.find(playerBound, function (tower) {
         if (player.faction !== tower.faction) {
@@ -202,19 +198,20 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 };
 
 GameServer.prototype.checkCollisions = function () {
-    for (var id in this.PLAYER_LIST) {
-        var player = this.PLAYER_LIST[id];
+    var id;
+    for (id in this.CONTROLLER_LIST) {
+        var player = this.CONTROLLER_LIST[id];
         this.checkPlayerCollision(player);
     }
-    for (var id in this.SHOOTING_SHARD_LIST) {
+    for (id in this.SHOOTING_SHARD_LIST) {
         var shard = this.SHOOTING_SHARD_LIST[id];
         this.checkShardCollision(shard);
     }
 };
 
 GameServer.prototype.updatePlayers = function () {
-    for (var id in this.PLAYER_LIST) {
-        var player = this.PLAYER_LIST[id];
+    for (var id in this.CONTROLLER_LIST) {
+        var player = this.CONTROLLER_LIST[id];
         player.update();
     }
 };
@@ -369,7 +366,7 @@ GameServer.prototype.start = function () {
             if (player.getRandomShard()) {
                 var shard = this.PLAYER_SHARD_LIST[player.getRandomShard()];
                 player.removeShard(shard);
-                shard.becomeShooting(player, data.x, data.y);
+                shard.becomePlayerShooting(player, data.x, data.y);
             }
         }.bind(this));
 

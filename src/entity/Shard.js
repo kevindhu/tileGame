@@ -13,6 +13,7 @@ function Shard(x, y, gameServer) {
 
     this.owner = null;
     this.home = null;
+    this.faction = null;
 
     this.xVel = 0;
     this.yVel = 0;
@@ -39,6 +40,10 @@ Shard.prototype.init = function () {
 
 
 Shard.prototype.limbo = function () {
+    this.removeOwner();
+    this.removeHome();
+    this.removeFaction();
+
     this.gameServer.shardTree.remove(this.quadItem);
     this.gameServer.shootingShardTree.remove(this.quadItem);
 
@@ -52,20 +57,46 @@ Shard.prototype.setName = function (name) {
     this.name = name;
 };
 
+Shard.prototype.setHome = function (home) {
+    this.home = home.id;
+};
+
+Shard.prototype.setOwner = function (owner) {
+    var faction = this.gameServer.FACTION_LIST[owner.faction];
+    this.owner = owner.id;
+    this.setFaction(faction);
+};
+
+Shard.prototype.setFaction = function (faction) {
+    this.faction = faction.name;
+};
+
+Shard.prototype.removeOwner = function () {
+    this.owner = null;
+    this.faction = null;
+};
+
+Shard.prototype.removeHome = function () {
+    this.home = null;
+};
+
+Shard.prototype.removeFaction = function () {
+    this.faction = null;
+}
 
 Shard.prototype.becomeStatic = function () {
-    this.visible = true;
-    this.owner = null;
-    this.timer = 0;
-    this.type = "static";
     this.limbo();
+    this.type = "static";
+    this.visible = true;
+    this.timer = 0;
 
     this.updateQuadItem();
     this.gameServer.shardTree.insert(this.quadItem);
     this.gameServer.STATIC_SHARD_LIST[this.id] = this;
 };
 
-Shard.prototype.becomeShooting = function (player, xVel, yVel, temp) {
+Shard.prototype.becomeShooting = function (xVel, yVel, temp) {
+    this.limbo();
     if (temp) {
         this.type = "tempShooting";
     }
@@ -73,31 +104,45 @@ Shard.prototype.becomeShooting = function (player, xVel, yVel, temp) {
         this.type = "shooting";
     }
     this.visible = true;
-    this.limbo();
-    this.owner = player.id;
     this.addVelocity(xVel, yVel);
 
     this.gameServer.shootingShardTree.insert(this.quadItem);
     this.gameServer.SHOOTING_SHARD_LIST[this.id] = this;
 };
 
+
+Shard.prototype.becomePlayerShooting = function (player,xVel,yVel,temp) {
+    this.becomeShooting(xVel,yVel, temp);
+    this.setOwner(player);
+};
+
+Shard.prototype.becomeHomeShooting = function (home, xVel, yVel, temp) {
+    this.becomeShooting(xVel, yVel, temp);
+    var faction = this.gameServer.FACTION_LIST[home.faction];
+    this.setFaction(faction);
+};
+
+
+
 Shard.prototype.becomePlayer = function (player) {
-    this.visible = true;
-    this.owner = player.id;
-    this.timer = 100;
-    this.type = "player";
-    this.updateQuadItem();
     this.limbo();
+    this.type = "player";
+    this.timer = 100;
+    this.visible = true;
+
+    this.setOwner(player);
+    this.updateQuadItem();
 
     this.gameServer.shardTree.insert(this.quadItem);
     this.gameServer.PLAYER_SHARD_LIST[this.id] = this;
 };
 
 Shard.prototype.becomeHome = function (home) {
-    this.visible = false;
-    this.home = home;
-    this.type = "home";
     this.limbo();
+    this.type = "home";
+    this.visible = false;
+
+    this.setHome(home);
     this.gameServer.HOME_SHARD_LIST[this.id] = this;
 };
 
@@ -113,7 +158,7 @@ Shard.prototype.updatePosition = function () {
             this.move();
             break;
         case "player":
-            var player = this.gameServer.PLAYER_LIST[this.owner];
+            var player = this.gameServer.CONTROLLER_LIST[this.owner];
             this.follow(player);
             break;
         case "home":
@@ -129,9 +174,11 @@ Shard.prototype.useSupply = function () {
 
 Shard.prototype.rotate = function () {
     if (this.home !== null) {
-        var radius = this.home.radius;
-        this.x = this.home.x + radius * Math.cos(this.theta);
-        this.y = this.home.y + radius * Math.sin(this.theta);
+        var home = this.gameServer.HOME_LIST[this.home];
+
+        var radius = home.radius;
+        this.x = home.x + radius * Math.cos(this.theta);
+        this.y = home.y + radius * Math.sin(this.theta);
         this.theta += Math.PI / 50;
     }
 };

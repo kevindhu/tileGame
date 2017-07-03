@@ -1,8 +1,0 @@
-
-
-
-
-RESOLVED:
-
-if hasBinary issue -
-    probably pushing objects to be emitted, not integers or strings

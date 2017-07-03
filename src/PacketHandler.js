@@ -4,7 +4,7 @@ function PacketHandler(gameServer) {
     this.gameServer = gameServer;
 
     this.addAnimationPacket = [];
-    this.addPlayerPacket = [];
+    this.addControllerPacket = [];
     this.addShardPacket = [];
     this.addHomePacket = [];
     this.addFactionPacket = [];
@@ -14,11 +14,11 @@ function PacketHandler(gameServer) {
     this.updateHomePacket = [];
     this.updateTilesPacket = [];
     this.updateShardsPacket = [];
-    this.updatePlayersPacket = [];
+    this.updateControllersPacket = [];
     this.updateFactionPacket = [];
 
     this.deleteBracketPacket = [];
-    this.deletePlayerPacket = [];
+    this.deleteControllerPacket = [];
     this.deleteShardPacket = [];
     this.deleteHomePacket = [];
     this.deleteFactionPacket = [];
@@ -40,22 +40,18 @@ PacketHandler.prototype.sendInitPackets = function (socket) {
 
 PacketHandler.prototype.createInitPacket = function (stage,id) {
     console.log("COMMENCING STAGE: " + stage);
-    var playerPacket = [],
+    var controllerPacket = [],
         shardPacket = [],
         homePacket = [],
         factionPacket = [],
-        tilePacket = [],
-        player,
-        shard,
-        home,
-        i;
+        tilePacket = [];
 
     var populate = function (packet,list, call, stage) {
         var size = Object.size(list);
         var count = 0;
         var bound = [size * stage/entityConfig.STAGES - 5,
             size * (stage + 1)/entityConfig.STAGES + 5];
-        for (i in list) {
+        for (var i in list) {
             if (count >= bound[0] && count < bound[1]) { // delta of 5 for overlap
                 var entity = list[i];
                 packet.push(call(entity,true));
@@ -64,7 +60,7 @@ PacketHandler.prototype.createInitPacket = function (stage,id) {
         }
     };
 
-    populate(playerPacket,this.gameServer.PLAYER_LIST, this.addPlayerPackets, stage);
+    populate(controllerPacket,this.gameServer.CONTROLLER_LIST, this.addControllerPackets, stage);
 
     populate(shardPacket,this.gameServer.HOME_SHARD_LIST, this.addShardPackets, stage);
     populate(shardPacket,this.gameServer.PLAYER_SHARD_LIST, this.addShardPackets, stage);
@@ -75,7 +71,7 @@ PacketHandler.prototype.createInitPacket = function (stage,id) {
     populate(factionPacket,this.gameServer.FACTION_LIST, this.addFactionPackets, stage);
 
     return {
-        playerInfo: playerPacket,
+        controllerInfo: controllerPacket,
         shardInfo: shardPacket,
         homeInfo: homePacket,
         factionInfo: factionPacket,
@@ -147,7 +143,6 @@ PacketHandler.prototype.addUIPackets = function (player, home, action) {
 		homeId = home.id;
 	}
 
-
 	this.addUIPacket.push(
         {
             playerId: player.id,
@@ -156,19 +151,19 @@ PacketHandler.prototype.addUIPackets = function (player, home, action) {
         });
 };
 
-PacketHandler.prototype.addPlayerPackets = function (player, ifInit) {
+PacketHandler.prototype.addControllerPackets = function (controller, ifInit) {
     var info = {
-        id: player.id,
-        name: player.name,
-        x: player.x,
-        y: player.y,
-        health: player.health
+        id: controller.id,
+        name: controller.name,
+        x: controller.x,
+        y: controller.y,
+        health: controller.health
     }
     if (ifInit) {
         return info;
     }
     else {
-        this.addPlayerPacket.push(info);
+        this.addControllerPacket.push(info);
     }
 };
 
@@ -270,12 +265,12 @@ PacketHandler.prototype.updateTilesPackets = function (tile) {
     });
 };
 
-PacketHandler.prototype.updatePlayersPackets = function (player) {
-	this.updatePlayersPacket.push({
-        id: player.id,
-        x: player.x,
-        y: player.y,
-        health: player.health
+PacketHandler.prototype.updateControllersPackets = function (controller) {
+	this.updateControllersPacket.push({
+        id: controller.id,
+        x: controller.x,
+        y: controller.y,
+        health: controller.health
     });
 };
 
@@ -287,7 +282,7 @@ PacketHandler.prototype.updateShardsPackets = function (shard) {
         y: shard.y,
         visible: shard.visible
     });
-}
+};
 
 PacketHandler.prototype.deleteUIPackets = function (player, action) {
     if (!player.id) {
@@ -301,10 +296,10 @@ PacketHandler.prototype.deleteUIPackets = function (player, action) {
 
 PacketHandler.prototype.deleteBracketPackets = function (player) {
     this.deleteBracketPacket.push({id: player.id});
-}
+};
 
-PacketHandler.prototype.deletePlayerPackets = function (player) {
-	this.deletePlayerPacket.push({id: player.id});
+PacketHandler.prototype.deleteControllerPackets = function (controller) {
+	this.deleteControllerPacket.push({id: controller.id});
 };
 
 PacketHandler.prototype.deleteFactionPackets = function (faction) {
@@ -328,7 +323,7 @@ PacketHandler.prototype.sendPackets = function () {
 
         socket.emit('addEntities',
             {
-                'playerInfo': this.addPlayerPacket,
+                'controllerInfo': this.addControllerPacket,
                 'shardInfo': this.addShardPacket,
                 'homeInfo': this.addHomePacket,
                 'factionInfo': this.addFactionPacket,
@@ -337,7 +332,7 @@ PacketHandler.prototype.sendPackets = function () {
 
         socket.emit('updateEntities',
             {
-                'playerInfo': this.updatePlayersPacket,
+                'controllerInfo': this.updateControllersPacket,
                 'tileInfo': this.updateTilesPacket,
                 'shardInfo': this.updateShardsPacket,
                 'homeInfo': this.updateHomePacket,
@@ -354,7 +349,7 @@ PacketHandler.prototype.sendPackets = function () {
             });
         socket.emit('deleteEntities',
             {
-                'playerInfo': this.deletePlayerPacket,
+                'controllerInfo': this.deleteControllerPacket,
                 'shardInfo': this.deleteShardPacket,
                 'homeInfo': this.deleteHomePacket,
                 'bracketInfo': this.deleteBracketPacket,
@@ -369,7 +364,7 @@ PacketHandler.prototype.sendPackets = function () {
 
 PacketHandler.prototype.resetPackets = function () {
     this.addAnimationPacket = [];
-    this.addPlayerPacket = [];
+    this.addControllerPacket = [];
     this.addShardPacket = [];
     this.addHomePacket = [];
     this.addFactionPacket = [];
@@ -379,11 +374,11 @@ PacketHandler.prototype.resetPackets = function () {
     this.updateHomePacket = [];
     this.updateTilesPacket = [];
     this.updateShardsPacket = [];
-    this.updatePlayersPacket = [];
+    this.updateControllersPacket = [];
     this.updateFactionPacket = [];
 
     this.deleteBracketPacket = [];
-    this.deletePlayerPacket = [];
+    this.deleteControllerPacket = [];
     this.deleteShardPacket = [];
     this.deleteHomePacket = [];
     this.deleteFactionPacket = [];

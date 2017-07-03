@@ -1,6 +1,8 @@
 var canvas = document.getElementById("bigCanvas");
-var ctx = canvas.getContext("2d");
 canvas.style.visibility = "hidden";
+
+document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+document.body.scroll = "no";
 
 
 var nameButton = document.getElementById("nameSubmit");
@@ -9,19 +11,16 @@ var factionNameInput = document.getElementById("factionNameInput");
 var playerNamer = document.getElementById("player_namer");
 
 
-document.documentElement.style.overflow = 'hidden';  // firefox, chrome
-document.body.scroll = "no";
-
 playerNamer.style.display = "block";
 
-playerNameInput.addEventListener("keyup", function(event) {
+playerNameInput.addEventListener("keyup", function (event) {
     event.preventDefault();
     if (event.keyCode === 13) {
         factionNameInput.focus();
     }
 });
 
-factionNameInput.addEventListener("keyup", function(event) {
+factionNameInput.addEventListener("keyup", function (event) {
     event.preventDefault();
     if (event.keyCode === 13) {
         nameButton.click();
@@ -55,7 +54,7 @@ function openShardNamerUI() {
     var shardNamer = document.getElementById('shard_namer');
     var textInput = document.getElementById("textInput");
     var nameShardButton = document.getElementById("nameShardButton");
-    var focusEvent = function(event) {
+    var focusEvent = function (event) {
         event.preventDefault();
         if (event.keyCode === 13) {
             textInput.focus();
@@ -63,7 +62,7 @@ function openShardNamerUI() {
         }
     };
     document.addEventListener("keyup", focusEvent);
-    textInput.addEventListener("keyup", function(event) {
+    textInput.addEventListener("keyup", function (event) {
         event.preventDefault();
         if (event.keyCode === 13) {
             nameShardButton.click();
@@ -85,17 +84,17 @@ function openHomeUI(home) {
     homeFaction.innerHTML = "";
     homeType.innerHTML = "";
 
+    homeInfo.style.display = 'block';
+
     homeLevel.innerHTML = home.level;
     homeHealth.innerHTML = home.health;
     homeFaction.innerHTML = home.id;
     homeType.innerHTML = home.type;
 
-    homeInfo.style.display = 'block';
 
     var shardsList = document.getElementById('shards_list');
     var colorPicker = document.getElementById('color_picker');
     shardsList.innerHTML = "";
-    colorPicker.innerHTML = "";
 
     addShards(shardsList, home);
     addColorPicker(colorPicker, home);
@@ -115,8 +114,6 @@ function closeUI(action) {
         homeInfo.style.display = 'none';
     }
 }
-
-
 
 
 function sendShardName() {
@@ -152,37 +149,54 @@ function addShards(list, home) {
 }
 
 
-
 function addColorPicker(colorPicker, home) {
+    var colorCanvas = document.getElementById("color_canvas");
+    var colorCtx = colorCanvas.getContext("2d");
+    var colorInput = document.getElementById("color_input");
+    var colorSubmitButton = document.getElementById("color_submit_button");
     if (!home.hasColor && home.level > 1) {
         colorPicker.style.visibility = "visible";
     }
     else {
-        console.log("CANT ADD COLOR!");
         colorPicker.style.visibility = "hidden";
         return;
     }
 
-    var prompt = document.createElement("a");
-    var colorInput = document.createElement("input");
-    var colorSubmitButton = document.createElement('button');
+    var colors = new Image();
+    colors.src = 'colors.jpg';
+    colors.onload = function () {
+        colorCtx.fillStyle = "#333eee";
+        colorCtx.fillRect(0,0,colorCanvas.width/2, colorCanvas.height/2);
+        colorCtx.fillStyle = "#623eee";
+        colorCtx.fillRect(colorCanvas.width/2,colorCanvas.height/2, colorCanvas.width, colorCanvas.height);
+    };
 
-    colorSubmitButton.innerHTML = "submit";
-    prompt.appendChild(document.createTextNode("CHOOSE YOUR COLOR"));
-
-    colorPicker.appendChild(prompt);
-    colorPicker.appendChild(colorInput);
-    colorPicker.appendChild(colorSubmitButton);
-    
-    colorInput.type = "text";
-    colorSubmitButton.addEventListener("click", function () {
-    socket.emit("newColor",
-        {
-            color: colorInput.value,
-            home: home.id
+    colorCanvas.addEventListener('mouseup', function (event) {
+        var rect = colorCanvas.getBoundingClientRect();
+        var x = event.clientX - rect.left;
+        var y = event.clientY - rect.top;
+        console.log(x,y);
+        var img_data = colorCtx.getImageData(x, y, 100, 100).data;
+        socket.emit("newColor", {
+            home: home.id,
+            color: {
+                r: img_data[0],
+                g: img_data[1],
+                b: img_data[2]
+            }
         });
-    colorInput.value = "";
+    });
 
-    closeUI('home info');
-});
+
+
+    colorSubmitButton.addEventListener("click", function () {
+        socket.emit("newColor",
+            {
+                color: colorInput.value,
+                home: home.id
+            });
+        colorInput.value = "";
+
+        closeUI('home info');
+    });
 }

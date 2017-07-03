@@ -29,7 +29,7 @@ var selfId = null;
 var FACTION_LIST = {};
 var FACTION_ARRAY = [];
 
-var PLAYER_LIST = {};
+var CONTROLLER_LIST = {};
 var TILE_LIST = {};
 var SHARD_LIST = {};
 var HOME_LIST = {};
@@ -51,13 +51,15 @@ var Faction = function (factionInfo) {
     this.y = factionInfo.y;
     this.size = factionInfo.size;
 };
-var Player = function (playerInfo) {
-    this.id = playerInfo.id;
-    this.name = playerInfo.name;
-    this.x = playerInfo.x;
-    this.y = playerInfo.y;
-    this.health = playerInfo.health;
+var Controller = function (controllerInfo) {
+    this.id = controllerInfo.id;
+    this.name = controllerInfo.name;
+    this.x = controllerInfo.x;
+    this.y = controllerInfo.y;
+    this.health = controllerInfo.health;
 };
+
+
 var Tile = function (tileInfo) {
     this.id = tileInfo.id;
     this.x = tileInfo.x;
@@ -153,7 +155,7 @@ function addEntities(data) {
     };
 
     addEntity(data.tileInfo, TILE_LIST, Tile);
-    addEntity(data.playerInfo, PLAYER_LIST, Player);
+    addEntity(data.controllerInfo, CONTROLLER_LIST, Controller);
     addEntity(data.shardInfo, SHARD_LIST, Shard);
     addEntity(data.homeInfo, HOME_LIST, Home);
     addEntity(data.factionInfo, FACTION_LIST, Faction, FACTION_ARRAY);
@@ -211,7 +213,7 @@ function deleteEntities(data) {
         }
     };
 
-    deleteEntity(data.playerInfo, PLAYER_LIST);
+    deleteEntity(data.controllerInfo, CONTROLLER_LIST);
     deleteEntity(data.shardInfo, SHARD_LIST);
     deleteEntity(data.homeInfo, HOME_LIST);
     deleteEntity(data.factionInfo, FACTION_LIST, FACTION_ARRAY);
@@ -284,14 +286,14 @@ function updateEntities(data) {
         }
     };
 
-    var updatePlayers = function (player, playerInfo) {
-        player.x = playerInfo.x;
-        player.y = playerInfo.y;
-        player.health = playerInfo.health;
+    var updateControllers = function (controller, controllerInfo) {
+        controller.x = controllerInfo.x;
+        controller.y = controllerInfo.y;
+        controller.health = controllerInfo.health;
     };
 
 
-    updateEntities(data.playerInfo, PLAYER_LIST, updatePlayers);
+    updateEntities(data.controllerInfo, CONTROLLER_LIST, updateControllers);
     updateEntities(data.tileInfo, TILE_LIST, updateTiles);
     updateEntities(data.shardInfo, SHARD_LIST, updateShards);
     updateEntities(data.homeInfo, HOME_LIST, updateHomes);
@@ -306,7 +308,7 @@ c2.width = canvas.width;
 c2.height = canvas.height;
 
 function drawScene(data) {
-    var selfPlayer = PLAYER_LIST[selfId];
+    var selfPlayer = CONTROLLER_LIST[selfId];
 
 
     if (!selfPlayer) {
@@ -318,13 +320,13 @@ function drawScene(data) {
         && y < (player.y+canvas.width) && y > (player.y-5/4*canvas.width);
     };
 
-    var drawPlayers = function () {
+    var drawControllers = function () {
         ctx2.font = "20px Arial";
         ctx2.fillStyle = "#000000";
-        for (var playerId in PLAYER_LIST) {
-            var player = PLAYER_LIST[playerId];
-            ctx2.fillText(player.name, player.x, player.y + 30);
-            ctx2.fillRect(player.x - player.health * 10 / 2, player.y + 10, player.health * 10, 10);
+        for (var id in CONTROLLER_LIST) {
+            var controller = CONTROLLER_LIST[id];
+            ctx2.fillText(controller.name, controller.x, controller.y + 30);
+            ctx2.fillRect(controller.x - controller.health * 10 / 2, controller.y + 10, controller.health * 10, 10);
         }
     };
 
@@ -345,6 +347,7 @@ function drawScene(data) {
                     tile.color.g + "," +
                     tile.color.b +
                     ")";
+
                 ctx2.fillRect(tile.x, tile.y, tile.length, tile.length);
             }
         }
@@ -574,7 +577,7 @@ function drawScene(data) {
     ctx3.clearRect(0,0, 500, 500);
 
     drawTiles();
-    drawPlayers();
+    drawControllers();
     drawShards();
     drawConnectors();
     drawHomes();
@@ -598,7 +601,7 @@ function factionSort(a,b) {
 
 function scaleImageData(imageData, scale, ctx) {
     var scaled = ctx.createImageData(imageData.width * scale, imageData.height * scale);
-    var subLine = ctx.createImageData(scale, 1).data
+    var subLine = ctx.createImageData(scale, 1).data;
     for (var row = 0; row < imageData.height; row++) {
         for (var col = 0; col < imageData.width; col++) {
             var sourcePixel = imageData.data.subarray(
@@ -644,7 +647,7 @@ document.onkeyup = function (event) {
 
 
 canvas.addEventListener("mousedown", function (event) {
-    if (PLAYER_LIST[selfId]) {
+    if (CONTROLLER_LIST[selfId]) {
         var rect = canvas.getBoundingClientRect();
         var x = event.clientX - rect.left;
         var y = event.clientY - rect.top;
@@ -654,14 +657,17 @@ canvas.addEventListener("mousedown", function (event) {
 
 
 canvas.addEventListener("mouseup", function (event) {
+    var rect = canvas.getBoundingClientRect();
     var magnitude = function (x,y) {
         return x * x + y * y;
     };
-
     var normalize = function(x,y) {
         return [x/magnitude(x,y), y/magnitude(x,y)];
     };
     var x,y;
+
+    ARROW.postX = event.clientX - rect.left;
+    ARROW.postY = event.clientY - rect.top;
 
     if (magnitude(ARROW.deltaX(),ARROW.deltaY()) > 10000) {
         var vector = normalize(ARROW.deltaX(), ARROW.deltaY());

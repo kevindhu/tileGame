@@ -1,4 +1,0 @@
-Bugs -
-
-2. crashes on shot
-3. when too many factions, cannot connect

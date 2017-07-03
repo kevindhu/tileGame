@@ -1,16 +1,16 @@
 const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
-var Player = require("./Player");
-var Headquarter = require("./Headquarter");
-var Sentinel = require("./Sentinel");
-var Tower = require("./Tower");
+var Player = require('./Player');
+var Headquarter = require('./Headquarter');
+var Tower = require('./Tower');
+var Sentinel = require('./Sentinel');
 
 function Faction(name, gameServer) {
     this.id = Math.random();
     this.gameServer = gameServer;
     this.packetHandler = gameServer.packetHandler;
     this.name = name;
-    this.players = [];
+    this.controllers = [];
     this.homes = [];
     this.init();
 }
@@ -52,8 +52,12 @@ Faction.prototype.addPlayer = function (id, playerName) {
     var player = new Player(id, playerName, this, this.gameServer);
     player.x = this.x;
     player.y = this.y;
-    this.players.push(player.id);
+    this.controllers.push(player.id);
     return player;
+};
+
+Faction.prototype.addBot = function (id) {
+
 };
 
 Faction.prototype.addHeadquarter = function () {
@@ -118,15 +122,15 @@ Faction.prototype.removeHome = function (home) {
     this.checkStatus();
 };
 
-Faction.prototype.removePlayer = function (player) {
-    var index = this.players.indexOf(player.id);
-    this.players.splice(index, 1);
+Faction.prototype.removeController = function (player) {
+    var index = this.controllers.indexOf(player.id);
+    this.controllers.splice(index, 1);
     this.checkStatus();
 };
 
 
 Faction.prototype.checkStatus = function () {
-    if (this.homes.length === 0 && this.players.length === 0) {
+    if (this.homes.length === 0 && this.controllers.length === 0) {
         this.onDelete();
     }
 };
@@ -137,11 +141,6 @@ Faction.prototype.onDelete = function () {
     this.packetHandler.deleteFactionPackets(this);
 };
 
-
-Faction.prototype.getRandomPlayer = function () {
-    var randomIndex = Arithmetic.getRandomInt(0, this.players.length - 1);
-    return this.players[randomIndex];
-};
 
 
 Faction.prototype.isNeighboringFaction = function (tile) {
@@ -166,6 +165,7 @@ Faction.prototype.isNeighboringFaction = function (tile) {
     }
     return false;
 };
+
 
 
 module.exports = Faction;

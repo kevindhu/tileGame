@@ -6,5 +6,4 @@ module.exports = {
     Sentinel: require('./Sentinel'),
     Tower: require('./Tower'),
     Faction: require('./Faction')
-
 };

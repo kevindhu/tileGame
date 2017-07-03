@@ -22,7 +22,6 @@ function Home(faction, x, y, gameServer) {
     this.radius = 10;
     this.health = 1;
     this.hasColor = false;
-    this.randomPlayer = this.gameServer.PLAYER_LIST[faction.getRandomPlayer()];
 }
 
 Home.prototype.mainInit = function () {
@@ -127,13 +126,6 @@ Home.prototype.getRandomShard = function () {
     return this.shards[randomIndex];
 };
 
-Home.prototype.getRandomPlayer = function () {
-    if (!this.randomPlayer) {
-        var faction = this.gameServer.FACTION_LIST[this.faction];
-        this.randomPlayer = this.gameServer.PLAYER_LIST[faction.getRandomPlayer()];
-    }
-    return this.randomPlayer;
-};
 
 Home.prototype.shootShard = function (player) {
 };
@@ -175,7 +167,7 @@ Home.prototype.dropShard = function () {
     var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
     if (shard) {
         this.removeShard(shard);
-        shard.becomeShooting(this.getRandomPlayer(), Arithmetic.getRandomInt(-30, 30),
+        shard.becomeHomeShooting(this, Arithmetic.getRandomInt(-30, 30),
             Arithmetic.getRandomInt(-30, 30));
     }
     this.packetHandler.removeHomeAnimationPackets(this);
@@ -185,7 +177,7 @@ Home.prototype.giveShard = function (home) {
     if (this !== home && this.getSupply() > 0) {
         var shard = this.gameServer.HOME_SHARD_LIST[this.getRandomShard()];
         this.removeShard(shard);
-        shard.becomeShooting(this.getRandomPlayer(), home.x - this.x / 10,
+        shard.becomeHomeShooting(this, home.x - this.x / 10,
             home.y - this.y / 10);
     }
 };
