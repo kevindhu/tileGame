@@ -7,8 +7,8 @@ c2.style.display = "none";
 c3.style.display = "none";
 c4.style.display = "none";
 
-c2.width = window.innerWidth;
-c2.height = window.innerHeight;
+c2.width = canvas.width;
+c2.height = canvas.height;
 
 var ctx = canvas.getContext("2d");
 var ctx2 = c2.getContext("2d");
@@ -18,7 +18,7 @@ var ctx4 = c4.getContext("2d");
 
 var socket = io();
 
-socket.on('addFactionsUI', addFactionstoUI)
+socket.on('addFactionsUI', addFactionstoUI);
 socket.on('addEntities', addEntities);
 socket.on('updateEntities', updateEntities);
 socket.on('deleteEntities', deleteEntities);
@@ -33,16 +33,12 @@ var CONTROLLER_LIST = {};
 var TILE_LIST = {};
 var SHARD_LIST = {};
 var HOME_LIST = {};
-
 var ANIMATION_LIST = {};
 
 var ARROW = null;
 var BRACKET = null;
 var serverMap = null;
-var tileTimer = 0;
 var mapTimer = 0;
-
-
 
 var Faction = function (factionInfo) {
     this.id = factionInfo.id;
@@ -58,8 +54,6 @@ var Controller = function (controllerInfo) {
     this.y = controllerInfo.y;
     this.health = controllerInfo.health;
 };
-
-
 var Tile = function (tileInfo) {
     this.id = tileInfo.id;
     this.x = tileInfo.x;
@@ -88,29 +82,24 @@ var Home = function (homeInfo) {
     this.health = homeInfo.health;
     this.neighbors = homeInfo.neighbors;
 };
-
-
-var Arrow = function (x,y) {
+var Arrow = function (x, y) {
     this.preX = x;
     this.preY = y;
     this.postX = null;
     this.postY = null;
-    this.deltaX = function() {
+    this.deltaX = function () {
         return this.postX - this.preX;
     };
-    this.deltaY = function() {
+    this.deltaY = function () {
         return this.postY - this.preY;
     }
 };
-
 var Bracket = function (bracketInfo) {
     var tile = TILE_LIST[bracketInfo.tileId];
     this.x = tile.x;
     this.y = tile.y;
     this.length = tile.length;
 };
-
-
 var Animation = function (animationInfo) {
     this.type = animationInfo.type;
     this.id = animationInfo.id;
@@ -118,7 +107,7 @@ var Animation = function (animationInfo) {
     this.x = animationInfo.x;
     this.y = animationInfo.y;
     this.theta = 15;
-    this.timer = getRandom(10,14);
+    this.timer = getRandom(10, 14);
 
     if (this.x) {
         this.endX = this.x + getRandom(-100, 100);
@@ -130,7 +119,7 @@ function addFactionstoUI(data) {
     var factions = document.getElementById('factions');
     var packet = data.factions;
 
-    for (var i = 0; i<packet.length; i++) {
+    for (var i = 0; i < packet.length; i++) {
         var name = packet[i];
         var option = document.createElement('option');
         option.value = name;
@@ -138,122 +127,67 @@ function addFactionstoUI(data) {
     }
 }
 
-
-
 function addEntities(data) {
+    var i, packet;
     var addEntity = function (packet, list, Entity, array) {
         if (!packet) {
             return;
         }
-        for (var i = 0; i < packet.length; i++) {
-            var info = packet[i];
-            list[info.id] = new Entity(info);
-            if (array && findWithAttr(array, "id", info.id) === -1) {
-                array.push(list[info.id]);
-            }
+        list[packet.id] = new Entity(packet);
+        if (array && findWithAttr(array, "id", packet.id) === -1) {
+            array.push(list[packet.id]);
         }
     };
 
-    addEntity(data.tileInfo, TILE_LIST, Tile);
-    addEntity(data.controllerInfo, CONTROLLER_LIST, Controller);
-    addEntity(data.shardInfo, SHARD_LIST, Shard);
-    addEntity(data.homeInfo, HOME_LIST, Home);
-    addEntity(data.factionInfo, FACTION_LIST, Faction, FACTION_ARRAY);
-    addEntity(data.animationInfo, ANIMATION_LIST, Animation);
-
-
-    var bracketPacket = data.bracketInfo;
-    if (bracketPacket) {
-        for (var i = 0; i < bracketPacket.length; i++) {
-            var bracketInfo = bracketPacket[i];
-            if (selfId === bracketInfo.playerId) {
-                BRACKET = new Bracket(bracketInfo);
-            }
-        }
-    }
-
-    var UIPacket = data.UIInfo;
-    if (UIPacket) {
-        for (var i = 0; i < UIPacket.length; i++) {
-            var UIInfo = UIPacket[i];
-            if (selfId === UIInfo.playerId) {
-                openUI(UIInfo);
-            }
-        }
-    }
-    if (data.selfId) {
-        selfId = data.selfId;
-    }
-}
-
-
-function findWithAttr(array, attr, value) {
-    for(var i = 0; i < array.length; i += 1) {
-        if(array[i][attr] === value) {
-            return i;
-        }
-    }
-    return -1;  
-}
-
-
-
-function deleteEntities(data) {
-    var deleteEntity = function (packet, list, array) {
-        if (!packet) {
-            return;
-        }
-        for (var i = 0; i < packet.length; i++) {
-            var info = packet[i];
-            if (array) {
-                var index = findWithAttr(array, "id", info.id);
-                array.splice(index,1);
-            }
-            delete list[info.id];
-        }
-    };
-
-    deleteEntity(data.controllerInfo, CONTROLLER_LIST);
-    deleteEntity(data.shardInfo, SHARD_LIST);
-    deleteEntity(data.homeInfo, HOME_LIST);
-    deleteEntity(data.factionInfo, FACTION_LIST, FACTION_ARRAY);
-
-    var bracketPacket = data.bracketInfo;
-    if (bracketPacket) {
-        for (var i = 0; i < bracketPacket.length; i++) {
-            var bracketInfo = bracketPacket[i];
-            if (selfId === bracketInfo.id) {
-                BRACKET = null;
-            }
-        }
-    }
-
-
-    var UIPacket = data.UIInfo;
-    if (UIPacket) {
-        for (var i = 0; i < UIPacket.length; i++) {
-            var UIInfo = UIPacket[i];
-            if (selfId === UIInfo.id) {
-                closeUI(UIInfo.action);
-            }
+    for (i = 0; i<data.length; i++) {
+        packet = data[i];
+        switch (packet.class) {
+            case "tileInfo":
+                addEntity(packet, TILE_LIST, Tile);
+                break;
+            case "controllerInfo":
+                addEntity(packet, CONTROLLER_LIST, Controller);
+                break;
+            case "shardInfo":
+                addEntity(packet, SHARD_LIST, Shard);
+                break;
+            case "homeInfo":
+                addEntity(packet, HOME_LIST, Home);
+                break;
+            case "factionInfo":
+                addEntity(packet, FACTION_LIST, Faction, FACTION_ARRAY);
+                break;
+            case "animationInfo":
+                addEntity(packet, ANIMATION_LIST, Animation);
+                break;
+            case "bracketInfo":
+                if (selfId === packet.playerId) {
+                    BRACKET = new Bracket(packet);
+                }
+                break;
+            case "UIInfo":
+                if (selfId === packet.playerId) {
+                    openUI(packet);
+                }
+                break;
+            case "selfId":
+                selfId = packet.selfId;
         }
     }
 }
-
 
 function updateEntities(data) {
-    function updateEntities(packet, list, callback) {
+    var packet;
+
+    function updateEntity(packet, list, callback) {
         if (!packet) {
             return;
         }
-        for (var i = 0; i < packet.length; i++) {
-            var entityInfo = packet[i];
-            var entity = list[entityInfo.id];
-            if (!entity) {
-                return;
-            }
-            callback(entity, entityInfo);
+        var entity = list[packet.id];
+        if (!entity) {
+            return;
         }
+        callback(entity, packet);
     }
 
     var updateFactions = function (faction, factionInfo) {
@@ -262,7 +196,7 @@ function updateEntities(data) {
         faction.size = factionInfo.size;
         FACTION_ARRAY.sort(factionSort);
     };
-    
+
     var updateHomes = function (home, homeInfo) {
         home.shards = homeInfo.shards;
         home.level = homeInfo.level;
@@ -275,7 +209,7 @@ function updateEntities(data) {
     var updateShards = function (shard, shardInfo) {
         shard.x = shardInfo.x;
         shard.y = shardInfo.y;
-        shard.visible = shardInfo.visible,
+        shard.visible = shardInfo.visible;
         shard.name = shardInfo.name;
     };
 
@@ -292,32 +226,98 @@ function updateEntities(data) {
         controller.health = controllerInfo.health;
     };
 
-
-    updateEntities(data.controllerInfo, CONTROLLER_LIST, updateControllers);
-    updateEntities(data.tileInfo, TILE_LIST, updateTiles);
-    updateEntities(data.shardInfo, SHARD_LIST, updateShards);
-    updateEntities(data.homeInfo, HOME_LIST, updateHomes);
-    updateEntities(data.factionInfo, FACTION_LIST, updateFactions);
+    for (var i = 0; i < data.length; i++) {
+        packet = data[i];
+        switch (packet.class) {
+            case "controllerInfo":
+                updateEntity(packet, CONTROLLER_LIST, updateControllers);
+                break;
+            case "tileInfo":
+                updateEntity(packet, TILE_LIST, updateTiles);
+                break;
+            case "shardInfo":
+                updateEntity(packet, SHARD_LIST, updateShards);
+                break;
+            case "homeInfo":
+                updateEntity(packet, HOME_LIST, updateHomes);
+                break;
+            case "factionInfo":
+                updateEntity(packet, FACTION_LIST, updateFactions);
+                break;
+        }
+    }
 }
 
-//canvas.height = window.innerHeight;
-//canvas.width = window.innerWidth;
+function deleteEntities(data) {
+    var packet, i;
+    var deleteEntity = function (packet, list, array) {
+        if (!packet) {
+            return;
+        }
+        if (array) {
+            var index = findWithAttr(array, "id", info.id);
+            array.splice(index, 1);
+        }
+        delete list[packet.id];
+    };
+
+    for (i = 0; i<data.length; i++) {
+        packet = data[i];
+        switch (packet.class) {
+            case "tileInfo":
+                deleteEntity(packet, TILE_LIST);
+                break;
+            case "controllerInfo":
+                deleteEntity(packet, CONTROLLER_LIST);
+                break;
+            case "shardInfo":
+                deleteEntity(packet, SHARD_LIST);
+                break;
+            case "homeInfo":
+                deleteEntity(packet, HOME_LIST);
+                break;
+            case "factionInfo":
+                deleteEntity(packet, FACTION_LIST, FACTION_ARRAY);
+                break;
+            case "animationInfo":
+                deleteEntity(packet, ANIMATION_LIST);
+                break;
+            case "bracketInfo":
+                if (selfId === packet.id) {
+                    BRACKET = null;
+                }
+                break;
+            case "UIInfo":
+                if (selfId === packet.id) {
+                    closeUI(packet.action);
+                }
+                break;
+        }
+    }
 
 
-c2.width = canvas.width;
-c2.height = canvas.height;
+
+}
+
+function findWithAttr(array, attr, value) {
+    for (var i = 0; i < array.length; i += 1) {
+        if (array[i][attr] === value) {
+            return i;
+        }
+    }
+    return -1;
+}
 
 function drawScene(data) {
     var selfPlayer = CONTROLLER_LIST[selfId];
-
 
     if (!selfPlayer) {
         return;
     }
 
-    var inBounds = function(player,x,y) {
-        return x < (player.x+canvas.width) && x > (player.x-5/4*canvas.width)
-        && y < (player.y+canvas.width) && y > (player.y-5/4*canvas.width);
+    var inBounds = function (player, x, y) {
+        return x < (player.x + canvas.width) && x > (player.x - 5 / 4 * canvas.width)
+            && y < (player.y + canvas.width) && y > (player.y - 5 / 4 * canvas.width);
     };
 
     var drawControllers = function () {
@@ -333,12 +333,12 @@ function drawScene(data) {
     var drawTiles = function () {
         for (var id in TILE_LIST) {
             var tile = TILE_LIST[id];
-            if (inBounds(selfPlayer,tile.x, tile.y)) {
+            if (inBounds(selfPlayer, tile.x, tile.y)) {
                 if (!tile.color) {
                     tile.color = {
-                        r: Math.round(getRandom(210,214)),
-                        g: Math.round(getRandom(210,214)),
-                        b: Math.round(getRandom(200,212))
+                        r: Math.round(getRandom(210, 214)),
+                        g: Math.round(getRandom(210, 214)),
+                        b: Math.round(getRandom(200, 212))
                     };
                 }
 
@@ -352,7 +352,6 @@ function drawScene(data) {
             }
         }
     };
-
 
 
     var drawShards = function () {
@@ -435,7 +434,7 @@ function drawScene(data) {
             ctx2.moveTo(selfPlayer.x, selfPlayer.y);
             ctx2.strokeStyle = "#521522";
             ctx2.lineWidth = 10;
-            ctx2.lineTo(selfPlayer.x+ARROW.deltaX(), selfPlayer.y + ARROW.deltaY());
+            ctx2.lineTo(selfPlayer.x + ARROW.deltaX(), selfPlayer.y + ARROW.deltaY());
             ctx2.stroke();
             ctx2.closePath();
         }
@@ -451,9 +450,9 @@ function drawScene(data) {
                     return;
                 }
                 ctx2.beginPath();
-                ctx2.lineWidth = 3*animation.timer;
+                ctx2.lineWidth = 3 * animation.timer;
                 ctx2.strokeStyle = "#012CCC";
-                ctx2.arc(home.x, home.y, home.radius, 0, animation.timer/1.2, true);
+                ctx2.arc(home.x, home.y, home.radius, 0, animation.timer / 1.2, true);
                 ctx2.stroke();
                 ctx2.closePath();
             }
@@ -467,7 +466,7 @@ function drawScene(data) {
                 ctx2.beginPath();
                 ctx2.lineWidth = 15 - animation.timer;
                 ctx2.strokeStyle = "rgba(255, 0, 0, " + animation.timer * 10 / 100 + ")";
-                ctx2.arc(home.x, home.y, home.radius, 0, 2*Math.PI, false);
+                ctx2.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
                 ctx2.stroke();
                 ctx2.closePath();
             }
@@ -496,16 +495,15 @@ function drawScene(data) {
     };
 
 
-
     var translateScene = function () {
-        ctx2.setTransform(1,0,0,1,0,0);
+        ctx2.setTransform(1, 0, 0, 1, 0, 0);
         if (keys[17] && keys[38] && scaleFactor < 2) {
             scaleFactor += 0.2;
         }
         if (keys[17] && keys[40] && scaleFactor > 0.7) {
             scaleFactor -= 0.2;
         }
-        ctx2.translate(canvas.width/2, canvas.height/2);
+        ctx2.translate(canvas.width / 2, canvas.height / 2);
         ctx2.scale(scaleFactor, scaleFactor);
         ctx2.translate(-selfPlayer.x, -selfPlayer.y);
     };
@@ -515,7 +513,7 @@ function drawScene(data) {
             var tileLength = Math.sqrt(Object.size(TILE_LIST));
             if (tileLength === 0 || !selfPlayer) {
                 return;
-            }   
+            }
             var imgData = ctx.createImageData(tileLength, tileLength);
             var tile;
             var tileRGB;
@@ -525,7 +523,7 @@ function drawScene(data) {
             for (var id in TILE_LIST) {
                 tileRGB = {};
                 tile = TILE_LIST[id];
-                if (tile.color && tile.alert || inBounds(selfPlayer,tile.x, tile.y)) {
+                if (tile.color && tile.alert || inBounds(selfPlayer, tile.x, tile.y)) {
                     tileRGB.r = tile.color.r;
                     tileRGB.g = tile.color.g;
                     tileRGB.b = tile.color.b;
@@ -536,21 +534,21 @@ function drawScene(data) {
                     tileRGB.b = 0;
                 }
 
-                imgData.data[i]= tileRGB.r;
-                imgData.data[i+1]= tileRGB.g;
-                imgData.data[i+2]= tileRGB.b;
-                imgData.data[i+3]=255;
+                imgData.data[i] = tileRGB.r;
+                imgData.data[i + 1] = tileRGB.g;
+                imgData.data[i + 2] = tileRGB.b;
+                imgData.data[i + 3] = 255;
                 i += 4;
             }
-            imgData = scaleImageData(imgData,2,ctx);
+            imgData = scaleImageData(imgData, 2, ctx);
 
             ctx3.putImageData(imgData, 0, 0);
 
-            ctx4.rotate(90*Math.PI/180);
+            ctx4.rotate(90 * Math.PI / 180);
             ctx4.scale(1, -1);
             ctx4.drawImage(c3, 0, 0);
             ctx4.scale(1, -1);
-            ctx4.rotate(270*Math.PI/180);
+            ctx4.rotate(270 * Math.PI / 180);
 
             serverMap = c4;
             mapTimer = 25;
@@ -563,19 +561,18 @@ function drawScene(data) {
         ctx.drawImage(serverMap, 100, 400);
     };
 
-    
+
     var drawScoreBoard = function () {
         for (var i = FACTION_ARRAY.length - 1; i >= 0; i--) {
             var faction = FACTION_ARRAY[i];
             ctx.font = "30px Arial";
-            ctx.fillText(faction.name, canvas.width * 3/4, 10 + (FACTION_ARRAY.length - i) * 30);
+            ctx.fillText(faction.name, canvas.width * 3 / 4, 10 + (FACTION_ARRAY.length - i) * 30);
         }
     };
 
     ctx.clearRect(0, 0, 11000, 11000);
     ctx2.clearRect(0, 0, 11000, 11000);
-    ctx3.clearRect(0,0, 500, 500);
-
+    ctx3.clearRect(0, 0, 500, 500);
     drawTiles();
     drawControllers();
     drawShards();
@@ -594,7 +591,7 @@ function drawScene(data) {
 }
 
 
-function factionSort(a,b) {
+function factionSort(a, b) {
     return a.size - b.size;
 }
 
@@ -608,7 +605,7 @@ function scaleImageData(imageData, scale, ctx) {
                 (row * imageData.width + col) * 4,
                 (row * imageData.width + col) * 4 + 4
             );
-            for (var x = 0; x < scale; x++) subLine.set(sourcePixel, x*4)
+            for (var x = 0; x < scale; x++) subLine.set(sourcePixel, x * 4)
             for (var y = 0; y < scale; y++) {
                 var destRow = row * scale + y;
                 var destCol = col * scale;
@@ -620,13 +617,13 @@ function scaleImageData(imageData, scale, ctx) {
     return scaled;
 }
 
-function lerp(a,b,ratio) {
-    return a + ratio * (b-a);
+function lerp(a, b, ratio) {
+    return a + ratio * (b - a);
 }
 
 
 var keys = [];
-var scaleFactor = 1.5; 
+var scaleFactor = 1.5;
 
 document.onkeydown = function (event) {
     keys[event.keyCode] = true;
@@ -636,14 +633,13 @@ document.onkeydown = function (event) {
     }
 };
 
-document.onkeyup = function (event) {   
+document.onkeyup = function (event) {
     keys[event.keyCode] = false;
     var id = returnId(event.keyCode);
     if (id !== null) {
         socket.emit('keyEvent', {id: id, state: false});
     }
 };
-
 
 
 canvas.addEventListener("mousedown", function (event) {
@@ -658,18 +654,18 @@ canvas.addEventListener("mousedown", function (event) {
 
 canvas.addEventListener("mouseup", function (event) {
     var rect = canvas.getBoundingClientRect();
-    var magnitude = function (x,y) {
+    var magnitude = function (x, y) {
         return x * x + y * y;
     };
-    var normalize = function(x,y) {
-        return [x/magnitude(x,y), y/magnitude(x,y)];
+    var normalize = function (x, y) {
+        return [x / magnitude(x, y), y / magnitude(x, y)];
     };
-    var x,y;
+    var x, y;
 
     ARROW.postX = event.clientX - rect.left;
     ARROW.postY = event.clientY - rect.top;
 
-    if (magnitude(ARROW.deltaX(),ARROW.deltaY()) > 10000) {
+    if (magnitude(ARROW.deltaX(), ARROW.deltaY()) > 10000) {
         var vector = normalize(ARROW.deltaX(), ARROW.deltaY());
         x = -vector[0] * 10000;
         y = -vector[1] * 10000;
@@ -687,7 +683,7 @@ canvas.addEventListener("mouseup", function (event) {
 
 
 canvas.addEventListener("mousemove", function (event) {
-    if (ARROW){
+    if (ARROW) {
         var rect = canvas.getBoundingClientRect();
         var x = event.clientX - rect.left;
         var y = event.clientY - rect.top;
@@ -740,10 +736,8 @@ var returnId = function (keyCode) {
 };
 
 
-
-
 function getRandom(min, max) {
-  return Math.random() * (max - min) + min;
+    return Math.random() * (max - min) + min;
 }
 
 Object.size = function (obj) {
