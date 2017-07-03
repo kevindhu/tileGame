@@ -51,6 +51,7 @@ function openUI(info) {
 }
 
 function openShardNamerUI() {
+    console.log("OPENING SHARD UI");
     var shardNamer = document.getElementById('shard_namer');
     var textInput = document.getElementById("textInput");
     var nameShardButton = document.getElementById("nameShardButton");
@@ -106,6 +107,7 @@ function closeUI(action) {
     var homeInfo = document.getElementById('home_info');
 
     if (action === "name shard") {
+        console.log("CLOSING SHARD INFO");
         var textInput = document.getElementById("textInput");
         textInput.value = "";
         shardNamer.style.display = 'none';
@@ -175,7 +177,6 @@ function addColorPicker(colorPicker, home) {
         var rect = colorCanvas.getBoundingClientRect();
         var x = event.clientX - rect.left;
         var y = event.clientY - rect.top;
-        console.log(x,y);
         var img_data = colorCtx.getImageData(x, y, 100, 100).data;
         socket.emit("newColor", {
             home: home.id,
