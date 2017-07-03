@@ -1,6 +1,7 @@
 const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
 var Player = require('./Player');
+var Bot = require('./Bot');
 var Headquarter = require('./Headquarter');
 var Tower = require('./Tower');
 var Sentinel = require('./Sentinel');
@@ -50,14 +51,16 @@ Faction.prototype.updateCoords = function () {
 
 Faction.prototype.addPlayer = function (id, playerName) {
     var player = new Player(id, playerName, this, this.gameServer);
-    player.x = this.x;
-    player.y = this.y;
     this.controllers.push(player.id);
     return player;
 };
 
-Faction.prototype.addBot = function (id) {
 
+
+Faction.prototype.addBot = function (player) {
+    var bot = new Bot(Math.random(), "shitBot", this, this.gameServer, player);
+    this.controllers.push(bot.id);
+    return bot;
 };
 
 Faction.prototype.addHeadquarter = function () {

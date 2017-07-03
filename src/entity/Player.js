@@ -5,13 +5,12 @@ var Controller = require('./Controller');
 var lerp = require('lerp');
 
 function Player(id, name, faction, gameServer) {
-    Player.super_.call(this,faction, gameServer);
-
-    this.id = id;
+    Player.super_.call(this, id, faction, gameServer);
     this.name = getName(name);
     this.emptyShard = null;
+    this.type = "Player";
+    this.maxSpeed = 10;
     this.shards = [];
-
     this.init();
 }
 
@@ -94,7 +93,7 @@ Player.prototype.decreaseHealth = function (amount) {
     if (this.health <= 0) {
         this.reset();
     }
-    this.packetHandler.updateControllerPackets(this);
+    this.packetHandler.updateControllersPackets(this);
 };
 
 Player.prototype.increaseHealth = function (amount) {
@@ -128,6 +127,11 @@ Player.prototype.dropAllShards = function () {
         this.dropShard(shard);
     }
 };
+
+Player.prototype.onDeath = function () {
+    this.reset();
+};
+
 
 Player.prototype.reset = function () {
     this.dropAllShards();

@@ -724,6 +724,9 @@ var returnId = function (keyCode) {
         case 88:
             id = 'X';
             break;
+        case 66:
+            id = 'B';
+            break;
         case 13:
             id = 'enter';
             break;

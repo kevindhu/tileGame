@@ -34,7 +34,7 @@ Sentinel.prototype.shootShard = function (player) {
         }
         var shardClone = new Shard(this.x, this.y, this.gameServer);
         shardClone.setName(shard.name);
-        shardClone.becomeShooting(this.getRandomPlayer(), (player.x - this.x) / 4,
+        shardClone.becomeHomeShooting(this, (player.x - this.x) / 4,
          (player.y - this.y) / 4, true);
     }
     this.packetHandler.updateHomePackets(this);

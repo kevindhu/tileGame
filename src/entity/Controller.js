@@ -2,16 +2,17 @@ const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
 var lerp = require('lerp');
 
-function Controller(faction, gameServer) {
+function Controller(id, faction, gameServer) {
+    this.id = id;
     this.gameServer = gameServer;
     this.packetHandler = gameServer.packetHandler;
 
     this.faction = faction.name;
 
-    this.x = entityConfig.WIDTH / 2;
-    this.y = entityConfig.WIDTH / 2;
+    this.x = faction.x;
+    this.y = faction.y;
     this.health = 5;
-    this.maxSpeed = 10;
+    this.maxSpeed = 7;
     this.timer = 0;
     this.xSpeed = 0;
     this.ySpeed = 0;
@@ -20,8 +21,6 @@ function Controller(faction, gameServer) {
     this.pressingLeft = false;
     this.pressingUp = false;
     this.pressingDown = false;
-
-    this.init();
 }
 
 Controller.prototype.init = function () {
@@ -65,7 +64,7 @@ Controller.prototype.update = function () {
 Controller.prototype.decreaseHealth = function (amount) {
     this.health -=amount;
     if (this.health <= 0) {
-        this.reset();
+        this.onDeath();
     }
 };
 
@@ -117,7 +116,6 @@ Controller.prototype.updatePosition = function () {
     if (!this.pressingUp && !this.pressingDown) {
         this.ySpeed = lerp(this.ySpeed,0,0.3);
     }
-    console.log(Math.round(this.xSpeed),Math.round(this.ySpeed));
     this.y += this.ySpeed;
     this.x += this.xSpeed;
 

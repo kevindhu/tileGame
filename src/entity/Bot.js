@@ -4,25 +4,18 @@ var lerp = require('lerp');
 var EntityFunctions = require('./EntityFunctions');
 var Controller = require('./Controller');
 
-function Bot(name, faction, gameServer) {
-    Player.super_.call(this,faction, gameServer);
-
+function Bot(id, name, faction, gameServer, player) {
+    Bot.super_.call(this, id, faction, gameServer);
     this.id = Math.random();
     this.name = getName(name);
-    this.owner = null;
+    this.owner = player.id;
     this.emptyShard = null;
+    this.type = "Bot";
     this.init();
 }
 
-EntityFunctions.inherits(Player, Controller);
+EntityFunctions.inherits(Bot, Controller);
 
-
-
-Bot.prototype.onDelete = function () {
-    this.gameServer.FACTION_LIST[this.faction].removeBot(this);
-    delete this.gameServer.PLAYER_LIST[this.id];
-    this.packetHandler.deleteBotPackets(this);
-};
 
 
 Bot.prototype.update = function () {
@@ -31,9 +24,12 @@ Bot.prototype.update = function () {
 
 
 Bot.prototype.updateControls = function () {
-    var player = this.gameServer.PLAYER_LIST[player];
-    this.pressingDown = false;
+    var player = this.gameServer.CONTROLLER_LIST[this.owner];
+    if (!player) {
+        return;
+    }
     this.pressingUp = false;
+    this.pressingDown = false;
     this.pressingLeft = false;
     this.pressingRight = false;
 
@@ -44,10 +40,10 @@ Bot.prototype.updateControls = function () {
         this.pressingRight = true;
     }
     if (player.y < this.y) {
-        this.pressingDown = true;
+        this.pressingUp = true;
     }
     else {
-        this.pressingUp = true;
+        this.pressingDown = true;
     }
 };
 
@@ -58,6 +54,9 @@ Bot.prototype.updatePosition = function () {
     Bot.super_.prototype.updatePosition.apply(this);
 };
 
+Bot.prototype.onDeath = function () {
+    this.onDelete();
+};
 
 
 Bot.prototype.getRandomShard = function () {

@@ -33,7 +33,7 @@ function GameServer() {
         Math.sqrt(entityConfig.TILES);
 }
 
-/** SERVER ENTITY INIT METHODS **/
+/** SERVER INIT METHODS **/
 GameServer.prototype.initTiles = function () {
     this.tileTree = new QuadNode({
         minx: this.minx,
@@ -87,6 +87,25 @@ GameServer.prototype.initTowers = function () {
     });
 };
 
+GameServer.prototype.initNewClients = function () {
+    for (var id in this.INIT_SOCKET_LIST) {
+        var socket = this.SOCKET_LIST[id];
+        if (!socket) {
+            delete this.INIT_SOCKET_LIST[id];
+        }
+        if (socket.timer !== 0) {
+            socket.timer -= 1;
+        }
+        else if (socket.stage <= entityConfig.STAGES) {
+            this.packetHandler.sendInitPackets(socket);
+            socket.timer = 3;
+        }
+        else {
+            delete this.INIT_SOCKET_LIST[id];
+        }
+    }
+};
+
 /** UPDATE METHODS **/
 GameServer.prototype.spawnShards = function () {
     if (Object.size(this.STATIC_SHARD_LIST) < entityConfig.SHARDS) {
@@ -131,68 +150,69 @@ GameServer.prototype.checkShardCollision = function (shard) {
     }.bind(this));
 };
 
-GameServer.prototype.checkPlayerCollision = function (player) {
-    var playerBound = {
-        minx: player.x - entityConfig.SHARD_WIDTH,
-        miny: player.y - entityConfig.SHARD_WIDTH,
-        maxx: player.x + entityConfig.SHARD_WIDTH,
-        maxy: player.y + entityConfig.SHARD_WIDTH
+GameServer.prototype.checkControllerCollision = function (controller) {
+    var controllerBound = {
+        minx: controller.x - entityConfig.SHARD_WIDTH,
+        miny: controller.y - entityConfig.SHARD_WIDTH,
+        maxx: controller.x + entityConfig.SHARD_WIDTH,
+        maxy: controller.y + entityConfig.SHARD_WIDTH
     };
 
-    //player + static/player shard collision
-    this.shardTree.find(playerBound, function (shard) {
-        if (player.faction !== shard.faction && shard.timer <= 0) {
-            if (player.emptyShard !== null) {
-                player.transformEmptyShard("unnamed");
-                this.packetHandler.deleteUIPackets(player, "name shard");
+    if (controller.type === "Player") {
+        //player + static/player shard collision
+        this.shardTree.find(controllerBound, function (shard) {
+            if (controller.faction !== shard.faction && shard.timer <= 0) {
+                if (controller.emptyShard !== null) {
+                    controller.transformEmptyShard("unnamed");
+                    this.packetHandler.deleteUIPackets(controller, "name shard");
+                }
+                //if shard already owned
+                if (shard.owner !== null) {
+                    var oldOwner = this.CONTROLLER_LIST[shard.owner];
+                    oldOwner.removeShard(shard);
+                }
+                if (shard.name === null) {
+                    this.packetHandler.deleteUIPackets(controller, "home info");
+                    this.packetHandler.addUIPackets(controller, null, "name shard");
+                }
+                controller.addShard(shard);
             }
-            //if shard already owned
-            if (shard.owner !== null) {
-                var oldOwner = this.CONTROLLER_LIST[shard.owner];
-                oldOwner.removeShard(shard);
-            }
-            if (shard.name === null) {
-                this.packetHandler.deleteUIPackets(player, "home info");
-                this.packetHandler.addUIPackets(player, null, "name shard");
-            }
-            player.addShard(shard);
-        }
-    }.bind(this));
+        }.bind(this));
 
-    //player + shooting shard collision
-    this.shootingShardTree.find(playerBound, function (shard) {
-        if (player.faction !== shard.faction) {
+        //player + home collision
+        this.homeTree.find(controllerBound, function (home) {
+            if (controller.faction === home.faction) {
+                for (var i =controller.shards.length - 1; i >= 0; i--) {
+                    var shard = this.PLAYER_SHARD_LIST[controller.shards[i]];
+                    controller.removeShard(shard);
+                    home.addShard(shard);
+                }
+                if (controller.pressingSpace) {
+                    if (controller.timer > 0) {
+                        controller.timer -= 1;
+                        return;
+                    }
+                    else {
+                        controller.timer = 15;
+                    }
+                    this.packetHandler.addUIPackets(player, home, "home info");
+                }
+            }
+        }.bind(this));
+    }
+
+    //controller + shooting shard collision
+    this.shootingShardTree.find(controllerBound, function (shard) {
+        if (controller.faction !== shard.faction) {
             shard.onDelete();
-            player.decreaseHealth(1);
+            controller.decreaseHealth(1);
         }
     }.bind(this));
 
-    //player + home collision
-    this.homeTree.find(playerBound, function (home) {
-        if (player.faction === home.faction) {
-            for (var i = player.shards.length - 1; i >= 0; i--) {
-                var shard = this.PLAYER_SHARD_LIST[player.shards[i]];
-                player.removeShard(shard);
-                home.addShard(shard);
-            }
-            if (player.pressingSpace) {
-                if (player.timer > 0) {
-                    player.timer -= 1;
-                    return;
-                }
-                else {
-                    player.timer = 15;
-                }
-                this.packetHandler.addUIPackets(player, home, "home info");
-            }
-        }
-    }.bind(this));
-
-    //player + tower collision
-    this.towerTree.find(playerBound, function (tower) {
-        if (player.faction !== tower.faction) {
-            //tower shoots at player
-            tower.shootShard(player);
+    //controller + tower collision
+    this.towerTree.find(controllerBound, function (tower) {
+        if (controller.faction !== tower.faction) {
+            tower.shootShard(controller);
         }
     }.bind(this));
 };
@@ -200,8 +220,8 @@ GameServer.prototype.checkPlayerCollision = function (player) {
 GameServer.prototype.checkCollisions = function () {
     var id;
     for (id in this.CONTROLLER_LIST) {
-        var player = this.CONTROLLER_LIST[id];
-        this.checkPlayerCollision(player);
+        var controller = this.CONTROLLER_LIST[id];
+        this.checkControllerCollision(controller);
     }
     for (id in this.SHOOTING_SHARD_LIST) {
         var shard = this.SHOOTING_SHARD_LIST[id];
@@ -213,25 +233,6 @@ GameServer.prototype.updatePlayers = function () {
     for (var id in this.CONTROLLER_LIST) {
         var player = this.CONTROLLER_LIST[id];
         player.update();
-    }
-};
-
-GameServer.prototype.initNewClients = function () {
-    for (var id in this.INIT_SOCKET_LIST) {
-        var socket = this.SOCKET_LIST[id];
-        if (!socket) {
-            delete this.INIT_SOCKET_LIST[id];
-        }
-        if (socket.timer !== 0) {
-            socket.timer -= 1;
-        }
-        else if (socket.stage <= entityConfig.STAGES) {
-            this.packetHandler.sendInitPackets(socket);
-            socket.timer = 3;
-        }
-        else {
-            delete this.INIT_SOCKET_LIST[id];
-        }
     }
 };
 
@@ -262,7 +263,6 @@ GameServer.prototype.update = function () {
     this.updateShards();
     this.packetHandler.sendPackets();
 };
-
 
 GameServer.prototype.start = function () {
     var express = require("express");
@@ -318,10 +318,10 @@ GameServer.prototype.start = function () {
         }.bind(this));
 
         socket.on('keyEvent', function x(data) {
-            var faction;
             if (!player) {
                 return;
             }
+            var faction = this.FACTION_LIST[player.faction];
             switch (data.id) {
                 case "left":
                     player.pressingLeft = data.state;
@@ -340,15 +340,19 @@ GameServer.prototype.start = function () {
                     break;
                 case "Z":
                     if (data.state) {
-                        faction = this.FACTION_LIST[player.faction];
                         faction.addSentinel(player);
                     }
                     break;
                 case "X":
                     if (data.state) {
-                        faction = this.FACTION_LIST[player.faction];
                         faction.addTower(player);
                     }
+                    break;
+                case "B":
+                    if (data.state) {
+                        faction.addBot(player);
+                    }
+                    break;
             }
         }.bind(this));
 
