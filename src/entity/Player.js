@@ -34,7 +34,6 @@ Player.prototype.update = function () {
             this.packetHandler.addBracketPackets(this, tile);
         }
     }
-
     Player.super_.prototype.update.apply(this);
 };
 

@@ -9,6 +9,7 @@ function PacketHandler(gameServer) {
     this.addHomePacket = [];
     this.addFactionPacket = [];
     this.addUIPacket = [];
+    this.addLaserPacket = [];
     this.addBracketPacket = [];
 
     this.updateHomePacket = [];
@@ -21,6 +22,7 @@ function PacketHandler(gameServer) {
     this.deleteControllerPacket = [];
     this.deleteShardPacket = [];
     this.deleteHomePacket = [];
+    this.deleteLaserPacket = [];
     this.deleteFactionPacket = [];
     this.deleteUIPacket = [];
 }
@@ -158,7 +160,7 @@ PacketHandler.prototype.addControllerPackets = function (controller, ifInit) {
         x: controller.x,
         y: controller.y,
         health: controller.health
-    }
+    };
     if (ifInit) {
         return info;
     }
@@ -208,6 +210,15 @@ PacketHandler.prototype.addTilePackets = function (tile, ifInit) {
         length: tile.length,
         alert: tile.alert
     };
+};
+
+
+PacketHandler.prototype.addLaserPackets = function (laser, ifInit) {
+    this.addLaserPacket.push({
+        id: laser.id,
+        owner: laser.owner,
+        target: laser.target
+    });
 };
 
 
@@ -302,6 +313,10 @@ PacketHandler.prototype.deleteControllerPackets = function (controller) {
 	this.deleteControllerPacket.push({id: controller.id});
 };
 
+PacketHandler.prototype.deleteLaserPackets = function (laser) {
+    this.deleteLaserPacket.push({id: laser.id});
+};
+
 PacketHandler.prototype.deleteFactionPackets = function (faction) {
     this.deleteFactionPacket.push({id: faction.id});
 };
@@ -353,7 +368,8 @@ PacketHandler.prototype.sendPackets = function () {
                 'shardInfo': this.deleteShardPacket,
                 'homeInfo': this.deleteHomePacket,
                 'bracketInfo': this.deleteBracketPacket,
-                'factionInfo': this.deleteFactionPacket
+                'factionInfo': this.deleteFactionPacket,
+                'laserInfo': this.deleteLaserPacket
             });
         socket.emit('drawScene', {});
     }
@@ -370,6 +386,7 @@ PacketHandler.prototype.resetPackets = function () {
     this.addFactionPacket = [];
     this.addUIPacket = [];
     this.addBracketPacket = [];
+    this.addLaserPacket = [];
 
     this.updateHomePacket = [];
     this.updateTilesPacket = [];
@@ -381,6 +398,7 @@ PacketHandler.prototype.resetPackets = function () {
     this.deleteControllerPacket = [];
     this.deleteShardPacket = [];
     this.deleteHomePacket = [];
+    this.deleteLaserPacket = [];
     this.deleteFactionPacket = [];
     this.deleteUIPacket = [];
 };

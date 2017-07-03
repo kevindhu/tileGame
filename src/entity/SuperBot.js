@@ -30,7 +30,7 @@ SuperBot.prototype.shootShard = function (player) {
     this.timer = 10;
 
     var shardClone = new Shard(this.x, this.y, this.gameServer);
-    shardClone.setName("ass");
+    shardClone.setName("bigAss");
     shardClone.becomeHomeShooting(this, (player.x - this.x) / 4,
         (player.y - this.y) / 4, true);
 
