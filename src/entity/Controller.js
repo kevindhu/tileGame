@@ -67,9 +67,13 @@ Controller.prototype.update = function () {
 Controller.prototype.checkCollisions = function () {
     this.gameServer.controllerTree.find(this.quadItem.bound, function (controller) {
         if (this.type === "Bot" && controller.faction !== this.faction) {
-            this.shootShard(controller);
+            //this.shootShard(controller);
+            this.shootLaser(controller);
         }
     }.bind(this))
+};
+
+Controller.prototype.shootLaser = function () {
 };
 
 

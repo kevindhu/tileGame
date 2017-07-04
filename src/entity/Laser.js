@@ -24,11 +24,20 @@ Laser.prototype.init = function () {
 
 Laser.prototype.update = function () {
     var target = this.gameServer.CONTROLLER_LIST[this.target];
+    if (!target || this.outofRange(target)) {
+        this.onDelete();
+        return;
+    }
     target.decreaseHealth(0.1);
     this.useSupply();
     this.checkStatus();
 };
 
+
+Laser.prototype.outofRange = function (target) {
+    return (target.x - this.x) * (target.x - this.x) +
+    (target.y - this.y) * (target.y - this.y) > 10000;
+};
 
 
 Laser.prototype.useSupply = function () {

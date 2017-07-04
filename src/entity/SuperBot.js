@@ -5,6 +5,7 @@ var EntityFunctions = require('./EntityFunctions');
 var Controller = require('./Controller');
 var Bot = require('./Bot');
 var Shard = require('./Shard');
+var Laser = require('./Laser');
 
 function SuperBot(id, name, faction, gameServer, player) {
     SuperBot.super_.call(this, id, name, faction, gameServer, player);
@@ -35,6 +36,12 @@ SuperBot.prototype.shootShard = function (player) {
         (player.y - this.y) / 4, true);
 
     this.packetHandler.updateHomePackets(this);
+};
+
+SuperBot.prototype.shootLaser = function (player) {
+    //TODO: what if the owner has been deleted?
+    var owner = this.gameServer.CONTROLLER_LIST[this.owner];
+    return new Laser(owner, player, this.gameServer);
 };
 
 

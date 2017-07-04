@@ -32,6 +32,7 @@ var FACTION_ARRAY = [];
 var CONTROLLER_LIST = {};
 var TILE_LIST = {};
 var SHARD_LIST = {};
+var LASER_LIST = {};
 var HOME_LIST = {};
 var ANIMATION_LIST = {};
 
@@ -68,6 +69,11 @@ var Shard = function (shardInfo) {
     this.y = shardInfo.y;
     this.name = shardInfo.name;
     this.visible = shardInfo.visible;
+};
+var Laser = function (laserInfo) {
+    this.id = laserInfo.id;
+    this.owner = laserInfo.owner;
+    this.target = laserInfo.target;
 };
 var Home = function (homeInfo) {
     this.id = homeInfo.id;
@@ -150,6 +156,9 @@ function addEntities(data) {
                 break;
             case "shardInfo":
                 addEntity(packet, SHARD_LIST, Shard);
+                break;
+            case "laserInfo":
+                addEntity(packet, LASER_LIST, Laser);
                 break;
             case "homeInfo":
                 addEntity(packet, HOME_LIST, Home);
@@ -372,6 +381,23 @@ function drawScene(data) {
         }
     };
 
+    var drawLasers = function () {
+        //TODO: add owner
+        for (var id in LASER_LIST) {
+            var laser = LASER_LIST[id];
+            var target = CONTROLLER_LIST[laser.target];
+            if (target && inBounds(selfPlayer, laser.owner, laser.owner)) {
+                ctx2.beginPath();
+                ctx2.moveTo(laser.owner, laser.owner);
+                ctx2.strokeStyle = "#912222";
+                ctx2.lineWidth = 10;
+                ctx2.lineTo(target.x, target.y);
+                ctx2.stroke();
+            }
+        }
+    };
+
+
     var drawConnectors = function () {
         for (var id in HOME_LIST) {
             var home = HOME_LIST[id];
@@ -576,6 +602,7 @@ function drawScene(data) {
     drawTiles();
     drawControllers();
     drawShards();
+    drawLasers();
     drawConnectors();
     drawHomes();
     drawFactions();
