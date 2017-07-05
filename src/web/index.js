@@ -20,7 +20,7 @@ var socket = io();
 
 socket.on('addFactionsUI', addFactionstoUI);
 socket.on('addEntities', addEntities);
-socket.on('updateEntities', updateEntities);
+socket.on('updateEntities', packetHandler);
 socket.on('deleteEntities', deleteEntities);
 socket.on('drawScene', drawScene);
 
@@ -121,20 +121,26 @@ var Animation = function (animationInfo) {
     }
 };
 
-function addFactionstoUI(data) {
-    var factions = document.getElementById('factions');
-    var packet = data.factions;
 
-    for (var i = 0; i < packet.length; i++) {
-        var name = packet[i];
-        var option = document.createElement('option');
-        option.value = name;
-        factions.appendChild(option);
+function packetHandler(data) {
+    var packet, i;
+    for (i = 0; i < data.length; i++) {
+        packet = data[i];
+        switch (packet.master) {
+            case "add":
+                addEntities(packet);
+                break;
+            case "delete":
+                deleteEntities(packet);
+                break;
+            case "update":
+                updateEntities(packet);
+                break;
+        }
     }
 }
 
-function addEntities(data) {
-    var i, packet;
+function addEntities(packet) {
     var addEntity = function (packet, list, Entity, array) {
         if (!packet) {
             return;
@@ -145,50 +151,47 @@ function addEntities(data) {
         }
     };
 
-    for (i = 0; i<data.length; i++) {
-        packet = data[i];
-        switch (packet.class) {
-            case "tileInfo":
-                addEntity(packet, TILE_LIST, Tile);
-                break;
-            case "controllerInfo":
-                addEntity(packet, CONTROLLER_LIST, Controller);
-                break;
-            case "shardInfo":
-                addEntity(packet, SHARD_LIST, Shard);
-                break;
-            case "laserInfo":
-                console.log("ADDING LASER: " + packet.id);
-                addEntity(packet, LASER_LIST, Laser);
-                break;
-            case "homeInfo":
-                addEntity(packet, HOME_LIST, Home);
-                break;
-            case "factionInfo":
-                addEntity(packet, FACTION_LIST, Faction, FACTION_ARRAY);
-                break;
-            case "animationInfo":
-                addEntity(packet, ANIMATION_LIST, Animation);
-                break;
-            case "bracketInfo":
-                if (selfId === packet.playerId) {
-                    BRACKET = new Bracket(packet);
-                }
-                break;
-            case "UIInfo":
-                if (selfId === packet.playerId) {
-                    openUI(packet);
-                }
-                break;
-            case "selfId":
-                selfId = packet.selfId;
-        }
+    switch (packet.class) {
+        case "tileInfo":
+            addEntity(packet, TILE_LIST, Tile);
+            break;
+        case "controllerInfo":
+            addEntity(packet, CONTROLLER_LIST, Controller);
+            break;
+        case "shardInfo":
+            addEntity(packet, SHARD_LIST, Shard);
+            break;
+        case "laserInfo":
+            console.log("ADDING LASER: " + packet.id);
+            addEntity(packet, LASER_LIST, Laser);
+            break;
+        case "homeInfo":
+            addEntity(packet, HOME_LIST, Home);
+            break;
+        case "factionInfo":
+            addEntity(packet, FACTION_LIST, Faction, FACTION_ARRAY);
+            break;
+        case "animationInfo":
+            addEntity(packet, ANIMATION_LIST, Animation);
+            break;
+        case "bracketInfo":
+            if (selfId === packet.playerId) {
+                BRACKET = new Bracket(packet);
+            }
+            break;
+        case "UIInfo":
+            if (selfId === packet.playerId) {
+                openUI(packet);
+            }
+            break;
+        case "selfId":
+            selfId = packet.selfId;
+            break;
     }
+
 }
 
-function updateEntities(data) {
-    var packet;
-
+function updateEntities(packet) {
     function updateEntity(packet, list, callback) {
         if (!packet) {
             return;
@@ -236,30 +239,27 @@ function updateEntities(data) {
         controller.health = controllerInfo.health;
     };
 
-    for (var i = 0; i < data.length; i++) {
-        packet = data[i];
-        switch (packet.class) {
-            case "controllerInfo":
-                updateEntity(packet, CONTROLLER_LIST, updateControllers);
-                break;
-            case "tileInfo":
-                updateEntity(packet, TILE_LIST, updateTiles);
-                break;
-            case "shardInfo":
-                updateEntity(packet, SHARD_LIST, updateShards);
-                break;
-            case "homeInfo":
-                updateEntity(packet, HOME_LIST, updateHomes);
-                break;
-            case "factionInfo":
-                updateEntity(packet, FACTION_LIST, updateFactions);
-                break;
-        }
+    switch (packet.class) {
+        case "controllerInfo":
+            updateEntity(packet, CONTROLLER_LIST, updateControllers);
+            break;
+        case "tileInfo":
+            updateEntity(packet, TILE_LIST, updateTiles);
+            break;
+        case "shardInfo":
+            updateEntity(packet, SHARD_LIST, updateShards);
+            break;
+        case "homeInfo":
+            updateEntity(packet, HOME_LIST, updateHomes);
+            break;
+        case "factionInfo":
+            updateEntity(packet, FACTION_LIST, updateFactions);
+            break;
     }
 }
 
-function deleteEntities(data) {
-    var packet, i;
+function deleteEntities(packet) {
+
     var deleteEntity = function (packet, list, array) {
         if (!packet) {
             return;
@@ -271,47 +271,56 @@ function deleteEntities(data) {
         delete list[packet.id];
     };
 
-    for (i = 0; i<data.length; i++) {
-        packet = data[i];
-        switch (packet.class) {
-            case "tileInfo":
-                deleteEntity(packet, TILE_LIST);
-                break;
-            case "controllerInfo":
-                deleteEntity(packet, CONTROLLER_LIST);
-                break;
-            case "shardInfo":
-                deleteEntity(packet, SHARD_LIST);
-                break;
-            case "homeInfo":
-                deleteEntity(packet, HOME_LIST);
-                break;
-            case "factionInfo":
-                deleteEntity(packet, FACTION_LIST, FACTION_ARRAY);
-                break;
-            case "animationInfo":
-                deleteEntity(packet, ANIMATION_LIST);
-                break;
-            case "laserInfo":
-                console.log("DELETING LASER" + packet.id);
-                deleteEntity(packet, LASER_LIST);
-                console.log(LASER_LIST);
-                break;
-            case "bracketInfo":
-                if (selfId === packet.id) {
-                    BRACKET = null;
-                }
-                break;
-            case "UIInfo":
-                if (selfId === packet.id) {
-                    closeUI(packet.action);
-                }
-                break;
-        }
+    switch (packet.class) {
+        case "tileInfo":
+            deleteEntity(packet, TILE_LIST);
+            break;
+        case "controllerInfo":
+            deleteEntity(packet, CONTROLLER_LIST);
+            break;
+        case "shardInfo":
+            deleteEntity(packet, SHARD_LIST);
+            break;
+        case "homeInfo":
+            deleteEntity(packet, HOME_LIST);
+            break;
+        case "factionInfo":
+            deleteEntity(packet, FACTION_LIST, FACTION_ARRAY);
+            break;
+        case "animationInfo":
+            deleteEntity(packet, ANIMATION_LIST);
+            break;
+        case "laserInfo":
+            console.log("DELETING LASER" + packet.id);
+            deleteEntity(packet, LASER_LIST);
+            console.log(LASER_LIST);
+            break;
+        case "bracketInfo":
+            if (selfId === packet.id) {
+                BRACKET = null;
+            }
+            break;
+        case "UIInfo":
+            if (selfId === packet.id) {
+                closeUI(packet.action);
+            }
+            break;
     }
 
+}
 
 
+
+function addFactionstoUI(data) {
+    var factions = document.getElementById('factions');
+    var packet = data.factions;
+
+    for (var i = 0; i < packet.length; i++) {
+        var name = packet[i];
+        var option = document.createElement('option');
+        option.value = name;
+        factions.appendChild(option);
+    }
 }
 
 function findWithAttr(array, attr, value) {
