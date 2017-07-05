@@ -326,8 +326,8 @@ PacketHandler.prototype.sendPackets = function () {
     for (var index in this.gameServer.SOCKET_LIST) {
         var socket = this.gameServer.SOCKET_LIST[index];
 
-        socket.emit('deleteEntities', this.deletePacket);
         socket.emit('addEntities', this.addPacket);
+        socket.emit('deleteEntities', this.deletePacket);
         socket.emit('updateEntities', this.updatePacket);
         socket.emit('drawScene', {});
     }

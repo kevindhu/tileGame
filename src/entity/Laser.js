@@ -2,6 +2,7 @@ const entityConfig = require('./entityConfig');
 var lerp = require('lerp');
 
 function Laser(owner, target, gameServer) {
+    console.log("NEW LASER");
     this.gameServer = gameServer;
     this.packetHandler = gameServer.packetHandler;
 
@@ -11,7 +12,7 @@ function Laser(owner, target, gameServer) {
 
     this.faction = owner.faction;
 
-    this.supply = 100;
+    this.supply = 30;
 
     this.init();
 }
@@ -35,8 +36,13 @@ Laser.prototype.update = function () {
 
 
 Laser.prototype.outofRange = function (target) {
-    return (target.x - this.x) * (target.x - this.x) +
-    (target.y - this.y) * (target.y - this.y) > 10000;
+    var owner = this.gameServer.CONTROLLER_LIST[this.owner];
+    console.log((target.x - owner.x) * (target.x - owner.x) +
+        (target.y - owner.y) * (target.y - owner.y) > 10000);
+
+
+    return (target.x - owner.x) * (target.x - owner.x) +
+        (target.y - owner.y) * (target.y - owner.y) > 10000;
 };
 
 
@@ -53,6 +59,7 @@ Laser.prototype.checkStatus = function () {
 
 
 Laser.prototype.onDelete = function () {
+    console.log("DELETING LASER!");
     delete this.gameServer.LASER_LIST[this.id];
     this.packetHandler.deleteLaserPackets(this);
 };

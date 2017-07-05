@@ -45,6 +45,9 @@ Controller.prototype.update = function () {
     if (this.timer > 0) {
         this.timer -= 1;
     }
+    if (this.laserTimer && this.laserTimer > 0) {
+        this.laserTimer -= 1;
+    }
     this.updatePosition();
     this.updateQuadItem();
     this.checkCollisions();

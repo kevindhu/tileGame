@@ -158,6 +158,7 @@ function addEntities(data) {
                 addEntity(packet, SHARD_LIST, Shard);
                 break;
             case "laserInfo":
+                console.log("ADDING LASER: " + packet.id);
                 addEntity(packet, LASER_LIST, Laser);
                 break;
             case "homeInfo":
@@ -290,6 +291,11 @@ function deleteEntities(data) {
                 break;
             case "animationInfo":
                 deleteEntity(packet, ANIMATION_LIST);
+                break;
+            case "laserInfo":
+                console.log("DELETING LASER" + packet.id);
+                deleteEntity(packet, LASER_LIST);
+                console.log(LASER_LIST);
                 break;
             case "bracketInfo":
                 if (selfId === packet.id) {
