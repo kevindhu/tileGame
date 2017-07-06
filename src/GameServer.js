@@ -289,6 +289,7 @@ GameServer.prototype.update = function () {
     this.packetHandler.sendPackets();
 };
 
+/** SERVER CREATION EVENTS **/
 GameServer.prototype.start = function () {
     var express = require("express");
     var app = express();
@@ -428,8 +429,6 @@ GameServer.prototype.start = function () {
     setInterval(this.update.bind(this), 1000 / 25);
 };
 
-
-/** SERVER CREATION EVENTS **/
 GameServer.prototype.createPlayer = function (socket, info) {
     var checkName = function (name) {
         if (name === null || name === "") {

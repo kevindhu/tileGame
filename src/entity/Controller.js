@@ -11,6 +11,7 @@ function Controller(id, faction, gameServer) {
 
     this.radius = 50;
 
+    this.stationary = true;
     this.x = faction.x;
     this.y = faction.y;
     this.health = 5;
@@ -68,12 +69,35 @@ Controller.prototype.update = function () {
 
 
 Controller.prototype.checkCollisions = function () {
-    this.gameServer.controllerTree.find(this.quadItem.bound, function (controller) {
-        if (this.type === "Bot" && controller.faction !== this.faction) {
-            //this.shootShard(controller);
-            this.shootLaser(controller);
-        }
-    }.bind(this))
+    if (this.type === "Bot") {
+        this.gameServer.controllerTree.find(this.quadItem.bound, function (controller) {
+            if (controller.faction !== this.faction) {
+                this.shootShard(controller);
+                this.shootLaser(controller);
+            }
+            else if (controller.faction) {
+                this.ricochet(controller);
+            }
+
+        }.bind(this))
+    }
+};
+
+
+Controller.prototype.ricochet = function (controller) {
+    if (controller.x - this.x > 0) {
+        this.xSpeed -= 2;
+    }
+    else {
+        this.xSpeed += 2;
+    }
+
+    if (controller.y - this.y > 0) {
+        this.ySpeed -= 2;
+    }
+    else {
+        this.ySpeed += 2;
+    }
 };
 
 Controller.prototype.shootLaser = function () {
@@ -95,14 +119,16 @@ Controller.prototype.addQuadItem = function () {
 
 
 Controller.prototype.updateQuadItem = function () {
-    this.quadItem.bound = {
-        minx: this.x - this.radius,
-        miny: this.y - this.radius,
-        maxx: this.x + this.radius,
-        maxy: this.y + this.radius
-    };
-    this.gameServer.controllerTree.remove(this.quadItem);
-    this.gameServer.controllerTree.insert(this.quadItem);
+    if (!this.stationary) { //also maybe add a timer so it doesn't update every frame
+        this.quadItem.bound = {
+            minx: this.x - this.radius,
+            miny: this.y - this.radius,
+            maxx: this.x + this.radius,
+            maxy: this.y + this.radius
+        };
+        this.gameServer.controllerTree.remove(this.quadItem);
+        this.gameServer.controllerTree.insert(this.quadItem);
+    }
 };
 
 Controller.prototype.decreaseHealth = function (amount) {
@@ -159,11 +185,27 @@ Controller.prototype.updatePosition = function () {
     if (!this.pressingUp && !this.pressingDown) {
         this.ySpeed = lerp(this.ySpeed,0,0.3);
     }
+    this.checkStationary();
+    this.checkStuck();
     this.y += this.ySpeed;
     this.x += this.xSpeed;
 
 
-    var checkStuck = function (coord) {
+};
+
+Controller.prototype.checkStationary = function () {
+    if (Math.abs(this.ySpeed) <= 0.3 && Math.abs(this.xSpeed) <= 0.3) {
+        this.ySpeed = 0;
+        this.xSpeed = 0;
+        this.stationary = true;
+    }
+    else {
+        this.stationary = false;
+    }
+};
+
+Controller.prototype.checkStuck = function () {
+    var resolveStuck = function (coord) {
         var newCoord;
         if (overBoundary(coord)) {
             if (coord < entityConfig.WIDTH/2) {
@@ -178,8 +220,8 @@ Controller.prototype.updatePosition = function () {
         return coord;
     };
 
-    this.x = checkStuck(this.x);
-    this.y = checkStuck(this.y);
+    this.x = resolveStuck(this.x);
+    this.y = resolveStuck(this.y);
 };
 
 

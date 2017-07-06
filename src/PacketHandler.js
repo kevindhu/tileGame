@@ -2,16 +2,14 @@ const entityConfig = require('./entity/entityConfig');
 const Arithmetic = require('./modules/Arithmetic');
 function PacketHandler(gameServer) {
     this.gameServer = gameServer;
+    this.masterPacket = [];
 
-    this.masterPacket = [];
-    this.masterPacket = [];
-    this.masterPacket = [];
 }
 
 PacketHandler.prototype.sendInitPackets = function (socket) {
     var stage = socket.stage;
     if (stage === 0) {
-        socket.emit('addFactionsUI', this.addFactionsUIPacket());
+        socket.emit('addFactionsUI', this.addFactionsUIPacket()); //make more streamlined?
         socket.emit('updateEntities', this.createInitPacket(stage, socket.id));
     }
     else {

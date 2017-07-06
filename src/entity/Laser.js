@@ -25,7 +25,8 @@ Laser.prototype.init = function () {
 
 Laser.prototype.update = function () {
     var target = this.gameServer.CONTROLLER_LIST[this.target];
-    if (!target || this.outofRange(target)) {
+    var owner = this.gameServer.CONTROLLER_LIST[this.owner];
+    if (!target || !owner || this.outofRange(owner, target)) {
         this.onDelete();
         return;
     }
@@ -35,10 +36,7 @@ Laser.prototype.update = function () {
 };
 
 
-Laser.prototype.outofRange = function (target) {
-    var owner = this.gameServer.CONTROLLER_LIST[this.owner];
-    console.log((target.x - owner.x) * (target.x - owner.x) +
-        (target.y - owner.y) * (target.y - owner.y));
+Laser.prototype.outofRange = function (owner, target) {
     return (target.x - owner.x) * (target.x - owner.x) +
         (target.y - owner.y) * (target.y - owner.y) > 40000;
 };
