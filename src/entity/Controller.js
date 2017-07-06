@@ -49,9 +49,9 @@ Controller.prototype.update = function () {
     if (this.laserTimer && this.laserTimer > 0) {
         this.laserTimer -= 1;
     }
+    this.checkCollisions();
     this.updatePosition();
     this.updateQuadItem();
-    this.checkCollisions();
 
     if (tile) {
         if (tile.faction === this.faction) {
@@ -85,17 +85,17 @@ Controller.prototype.checkCollisions = function () {
 
 
 Controller.prototype.ricochet = function (controller) {
-    if (controller.x - this.x > 0) {
+    if (controller.x - this.x > 0 && !onBoundary(this.x - 4)) {
         this.xSpeed -= 2;
     }
-    else {
+    else if (!onBoundary(this.x + 4)){
         this.xSpeed += 2;
     }
 
-    if (controller.y - this.y > 0) {
+    if (controller.y - this.y > 0 && !onBoundary(this.y - 4)) {
         this.ySpeed -= 2;
     }
-    else {
+    else if (!onBoundary(this.y + 4)){
         this.ySpeed += 2;
     }
 };
@@ -146,51 +146,33 @@ Controller.prototype.increaseHealth = function (amount) {
 
 Controller.prototype.updatePosition = function () {
     if (this.pressingDown) {
-        if (!onBoundary(this.y + this.maxSpeed)) {
-            this.ySpeed = lerp(this.ySpeed, this.maxSpeed, 0.3);
-        }
-        else {
-            this.ySpeed = 0;
-        }
+        this.ySpeed = lerp(this.ySpeed, this.maxSpeed, 0.3);
     }
     if (this.pressingUp) {
-        if (!onBoundary(this.y - this.maxSpeed)) {
-            this.ySpeed = lerp(this.ySpeed, -this.maxSpeed, 0.3);
-        }
-        else {
-            this.ySpeed = 0;
-        }
+        this.ySpeed = lerp(this.ySpeed, -this.maxSpeed, 0.3);
     }
     if (this.pressingLeft) {
-        if (!onBoundary(this.x - this.maxSpeed)) {
-            this.xSpeed = lerp(this.xSpeed, -this.maxSpeed, 0.3);
-        }
-        else {
-            this.xSpeed = 0;
-        }
+        this.xSpeed = lerp(this.xSpeed, -this.maxSpeed, 0.3);
     }
     if (this.pressingRight) {
-        if (!onBoundary(this.x + this.maxSpeed)) {
-            this.xSpeed = lerp(this.xSpeed, this.maxSpeed, 0.3);
-        }
-        else {
-            this.xSpeed = 0;
-        }
+        this.xSpeed = lerp(this.xSpeed, this.maxSpeed, 0.3);
     }
-
-
     if (!this.pressingRight && !this.pressingLeft) {
         this.xSpeed = lerp(this.xSpeed,0,0.3);
     }
     if (!this.pressingUp && !this.pressingDown) {
         this.ySpeed = lerp(this.ySpeed,0,0.3);
     }
+    if (onBoundary(this.x + this.xSpeed)) {
+        this.xSpeed = 0;
+    }
+    if (onBoundary(this.y + this.ySpeed)) {
+        this.ySpeed = 0;
+    }
     this.checkStationary();
     this.checkStuck();
     this.y += this.ySpeed;
     this.x += this.xSpeed;
-
-
 };
 
 Controller.prototype.checkStationary = function () {

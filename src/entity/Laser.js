@@ -2,7 +2,6 @@ const entityConfig = require('./entityConfig');
 var lerp = require('lerp');
 
 function Laser(owner, target, gameServer) {
-    console.log("NEW LASER");
     this.gameServer = gameServer;
     this.packetHandler = gameServer.packetHandler;
 
