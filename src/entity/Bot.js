@@ -10,7 +10,7 @@ function Bot(id, name, faction, gameServer, player) {
     this.id = Math.random();
     this.name = getName(name);
     this.owner = player.id;
-    this.radius = 40;
+    this.radius = 20;
     this.emptyShard = null;
     this.type = "Bot";
     this.timer = 0;
@@ -40,13 +40,13 @@ Bot.prototype.updateControls = function () {
     if (player.x < this.x) {
         this.pressingLeft = true;
     }
-    else {
+    else if (player.x > this.x) {
         this.pressingRight = true;
     }
     if (player.y < this.y) {
         this.pressingUp = true;
     }
-    else {
+    else if (player.y > this.y) {
         this.pressingDown = true;
     }
 };

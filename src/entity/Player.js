@@ -9,6 +9,7 @@ function Player(id, name, faction, gameServer) {
     this.name = getName(name);
     this.emptyShard = null;
     this.type = "Player";
+    this.radius = 100;
     this.maxSpeed = 10;
     this.shards = [];
     this.init();

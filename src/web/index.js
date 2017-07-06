@@ -349,6 +349,10 @@ function drawScene(data) {
         ctx2.fillStyle = "#000000";
         for (var id in CONTROLLER_LIST) {
             var controller = CONTROLLER_LIST[id];
+            ctx2.beginPath();
+            ctx2.arc(controller.x, controller.y, 30, 0, 2 * Math.PI, false);
+            ctx2.fill();
+            ctx2.stroke();
             ctx2.fillText(controller.name, controller.x, controller.y + 30);
             ctx2.fillRect(controller.x - controller.health * 10 / 2, controller.y + 10, controller.health * 10, 10);
         }

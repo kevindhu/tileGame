@@ -85,18 +85,26 @@ Controller.prototype.checkCollisions = function () {
 
 
 Controller.prototype.ricochet = function (controller) {
-    if (controller.x - this.x > 0 && !onBoundary(this.x - 4)) {
-        this.xSpeed -= 2;
+    var xAdd = Math.abs(controller.x - this.x)/20;
+    var yAdd = Math.abs(controller.y - this.y)/20;
+
+    var xImpulse = 3.1 - xAdd;
+    var yImpulse = 3.1 - yAdd;
+
+
+
+    if (controller.x>this.x) {
+        this.xSpeed -= xImpulse;
     }
-    else if (!onBoundary(this.x + 4)){
-        this.xSpeed += 2;
+    else {
+        this.xSpeed += xImpulse;
     }
 
-    if (controller.y - this.y > 0 && !onBoundary(this.y - 4)) {
-        this.ySpeed -= 2;
+    if (controller.y>this.y) {
+        this.ySpeed -= yImpulse;
     }
-    else if (!onBoundary(this.y + 4)){
-        this.ySpeed += 2;
+    else {
+        this.ySpeed += yImpulse;
     }
 };
 

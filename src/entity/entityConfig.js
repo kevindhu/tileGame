@@ -38,7 +38,7 @@ var superLarge  = function () {
     STAGES = 20;
 };
 
-small();
+medium();
 
 
 var tileRoot = Math.floor(Math.sqrt(TILES_INPUT));
