@@ -397,13 +397,14 @@ function drawScene(data) {
     };
 
     var drawLasers = function () {
-        //TODO: add owner
-        for (var id in LASER_LIST) {
-            var laser = LASER_LIST[id];
-            var target = CONTROLLER_LIST[laser.target];
-            if (target && inBounds(selfPlayer, laser.owner, laser.owner)) {
+        var id, laser, target, owner;
+        for (id in LASER_LIST) {
+            laser = LASER_LIST[id];
+            target = CONTROLLER_LIST[laser.target];
+            owner = CONTROLLER_LIST[laser.owner];
+            if (target && inBounds(selfPlayer, owner.x, owner.y)) {
                 ctx2.beginPath();
-                ctx2.moveTo(laser.owner, laser.owner);
+                ctx2.moveTo(owner.x, owner.y);
                 ctx2.strokeStyle = "#912222";
                 ctx2.lineWidth = 10;
                 ctx2.lineTo(target.x, target.y);

@@ -44,7 +44,7 @@ SuperBot.prototype.shootLaser = function (player) {
         this.laserTimer = 100;
         //TODO: what if the owner has been deleted?
         var owner = this.gameServer.CONTROLLER_LIST[this.owner];
-        return new Laser(owner, player, this.gameServer);
+        return new Laser(this, player, this.gameServer);
     }
 
 };
