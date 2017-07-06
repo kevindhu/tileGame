@@ -75,7 +75,7 @@ Controller.prototype.checkCollisions = function () {
                 this.shootShard(controller);
                 this.shootLaser(controller);
             }
-            else if (controller.faction) {
+            else if (controller.faction && controller.id !== this.id) {
                 this.ricochet(controller);
             }
 
@@ -85,22 +85,27 @@ Controller.prototype.checkCollisions = function () {
 
 
 Controller.prototype.ricochet = function (controller) {
-    var xAdd = Math.abs(controller.x - this.x)/20;
-    var yAdd = Math.abs(controller.y - this.y)/20;
+    var xAdd = Math.abs(controller.x - this.x) / 20;
+    var yAdd = Math.abs(controller.y - this.y) / 20;
 
-    var xImpulse = 3.1 - xAdd;
-    var yImpulse = 3.1 - yAdd;
+    if (xAdd < 0) {
+        xAdd = 4;
+    }
+    if (yAdd < 0) {
+        yAdd = 4;
+    }
+    var xImpulse = 4 - xAdd;
+    var yImpulse = 4 - yAdd;
 
 
-
-    if (controller.x>this.x) {
+    if (controller.x > this.x) {
         this.xSpeed -= xImpulse;
     }
     else {
         this.xSpeed += xImpulse;
     }
 
-    if (controller.y>this.y) {
+    if (controller.y > this.y) {
         this.ySpeed -= yImpulse;
     }
     else {
@@ -140,7 +145,7 @@ Controller.prototype.updateQuadItem = function () {
 };
 
 Controller.prototype.decreaseHealth = function (amount) {
-    this.health -=amount;
+    this.health -= amount;
     if (this.health <= 0) {
         this.onDeath();
     }
@@ -166,10 +171,10 @@ Controller.prototype.updatePosition = function () {
         this.xSpeed = lerp(this.xSpeed, this.maxSpeed, 0.3);
     }
     if (!this.pressingRight && !this.pressingLeft) {
-        this.xSpeed = lerp(this.xSpeed,0,0.3);
+        this.xSpeed = lerp(this.xSpeed, 0, 0.3);
     }
     if (!this.pressingUp && !this.pressingDown) {
-        this.ySpeed = lerp(this.ySpeed,0,0.3);
+        this.ySpeed = lerp(this.ySpeed, 0, 0.3);
     }
     if (onBoundary(this.x + this.xSpeed)) {
         this.xSpeed = 0;
@@ -198,7 +203,7 @@ Controller.prototype.checkStuck = function () {
     var resolveStuck = function (coord) {
         var newCoord;
         if (overBoundary(coord)) {
-            if (coord < entityConfig.WIDTH/2) {
+            if (coord < entityConfig.WIDTH / 2) {
                 newCoord = entityConfig.BORDER_WIDTH + 100;
                 return newCoord;
             }
@@ -215,12 +220,12 @@ Controller.prototype.checkStuck = function () {
 };
 
 
-function onBoundary (coord) {
+function onBoundary(coord) {
     return coord <= entityConfig.BORDER_WIDTH ||
         coord >= entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
 }
 
-function overBoundary (coord) {
+function overBoundary(coord) {
     return coord < entityConfig.BORDER_WIDTH - 1 ||
         coord > entityConfig.WIDTH - entityConfig.BORDER_WIDTH + 1;
 }
