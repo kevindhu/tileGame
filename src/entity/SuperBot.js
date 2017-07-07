@@ -29,7 +29,7 @@ SuperBot.prototype.shootShard = function (player) {
         this.timer--;
         return;
     }
-    this.timer = 10;
+    this.timer = 100;
 
     var shardClone = new Shard(this.x, this.y, this.gameServer);
     shardClone.setName("bigAss");

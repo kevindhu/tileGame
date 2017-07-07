@@ -399,6 +399,9 @@ GameServer.prototype.start = function () {
             if (!player) {
                 return;
             }
+            if (player.bots.length > 0) {
+                player.moveBots(data.x, data.y);
+            }
             if (player.getRandomShard()) {
                 var shard = this.PLAYER_SHARD_LIST[player.getRandomShard()];
                 player.removeShard(shard);

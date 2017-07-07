@@ -58,12 +58,14 @@ Faction.prototype.addPlayer = function (id, playerName) {
 
 Faction.prototype.addBot = function (player) {
     var bot = new Bot(Math.random(), "shitBot", this, this.gameServer, player);
+    player.addBot(bot);
     this.controllers.push(bot.id);
     return bot;
 };
 
 Faction.prototype.addSuperBot = function (player) {
     var bot = new SuperBot(Math.random(), "SUPAHBot", this, this.gameServer, player);
+    player.addBot(bot);
     this.controllers.push(bot.id);
     return bot;
 };

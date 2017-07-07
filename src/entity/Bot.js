@@ -14,6 +14,8 @@ function Bot(id, name, faction, gameServer, player) {
     this.emptyShard = null;
     this.type = "Bot";
     this.timer = 0;
+    this.manual = false;
+    this.manualCoord = null;
     this.init();
 }
 
@@ -24,8 +26,16 @@ Bot.prototype.update = function () {
     Bot.super_.prototype.update.apply(this);
 };
 
+Bot.prototype.setManual = function (x,y) {
+    this.manual = true;
+    this.manualCoord = {
+        x: x,
+        y: y
+    }
+};
 
 Bot.prototype.updateControls = function () {
+    var target;
     var player = this.gameServer.CONTROLLER_LIST[this.owner];
 
     this.pressingUp = false;
@@ -37,16 +47,22 @@ Bot.prototype.updateControls = function () {
         return;
     }
 
-    if (player.x < this.x) {
+    if (!this.manual) {
+        target = player;
+    }
+    else if (this.manualCoord) {
+        target = this.manualCoord;
+    }
+    if (target.x < this.x) {
         this.pressingLeft = true;
     }
-    else if (player.x > this.x) {
+    else if (target.x > this.x) {
         this.pressingRight = true;
     }
-    if (player.y < this.y) {
+    if (target.y < this.y) {
         this.pressingUp = true;
     }
-    else if (player.y > this.y) {
+    else if (target.y > this.y) {
         this.pressingDown = true;
     }
 };
