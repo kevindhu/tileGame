@@ -9,7 +9,7 @@ function Player(id, name, faction, gameServer) {
     this.name = getName(name);
     this.emptyShard = null;
     this.type = "Player";
-    this.radius = 100;
+    this.radius = 10;
     this.maxSpeed = 10;
     this.bots = [];
     this.shards = [];
@@ -27,6 +27,14 @@ Player.prototype.onDelete = function () {
 Player.prototype.shootShard = function (controller) {
 };
 
+Player.prototype.shootShard = function (x,y) {
+    if (this.getRandomShard()) {
+        var shard = this.PLAYER_SHARD_LIST[this.getRandomShard()];
+        this.removeShard(shard);
+        shard.becomePlayerShooting(this, x, y);
+    }
+};
+
 Player.prototype.addBot = function (bot) {
     this.bots.push(bot.id);
 };
@@ -35,7 +43,7 @@ Player.prototype.addBot = function (bot) {
 Player.prototype.moveBots = function (x, y) {
     for (var i = 0; i<this.bots.length; i++) {
         var bot = this.gameServer.CONTROLLER_LIST[this.bots[i]];
-        bot.setManual(this.x + x * 100,this.y + y * 100);
+        bot.setManual(this.x + x, this.y + y);
     }
 };
 

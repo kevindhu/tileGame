@@ -15,7 +15,8 @@ function Controller(id, faction, gameServer) {
     this.x = faction.x;
     this.y = faction.y;
     this.health = 5;
-    this.maxSpeed = 7;
+    this.maxXSpeed = 10;
+    this.maxYSpeed = 10;
     this.timer = 0;
     this.xSpeed = 0;
     this.ySpeed = 0;
@@ -159,16 +160,16 @@ Controller.prototype.increaseHealth = function (amount) {
 
 Controller.prototype.updatePosition = function () {
     if (this.pressingDown) {
-        this.ySpeed = lerp(this.ySpeed, this.maxSpeed, 0.3);
+        this.ySpeed = lerp(this.ySpeed, this.maxYSpeed, 0.3);
     }
     if (this.pressingUp) {
-        this.ySpeed = lerp(this.ySpeed, -this.maxSpeed, 0.3);
+        this.ySpeed = lerp(this.ySpeed, -this.maxYSpeed, 0.3);
     }
     if (this.pressingLeft) {
-        this.xSpeed = lerp(this.xSpeed, -this.maxSpeed, 0.3);
+        this.xSpeed = lerp(this.xSpeed, -this.maxXSpeed, 0.3);
     }
     if (this.pressingRight) {
-        this.xSpeed = lerp(this.xSpeed, this.maxSpeed, 0.3);
+        this.xSpeed = lerp(this.xSpeed, this.maxXSpeed, 0.3);
     }
     if (!this.pressingRight && !this.pressingLeft) {
         this.xSpeed = lerp(this.xSpeed, 0, 0.3);

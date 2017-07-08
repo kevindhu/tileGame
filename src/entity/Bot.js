@@ -14,6 +14,7 @@ function Bot(id, name, faction, gameServer, player) {
     this.emptyShard = null;
     this.type = "Bot";
     this.timer = 0;
+    this.theta = 0;
     this.manual = false;
     this.manualCoord = null;
     this.init();
@@ -53,6 +54,11 @@ Bot.prototype.updateControls = function () {
     else if (this.manualCoord) {
         target = this.manualCoord;
     }
+
+    this.theta = Math.atan((this.y - target.y)/(this.x - target.x));
+    this.maxXSpeed = Math.abs(10 * Math.cos(this.theta));
+    this.maxYSpeed = Math.abs(10 * Math.sin(this.theta));
+
     if (target.x < this.x) {
         this.pressingLeft = true;
     }

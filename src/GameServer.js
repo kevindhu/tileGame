@@ -350,42 +350,52 @@ GameServer.prototype.start = function () {
             }
             var faction = this.FACTION_LIST[player.faction];
             switch (data.id) {
-                case "left":
-                    player.pressingLeft = data.state;
-                    break;
-                case "right":
+                case 39:
+                case 68:
                     player.pressingRight = data.state;
                     break;
-                case "up":
-                    player.pressingUp = data.state;
-                    break;
-                case "down":
+                case 40:
+                case 83:
                     player.pressingDown = data.state;
                     break;
-                case "space":
+                case 37:
+                case 65:
+                    player.pressingLeft = data.state;
+                    break;
+                case 38:
+                case 87:
+                    player.pressingUp = data.state;
+                    break;
+                case 32:
                     player.pressingSpace = data.state;
                     break;
-                case "Z":
+                case 90:
                     if (data.state) {
                         faction.addSentinel(player);
                     }
                     break;
-                case "X":
+                case 88:
                     if (data.state) {
                         faction.addTower(player);
                     }
                     break;
-                case "B":
+                case 66:
                     if (data.state) {
                         faction.addBot(player);
                     }
                     break;
-                case "C":
+                case 67:
                     if (data.state) {
                         faction.addSuperBot(player);
                     }
                     break;
+
+
+
+
+
             }
+
         }.bind(this));
 
         socket.on('textInput', function (data) {
@@ -394,19 +404,12 @@ GameServer.prototype.start = function () {
             }
         }.bind(this));
 
-
-        socket.on("arrowVector", function (data) {
+        socket.on("botCommand", function (data) {
             if (!player) {
                 return;
             }
-            if (player.bots.length > 0) {
-                player.moveBots(data.x, data.y);
-            }
-            if (player.getRandomShard()) {
-                var shard = this.PLAYER_SHARD_LIST[player.getRandomShard()];
-                player.removeShard(shard);
-                shard.becomePlayerShooting(player, data.x, data.y);
-            }
+            player.moveBots(data.x, data.y);
+            //player.shootShard(data.x,data.y);
         }.bind(this));
 
         socket.on('removeHomeShard', function (data) {

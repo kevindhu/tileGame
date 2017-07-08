@@ -88,16 +88,14 @@ var Home = function (homeInfo) {
     this.health = homeInfo.health;
     this.neighbors = homeInfo.neighbors;
 };
-var Arrow = function (x, y) {
-    this.preX = x;
-    this.preY = y;
+var Arrow = function () {
     this.postX = null;
     this.postY = null;
     this.deltaX = function () {
-        return this.postX - this.preX;
+        return this.postX - canvas.width/2;
     };
     this.deltaY = function () {
-        return this.postY - this.preY;
+        return this.postY - canvas.height/2;
     }
 };
 var Bracket = function (bracketInfo) {
@@ -476,13 +474,15 @@ function drawScene(data) {
 
     var drawArrow = function () {
         if (ARROW && ARROW.postX) {
+            console.log("POSTX :" + ARROW.postX, ARROW.postY);
             ctx2.beginPath();
-            ctx2.moveTo(selfPlayer.x, selfPlayer.y);
             ctx2.strokeStyle = "#521522";
-            ctx2.lineWidth = 10;
-            ctx2.lineTo(selfPlayer.x + ARROW.deltaX(), selfPlayer.y + ARROW.deltaY());
+
+            var x = (ARROW.postX - c2.width/2) / scaleFactor;
+            var y = (ARROW.postY - c2.height/2) / scaleFactor;
+
+            ctx2.arc(selfPlayer.x + x, selfPlayer.y + y, 3, 0, 2 * Math.PI, true);
             ctx2.stroke();
-            ctx2.closePath();
         }
     };
 
@@ -674,54 +674,32 @@ var scaleFactor = 1.5;
 
 document.onkeydown = function (event) {
     keys[event.keyCode] = true;
-    var id = returnId(event.keyCode);
-    if (id !== null) {
-        socket.emit('keyEvent', {id: id, state: true});
-    }
+    socket.emit('keyEvent', {id: event.keyCode, state: true});
 };
 
 document.onkeyup = function (event) {
     keys[event.keyCode] = false;
-    var id = returnId(event.keyCode);
-    if (id !== null) {
-        socket.emit('keyEvent', {id: id, state: false});
-    }
+    socket.emit('keyEvent', {id: event.keyCode, state: false});
 };
 
 
 canvas.addEventListener("mousedown", function (event) {
     if (CONTROLLER_LIST[selfId]) {
-        var rect = canvas.getBoundingClientRect();
-        var x = event.clientX - rect.left;
-        var y = event.clientY - rect.top;
-        ARROW = new Arrow(x, y);
+        ARROW = new Arrow();
+        ARROW.postX = event.x/canvas.offsetWidth * 1000;
+        ARROW.postY = event.y/canvas.offsetHeight * 500;
     }
 });
 
 
 canvas.addEventListener("mouseup", function (event) {
     var rect = canvas.getBoundingClientRect();
-    var magnitude = function (x, y) {
-        return x * x + y * y;
-    };
-    var normalize = function (x, y) {
-        return [x / magnitude(x, y), y / magnitude(x, y)];
-    };
-    var x, y;
 
-    ARROW.postX = event.clientX - rect.left;
-    ARROW.postY = event.clientY - rect.top;
 
-    if (magnitude(ARROW.deltaX(), ARROW.deltaY()) > 10000) {
-        var vector = normalize(ARROW.deltaX(), ARROW.deltaY());
-        x = -vector[0] * 10000;
-        y = -vector[1] * 10000;
-    }
-    else {
-        x = -ARROW.deltaX();
-        y = -ARROW.deltaY();
-    }
-    socket.emit("arrowVector", {
+    var x = (ARROW.postX - c2.width/2) / scaleFactor;
+    var y = (ARROW.postY - c2.height/2) / scaleFactor;
+
+    socket.emit("botCommand", {
         x: x,
         y: y
     });
@@ -731,56 +709,13 @@ canvas.addEventListener("mouseup", function (event) {
 
 canvas.addEventListener("mousemove", function (event) {
     if (ARROW) {
-        var rect = canvas.getBoundingClientRect();
-        var x = event.clientX - rect.left;
-        var y = event.clientY - rect.top;
-        ARROW.postX = x;
-        ARROW.postY = y;
+        console.log(canvas.offsetWidth, canvas.offsetHeight);
+        ARROW.postX = event.x/canvas.offsetWidth * 1000;
+        ARROW.postY = event.y/canvas.offsetHeight * 500;
     }
 });
 
-var returnId = function (keyCode) {
-    var id = null;
-    switch (keyCode) {
-        case 39:
-        case 68:
-            id = 'right';
-            break;
-        case 40:
-        case 83:
-            id = 'down';
-            break;
-        case 37:
-        case 65:
-            id = 'left';
-            break;
-        case 38:
-        case 87:
-            id = 'up';
-            break;
-        case 32:
-            id = 'space';
-            break;
-        case 90:
-            id = 'Z';
-            break;
-        case 88:
-            id = 'X';
-            break;
-        case 66:
-            id = 'B';
-            break;
-        case 67:
-            id = 'C';
-            break;
-        case 13:
-            id = 'enter';
-            break;
 
-
-    }
-    return id;
-};
 
 
 function getRandom(min, max) {
