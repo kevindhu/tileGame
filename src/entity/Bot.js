@@ -89,6 +89,12 @@ Bot.prototype.onDeath = function () {
     this.onDelete();
 };
 
+Bot.prototype.onDelete = function () {
+    var player = this.gameServer.CONTROLLER_LIST[this.owner];
+    player.removeBot(this);
+    Bot.super_.prototype.onDelete.apply(this);
+};
+
 Bot.prototype.getRandomShard = function () {
     var randomIndex = Arithmetic.getRandomInt(0, this.shards.length - 1);
     return this.shards[randomIndex];

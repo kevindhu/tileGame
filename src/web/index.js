@@ -405,7 +405,7 @@ function drawScene(data) {
             laser = LASER_LIST[id];
             target = CONTROLLER_LIST[laser.target];
             owner = CONTROLLER_LIST[laser.owner];
-            if (target && inBounds(selfPlayer, owner.x, owner.y)) {
+            if (target && owner && inBounds(selfPlayer, owner.x, owner.y)) {
                 ctx2.beginPath();
                 ctx2.moveTo(owner.x, owner.y);
                 ctx2.strokeStyle = "#912222";

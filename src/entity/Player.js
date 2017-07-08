@@ -39,6 +39,11 @@ Player.prototype.addBot = function (bot) {
     this.bots.push(bot.id);
 };
 
+Player.prototype.removeBot = function (bot) {
+    var index = this.bots.indexOf(bot.id);
+    this.bots.splice(index, 1);
+};
+
 
 Player.prototype.moveBots = function (x, y) {
     for (var i = 0; i<this.bots.length; i++) {
