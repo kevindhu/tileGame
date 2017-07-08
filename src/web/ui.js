@@ -5,6 +5,7 @@ document.documentElement.style.overflow = 'hidden';  // firefox, chrome
 document.body.scroll = "no";
 
 
+
 var nameButton = document.getElementById("nameSubmit");
 var playerNameInput = document.getElementById("playerNameInput");
 var factionNameInput = document.getElementById("factionNameInput");

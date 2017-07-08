@@ -43,8 +43,34 @@ Player.prototype.addBot = function (bot) {
 Player.prototype.moveBots = function (x, y) {
     for (var i = 0; i<this.bots.length; i++) {
         var bot = this.gameServer.CONTROLLER_LIST[this.bots[i]];
-        bot.setManual(this.x + x, this.y + y);
+        if (bot.selected) {
+            bot.setManual(this.x + x, this.y + y);
+        }
     }
+};
+
+Player.prototype.resetSelect = function () {
+    for (var i = 0; i<this.bots.length; i++) {
+        var bot = this.gameServer.CONTROLLER_LIST[this.bots[i]];
+        bot.selected = false;
+    }
+};
+
+Player.prototype.groupBots = function () {
+    for (var i = 0; i<this.bots.length; i++) {
+        var bot = this.gameServer.CONTROLLER_LIST[this.bots[i]];
+        bot.removeManual();
+    }
+};
+
+Player.prototype.createBoundary = function (boundary) {
+    var playerBoundary = {};
+    playerBoundary.minx  = this.x + boundary.minX;
+    playerBoundary.miny  = this.y + boundary.minY;
+    playerBoundary.maxx  = this.x + boundary.maxX;
+    playerBoundary.maxy  = this.y + boundary.maxY;
+    playerBoundary.player = this.id;
+    return playerBoundary;
 };
 
 Player.prototype.update = function () {

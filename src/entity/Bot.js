@@ -17,6 +17,7 @@ function Bot(id, name, faction, gameServer, player) {
     this.theta = 0;
     this.manual = false;
     this.manualCoord = null;
+    this.selected = false;
     this.init();
 }
 
@@ -33,6 +34,11 @@ Bot.prototype.setManual = function (x,y) {
         x: x,
         y: y
     }
+};
+
+Bot.prototype.removeManual = function () {
+    this.selected = false;
+    this.manual = false;
 };
 
 Bot.prototype.updateControls = function () {
@@ -82,7 +88,6 @@ Bot.prototype.updatePosition = function () {
 Bot.prototype.onDeath = function () {
     this.onDelete();
 };
-
 
 Bot.prototype.getRandomShard = function () {
     var randomIndex = Arithmetic.getRandomInt(0, this.shards.length - 1);

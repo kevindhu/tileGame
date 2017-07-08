@@ -36,6 +36,7 @@ var LASER_LIST = {};
 var HOME_LIST = {};
 var ANIMATION_LIST = {};
 
+var rightClick = false;
 var ARROW = null;
 var BRACKET = null;
 var serverMap = null;
@@ -88,14 +89,16 @@ var Home = function (homeInfo) {
     this.health = homeInfo.health;
     this.neighbors = homeInfo.neighbors;
 };
-var Arrow = function () {
-    this.postX = null;
-    this.postY = null;
+var Arrow = function (x, y) {
+    this.preX = x;
+    this.preY = y;
+    this.postX = x;
+    this.postY = y;
     this.deltaX = function () {
-        return this.postX - canvas.width/2;
+        return this.postX - canvas.width / 2;
     };
     this.deltaY = function () {
-        return this.postY - canvas.height/2;
+        return this.postY - canvas.height / 2;
     }
 };
 var Bracket = function (bracketInfo) {
@@ -160,7 +163,6 @@ function addEntities(packet) {
             addEntity(packet, SHARD_LIST, Shard);
             break;
         case "laserInfo":
-            console.log("ADDING LASER: " + packet.id);
             addEntity(packet, LASER_LIST, Laser);
             break;
         case "homeInfo":
@@ -289,9 +291,7 @@ function deleteEntities(packet) {
             deleteEntity(packet, ANIMATION_LIST);
             break;
         case "laserInfo":
-            console.log("DELETING LASER" + packet.id);
             deleteEntity(packet, LASER_LIST);
-            console.log(LASER_LIST);
             break;
         case "bracketInfo":
             if (selfId === packet.id) {
@@ -306,7 +306,6 @@ function deleteEntities(packet) {
     }
 
 }
-
 
 
 function addFactionstoUI(data) {
@@ -347,6 +346,8 @@ function drawScene(data) {
         ctx2.fillStyle = "#000000";
         for (var id in CONTROLLER_LIST) {
             var controller = CONTROLLER_LIST[id];
+            ctx2.strokeStyle = "#1d55af";
+            ctx2.lineWidth = 5;
             ctx2.beginPath();
             ctx2.arc(controller.x, controller.y, 30, 0, 2 * Math.PI, false);
             ctx2.fill();
@@ -474,14 +475,18 @@ function drawScene(data) {
 
     var drawArrow = function () {
         if (ARROW && ARROW.postX) {
-            console.log("POSTX :" + ARROW.postX, ARROW.postY);
             ctx2.beginPath();
             ctx2.strokeStyle = "#521522";
 
-            var x = (ARROW.postX - c2.width/2) / scaleFactor;
-            var y = (ARROW.postY - c2.height/2) / scaleFactor;
+            var preX = selfPlayer.x + (ARROW.preX - c2.width / 2) / scaleFactor;
+            var preY = selfPlayer.y + (ARROW.preY - c2.height / 2) / scaleFactor;
 
-            ctx2.arc(selfPlayer.x + x, selfPlayer.y + y, 3, 0, 2 * Math.PI, true);
+            var postX = selfPlayer.x + (ARROW.postX - c2.width / 2) / scaleFactor;
+            var postY = selfPlayer.y + (ARROW.postY - c2.height / 2) / scaleFactor;
+
+            ctx2.fillRect(preX, preY, postX - preX, postY - preY);
+
+            ctx2.arc(postX, postY, 3, 0, 2 * Math.PI, true);
             ctx2.stroke();
         }
     };
@@ -684,38 +689,60 @@ document.onkeyup = function (event) {
 
 
 canvas.addEventListener("mousedown", function (event) {
-    if (CONTROLLER_LIST[selfId]) {
-        ARROW = new Arrow();
-        ARROW.postX = event.x/canvas.offsetWidth * 1000;
-        ARROW.postY = event.y/canvas.offsetHeight * 500;
+    if (event.button === 2) {
+        rightClick = true;
+    } else if (CONTROLLER_LIST[selfId]) {
+        ARROW = new Arrow(event.x / canvas.offsetWidth * 1000,
+            event.y / canvas.offsetHeight * 500);
     }
 });
 
 
+
+document.addEventListener('contextmenu', function(e) {
+    e.preventDefault();
+}, false);
+
 canvas.addEventListener("mouseup", function (event) {
-    var rect = canvas.getBoundingClientRect();
+    if (!rightClick) {
+        ARROW.postX = event.x / canvas.offsetWidth * 1000;
+        ARROW.postY = event.y / canvas.offsetHeight * 500;
 
+        var minX = (ARROW.preX - c2.width / 2) / scaleFactor;
+        var minY = (ARROW.preY - c2.height / 2) / scaleFactor;
+        var maxX = (ARROW.postX - c2.width / 2) / scaleFactor;
+        var maxY = (ARROW.postY - c2.height / 2) / scaleFactor;
+        console.log("SELECT BOTS");
+        socket.emit("selectBots", {
+            minX: minX,
+            minY: minY,
+            maxX: maxX,
+            maxY: maxY
+        });
+    }
+    else {
+        var x = event.x / canvas.offsetWidth * 1000;
+        var y = event.y / canvas.offsetHeight * 500;
+        maxX = (x - c2.width / 2) / scaleFactor;
+        maxY = (y - c2.height / 2) / scaleFactor;
 
-    var x = (ARROW.postX - c2.width/2) / scaleFactor;
-    var y = (ARROW.postY - c2.height/2) / scaleFactor;
+        socket.emit("botCommand", {
+            x: maxX,
+            y: maxY
+        });
+    }
 
-    socket.emit("botCommand", {
-        x: x,
-        y: y
-    });
+    rightClick = false;
     ARROW = null;
 });
 
 
 canvas.addEventListener("mousemove", function (event) {
     if (ARROW) {
-        console.log(canvas.offsetWidth, canvas.offsetHeight);
-        ARROW.postX = event.x/canvas.offsetWidth * 1000;
-        ARROW.postY = event.y/canvas.offsetHeight * 500;
+        ARROW.postX = event.x / canvas.offsetWidth * 1000;
+        ARROW.postY = event.y / canvas.offsetHeight * 500;
     }
 });
-
-
 
 
 function getRandom(min, max) {

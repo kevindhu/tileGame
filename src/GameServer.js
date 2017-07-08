@@ -389,6 +389,10 @@ GameServer.prototype.start = function () {
                         faction.addSuperBot(player);
                     }
                     break;
+                case 86:
+                    if (data.state) {{
+                        player.groupBots();
+                    }}
 
 
 
@@ -410,6 +414,15 @@ GameServer.prototype.start = function () {
             }
             player.moveBots(data.x, data.y);
             //player.shootShard(data.x,data.y);
+        }.bind(this));
+
+        socket.on("selectBots", function (data) {
+            if (!player) {
+                return;
+            }
+            player.resetSelect();
+            var boundary = player.createBoundary(data);
+            this.findBots(boundary);
         }.bind(this));
 
         socket.on('removeHomeShard', function (data) {
@@ -461,6 +474,15 @@ GameServer.prototype.createEmptyShard = function () {
 };
 
 /** MISC METHODS **/
+GameServer.prototype.findBots = function (boundary) {
+    this.controllerTree.find(boundary, function (controller) {
+        if (controller.type === "Bot" && controller.owner === boundary.player) {
+            controller.selected = true;
+        }
+    }.bind(this));
+};
+
+
 Object.size = function (obj) {
     var size = 0, key;
     for (key in obj) {
