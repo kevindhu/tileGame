@@ -27,7 +27,7 @@ Player.prototype.onDelete = function () {
 Player.prototype.shootShard = function (controller) {
 };
 
-Player.prototype.shootShard = function (x,y) {
+Player.prototype.shootShard = function (x, y) {
     if (this.getRandomShard()) {
         var shard = this.PLAYER_SHARD_LIST[this.getRandomShard()];
         this.removeShard(shard);
@@ -45,35 +45,58 @@ Player.prototype.removeBot = function (bot) {
 };
 
 
+Player.prototype.isTarget = function (x, y) {
+    var target = null;
+    var bound = {
+        minx: x - 20,
+        miny: y - 20,
+        maxx: x + 20,
+        maxy: y + 20
+    };
+    this.gameServer.controllerTree.find(bound, function (controller) {
+        if (controller.faction !== this.faction) {
+            console.log("DETECTED ENEMY");
+            target = controller;
+        }
+    });
+    return target;
+};
+
 Player.prototype.moveBots = function (x, y) {
-    for (var i = 0; i<this.bots.length; i++) {
+    var target = this.isTarget(this.x + x, this.y + y);
+
+    for (var i = 0; i < this.bots.length; i++) {
         var bot = this.gameServer.CONTROLLER_LIST[this.bots[i]];
         if (bot.selected) {
-            bot.setManual(this.x + x, this.y + y);
+            if (target) {
+                bot.setEnemy(target);
+            } else {
+                bot.setManual(this.x + x, this.y + y);
+            }
         }
     }
 };
 
 Player.prototype.resetSelect = function () {
-    for (var i = 0; i<this.bots.length; i++) {
+    for (var i = 0; i < this.bots.length; i++) {
         var bot = this.gameServer.CONTROLLER_LIST[this.bots[i]];
         bot.removeSelect();
     }
 };
 
-Player.prototype.groupBots = function () {
-    for (var i = 0; i<this.bots.length; i++) {
+Player.prototype.groupBots = function () { //get all bots back to player
+    for (var i = 0; i < this.bots.length; i++) {
         var bot = this.gameServer.CONTROLLER_LIST[this.bots[i]];
-        bot.removeManual();
+        bot.regroup();
     }
 };
 
 Player.prototype.createBoundary = function (boundary) {
     var playerBoundary = {};
-    playerBoundary.minx  = this.x + boundary.minX;
-    playerBoundary.miny  = this.y + boundary.minY;
-    playerBoundary.maxx  = this.x + boundary.maxX;
-    playerBoundary.maxy  = this.y + boundary.maxY;
+    playerBoundary.minx = this.x + boundary.minX;
+    playerBoundary.miny = this.y + boundary.minY;
+    playerBoundary.maxx = this.x + boundary.maxX;
+    playerBoundary.maxy = this.y + boundary.maxY;
     playerBoundary.player = this.id;
     return playerBoundary;
 };
@@ -192,8 +215,8 @@ Player.prototype.reset = function () {
         this.y = headquarter.y;
     }
     else {
-        this.x = entityConfig.WIDTH/2;
-        this.y = entityConfig.WIDTH/2;
+        this.x = entityConfig.WIDTH / 2;
+        this.y = entityConfig.WIDTH / 2;
     }
     this.maxSpeed = 10;
     this.xSpeed = 0;

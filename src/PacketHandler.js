@@ -136,6 +136,7 @@ PacketHandler.prototype.addControllerPackets = function (controller, ifInit) {
     var info = {
         master: "add",
         class: "controllerInfo",
+        owner: controller.owner,
         id: controller.id,
         name: controller.name,
         x: controller.x,

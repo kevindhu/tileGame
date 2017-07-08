@@ -17,6 +17,7 @@ function Bot(id, name, faction, gameServer, player) {
     this.theta = 0;
     this.manual = false;
     this.manualCoord = null;
+    this.enemy = null;
     this.init();
 }
 
@@ -35,6 +36,12 @@ Bot.prototype.setManual = function (x,y) {
     }
 };
 
+Bot.prototype.regroup = function () {
+    this.removeManual();
+    this.removeSelect();
+    this.removeEnemy();
+};
+
 Bot.prototype.becomeSelected = function () {
     this.selected = true;
     this.packetHandler.updateControllersPackets(this);
@@ -46,8 +53,16 @@ Bot.prototype.removeSelect = function () {
 };
 
 Bot.prototype.removeManual = function () {
-    this.selected = false;
     this.manual = false;
+};
+
+Bot.prototype.setEnemy = function (target) {
+    this.removeManual();
+    this.enemy = target.id;
+};
+
+Bot.prototype.removeEnemy = function () {
+    this.enemy = null;
 };
 
 Bot.prototype.updateControls = function () {
@@ -64,7 +79,16 @@ Bot.prototype.updateControls = function () {
     }
 
     if (!this.manual) {
-        target = player;
+        if (this.enemy) {
+            var enemy = this.gameServer.CONTROLLER_LIST[this.enemy];
+            if (!enemy || this.outofRange(enemy)) {
+                this.regroup();
+                return;
+            }
+            target = enemy;
+        } else {
+            target = player;
+        }
     }
     else if (this.manualCoord) {
         target = this.manualCoord;
@@ -136,6 +160,12 @@ Bot.prototype.shootShard = function (player) {
     this.packetHandler.updateHomePackets(this);
 };
 
+
+Bot.prototype.outofRange = function (enemy) {
+    var player = this.gameServer.CONTROLLER_LIST[this.owner];
+    return Math.abs(player.x - enemy.x) > 300 &&
+        Math.abs(player.y - enemy.y) > 300
+};
 
 function getName(name) {
     if (name === "") {

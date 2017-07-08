@@ -56,6 +56,7 @@ var Controller = function (controllerInfo) {
     this.y = controllerInfo.y;
     this.health = controllerInfo.health;
     this.selected = controllerInfo.selected;
+    this.owner = controllerInfo.owner;
 };
 var Tile = function (tileInfo) {
     this.id = tileInfo.id;
@@ -354,7 +355,7 @@ function drawScene(data) {
             ctx2.fillText(controller.name, controller.x, controller.y + 30);
             ctx2.fillRect(controller.x - controller.health * 10 / 2, controller.y + 10,
                 controller.health * 10, 10);
-            if (controller.selected) {
+            if (controller.selected && controller.owner === selfPlayer.id) {
                 ctx2.lineWidth = 5;
                 ctx2.strokeStyle = "#1d55af";
                 ctx2.stroke();
