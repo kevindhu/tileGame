@@ -23,7 +23,11 @@ ul {
 
 #shard_namer {
     display: none;
-    position: absolute;
+    position:absolute;
+    left:50%;
+    margin-left:-300px;
+    top:50%;
+    margin-top:-300px;
     background: white;
 }
 
@@ -78,9 +82,13 @@ ul {
 
 
 #home_info {
-    background: grey;
+    position:absolute;
+    left:30%;
+    top:50%;
+    margin-left:-300px;
+    margin-top:-300px;
+    background: gray;
     display: none;
-    position:relative;
 }
 
 #home_info a{
