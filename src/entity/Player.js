@@ -57,7 +57,7 @@ Player.prototype.moveBots = function (x, y) {
 Player.prototype.resetSelect = function () {
     for (var i = 0; i<this.bots.length; i++) {
         var bot = this.gameServer.CONTROLLER_LIST[this.bots[i]];
-        bot.selected = false;
+        bot.removeSelect();
     }
 };
 

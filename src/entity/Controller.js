@@ -20,6 +20,7 @@ function Controller(id, faction, gameServer) {
     this.timer = 0;
     this.xSpeed = 0;
     this.ySpeed = 0;
+    this.selected = false;
 
     this.pressingRight = false;
     this.pressingLeft = false;

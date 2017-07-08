@@ -55,6 +55,7 @@ var Controller = function (controllerInfo) {
     this.x = controllerInfo.x;
     this.y = controllerInfo.y;
     this.health = controllerInfo.health;
+    this.selected = controllerInfo.selected;
 };
 var Tile = function (tileInfo) {
     this.id = tileInfo.id;
@@ -237,6 +238,7 @@ function updateEntities(packet) {
         controller.x = controllerInfo.x;
         controller.y = controllerInfo.y;
         controller.health = controllerInfo.health;
+        controller.selected = controllerInfo.selected;
     };
 
     switch (packet.class) {
@@ -346,14 +348,17 @@ function drawScene(data) {
         ctx2.fillStyle = "#000000";
         for (var id in CONTROLLER_LIST) {
             var controller = CONTROLLER_LIST[id];
-            ctx2.strokeStyle = "#1d55af";
-            ctx2.lineWidth = 5;
             ctx2.beginPath();
             ctx2.arc(controller.x, controller.y, 30, 0, 2 * Math.PI, false);
             ctx2.fill();
-            ctx2.stroke();
             ctx2.fillText(controller.name, controller.x, controller.y + 30);
-            ctx2.fillRect(controller.x - controller.health * 10 / 2, controller.y + 10, controller.health * 10, 10);
+            ctx2.fillRect(controller.x - controller.health * 10 / 2, controller.y + 10,
+                controller.health * 10, 10);
+            if (controller.selected) {
+                ctx2.lineWidth = 5;
+                ctx2.strokeStyle = "#1d55af";
+                ctx2.stroke();
+            }
         }
     };
 

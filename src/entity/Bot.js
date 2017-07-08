@@ -17,7 +17,6 @@ function Bot(id, name, faction, gameServer, player) {
     this.theta = 0;
     this.manual = false;
     this.manualCoord = null;
-    this.selected = false;
     this.init();
 }
 
@@ -34,6 +33,16 @@ Bot.prototype.setManual = function (x,y) {
         x: x,
         y: y
     }
+};
+
+Bot.prototype.becomeSelected = function () {
+    this.selected = true;
+    this.packetHandler.updateControllersPackets(this);
+};
+
+Bot.prototype.removeSelect = function () {
+    this.selected = false;
+    this.packetHandler.updateControllersPackets(this);
 };
 
 Bot.prototype.removeManual = function () {

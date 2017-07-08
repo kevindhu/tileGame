@@ -477,7 +477,7 @@ GameServer.prototype.createEmptyShard = function () {
 GameServer.prototype.findBots = function (boundary) {
     this.controllerTree.find(boundary, function (controller) {
         if (controller.type === "Bot" && controller.owner === boundary.player) {
-            controller.selected = true;
+            controller.becomeSelected();
         }
     }.bind(this));
 };

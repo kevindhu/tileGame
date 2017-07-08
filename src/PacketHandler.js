@@ -140,7 +140,8 @@ PacketHandler.prototype.addControllerPackets = function (controller, ifInit) {
         name: controller.name,
         x: controller.x,
         y: controller.y,
-        health: controller.health
+        health: controller.health,
+        selected: controller.selected
     };
     if (ifInit) {
         return info;
@@ -279,7 +280,8 @@ PacketHandler.prototype.updateControllersPackets = function (controller) {
         id: controller.id,
         x: controller.x,
         y: controller.y,
-        health: controller.health
+        health: controller.health,
+        selected: controller.selected
     });
 };
 
