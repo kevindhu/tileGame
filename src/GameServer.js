@@ -105,6 +105,18 @@ GameServer.prototype.initNewClients = function () {
         if (!socket) {
             delete this.INIT_SOCKET_LIST[id];
         }
+
+
+        if (!socket.verified) {
+            socket.life -= 1;
+            console.log("LIFE LEFT: " + socket.life);
+            if (socket.life === 0) {
+                console.log("DETECTED ROGUE CLIENT!");
+                socket.disconnect();
+            }
+        }
+
+
         if (socket.timer !== 0) {
             socket.timer -= 1;
         }
@@ -194,7 +206,7 @@ GameServer.prototype.checkControllerCollision = function (controller) {
         //player + home collision
         this.homeTree.find(controllerBound, function (home) {
             if (controller.faction === home.faction) {
-                for (var i =controller.shards.length - 1; i >= 0; i--) {
+                for (var i = controller.shards.length - 1; i >= 0; i--) {
                     var shard = this.PLAYER_SHARD_LIST[controller.shards[i]];
                     controller.removeShard(shard);
                     home.addShard(shard);
@@ -275,7 +287,7 @@ GameServer.prototype.updateShards = function () {
 };
 
 GameServer.prototype.updateLasers = function () {
-    var laser,id;
+    var laser, id;
     for (id in this.LASER_LIST) {
         laser = this.LASER_LIST[id];
         laser.update();
@@ -319,6 +331,8 @@ GameServer.prototype.start = function () {
 
         socket.id = Math.random();
         socket.timer = 0;
+        socket.life = 20;
+        socket.verified = false;
         socket.stage = 0;
 
         this.SOCKET_LIST[socket.id] = socket;
@@ -326,7 +340,15 @@ GameServer.prototype.start = function () {
 
         console.log("Client #" + socket.id + " has joined the server");
 
+        socket.on("verify", function (data) {
+            if (!socket.verified) {
+                console.log("VERIFIED BITCH");
+            }
+            socket.verified = true;
+        }.bind(this));
+
         socket.on('newPlayer', function (data) {
+            console.log("NEW PLAYER FOR SOCKET " + socket.id);
             player = this.createPlayer(socket, data);
         }.bind(this));
 
@@ -390,12 +412,11 @@ GameServer.prototype.start = function () {
                     }
                     break;
                 case 86:
-                    if (data.state) {{
-                        player.groupBots();
-                    }}
-
-
-
+                    if (data.state) {
+                        {
+                            player.groupBots();
+                        }
+                    }
 
 
             }

@@ -101,8 +101,6 @@ Controller.prototype.ricochet = function (controller) {
     var xImpulse = (4 - xAdd)/10;
     var yImpulse = (4 - yAdd)/10;
 
-
-
     if (controller.x > this.x) {
         this.xSpeed -= xImpulse;
     }

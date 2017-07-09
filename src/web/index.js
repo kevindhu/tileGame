@@ -16,13 +16,11 @@ var ctx2 = c2.getContext("2d");
 var ctx3 = c3.getContext("2d");
 var ctx4 = c4.getContext("2d");
 
-
 var socket = io();
+socket.verified = false;
 
 socket.on('addFactionsUI', addFactionstoUI);
-socket.on('addEntities', addEntities);
 socket.on('updateEntities', packetHandler);
-socket.on('deleteEntities', deleteEntities);
 socket.on('drawScene', drawScene);
 
 var selfId = null;
@@ -147,6 +145,10 @@ function packetHandler(data) {
 }
 
 function addEntities(packet) {
+    if (!socket.verified) {
+        socket.emit("verify", {});
+        socket.verified = true;
+    }
     var addEntity = function (packet, list, Entity, array) {
         if (!packet) {
             return;
@@ -675,7 +677,7 @@ function drawScene(data) {
 
     translateScene();
     ctx.drawImage(c2, 0, 0);
-    drawMiniMap();
+    //drawMiniMap();
     drawScoreBoard();
 }
 

@@ -31,14 +31,14 @@ var large  = function () {
 
 
 var superLarge  = function () {
-    WIDTH = 80000;
-    TILES_INPUT = 50000;
+    WIDTH = 100000;
+    TILES_INPUT = 200000;
     SHARDS = 10000;
     BORDER_WIDTH = 5000;
-    STAGES = 20;
+    STAGES = 50;
 };
 
-medium();
+large();
 
 
 var tileRoot = Math.floor(Math.sqrt(TILES_INPUT));

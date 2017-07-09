@@ -20,6 +20,7 @@ PacketHandler.prototype.sendInitPackets = function (socket) {
 
 
 PacketHandler.prototype.createInitPacket = function (stage, id) {
+    console.log("COMMENCING STAGE: " + stage);
     var initPacket = [];
     var populate = function (list, call, stage) {
         var size = Object.size(list);
