@@ -266,7 +266,6 @@ function updateEntities(packet) {
 }
 
 function deleteEntities(packet) {
-
     var deleteEntity = function (packet, list, array) {
         if (!packet) {
             return;
@@ -314,7 +313,6 @@ function deleteEntities(packet) {
 
 }
 
-
 function addFactionstoUI(data) {
     var factions = document.getElementById('factions');
     var packet = data.factions;
@@ -359,37 +357,33 @@ function drawScene(data) {
             if (controller.type === "Player") {
                 var radius = 30;
                 ctx2.moveTo(controller.x + radius, controller.y);
-                for (i = 0.3; i <= 2 * Math.PI - 0.4; i+= 0.4) {
-                    theta = i + getRandom(0,1)/7;
+                for (i = 0.3; i <= 2 * Math.PI - 0.4; i += 0.4) {
+                    theta = i + getRandom(0, 1) / 7;
                     x = radius * Math.cos(theta);
                     y = radius * Math.sin(theta);
                     ctx2.lineTo(controller.x + x, controller.y + y);
                 }
                 ctx2.lineTo(controller.x + radius, controller.y);
                 ctx2.fill();
-            } else {
-                var x, y, theta;
-                var radius = 20;
+            } else { //bot
+                var x, y, theta, startX, startY;
+                var smallRadius = 12;
+                var bigRadius = 20;
 
                 theta = controller.theta;
-                x = radius * Math.cos(theta);
-                y = radius * Math.sin(theta);
-                ctx2.moveTo(controller.x + x, controller.y + y);
-                radius = 10;
+                startX = bigRadius * Math.cos(theta);
+                startY = bigRadius * Math.sin(theta);
+                ctx2.lineTo(controller.x + startX, controller.y + startY);
                 for (i = 1; i <= 2; i++) {
-                    theta = 2 * Math.PI / 3 * i + controller.theta + getRandom(0,1)/8;
-                    x = radius * Math.cos(theta);
-                    y = radius * Math.sin(theta);
+                    theta = 2 * Math.PI / 3 * i + controller.theta + getRandom(0, 1) / 8;
+                    x = smallRadius * Math.cos(theta);
+                    y = smallRadius * Math.sin(theta);
                     ctx2.lineTo(controller.x + x, controller.y + y);
                 }
-                radius = 20;
                 theta = controller.theta;
-                x = radius * Math.cos(theta);
-                y = radius * Math.sin(theta);
-                ctx2.lineTo(controller.x + x, controller.y + y);
+                ctx2.lineTo(controller.x + startX, controller.y + startY);
                 ctx2.fill();
             }
-
 
             ctx2.fillText(controller.name, controller.x, controller.y + 30);
             ctx2.fillRect(controller.x - controller.health * 10 / 2, controller.y + 10,
@@ -413,13 +407,11 @@ function drawScene(data) {
                         b: Math.round(getRandom(200, 212))
                     };
                 }
-
                 ctx2.fillStyle = "rgb(" +
                     tile.color.r + "," +
                     tile.color.g + "," +
                     tile.color.b +
                     ")";
-
                 ctx2.fillRect(tile.x, tile.y, tile.length, tile.length);
             }
         }

@@ -475,9 +475,11 @@ GameServer.prototype.createEmptyShard = function () {
 
 /** MISC METHODS **/
 GameServer.prototype.findBots = function (boundary) {
+
     this.controllerTree.find(boundary, function (controller) {
         if (controller.type === "Bot" && controller.owner === boundary.player) {
-            controller.becomeSelected();
+            var player = this.CONTROLLER_LIST[boundary.player];
+            player.selectBot(controller);
         }
     }.bind(this));
 };

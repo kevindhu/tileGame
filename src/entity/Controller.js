@@ -77,7 +77,7 @@ Controller.prototype.checkCollisions = function () {
                 this.shootShard(controller);
                 this.shootLaser(controller);
             }
-            else if (controller.faction && controller.id !== this.id) {
+            else if (controller.faction && controller.id !== this.id && this.xSpeed < 5 && this.ySpeed < 5) {
                 this.ricochet(controller);
             }
 
@@ -96,8 +96,8 @@ Controller.prototype.ricochet = function (controller) {
     if (yAdd < 0) {
         yAdd = 4;
     }
-    var xImpulse = 4 - xAdd;
-    var yImpulse = 4 - yAdd;
+    var xImpulse = (4 - xAdd)/10;
+    var yImpulse = (4 - yAdd)/10;
 
 
     if (controller.x > this.x) {

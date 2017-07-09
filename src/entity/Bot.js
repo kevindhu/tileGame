@@ -74,11 +74,18 @@ Bot.prototype.updateControls = function () {
     this.pressingRight = false;
 
     target = this.getTarget();
-    if (!target) {return;}
+    if (!target) {
+        return;
+    }
     this.getTheta(target);
 
     this.maxXSpeed = Math.abs(10 * Math.cos(this.theta));
     this.maxYSpeed = Math.abs(10 * Math.sin(this.theta));
+
+    if (this.inRange(target)) {
+        this.theta = 0;
+        return;
+    }
 
     if (target.x < this.x) {
         this.pressingLeft = true;
@@ -104,13 +111,21 @@ Bot.prototype.getTheta = function (target) {
 };
 
 Bot.prototype.getTarget = function () {
-    var player = this.gameServer.CONTROLLER_LIST[this.owner];
     var target;
+    var player = this.gameServer.CONTROLLER_LIST[this.owner];
+
+    if (!player) {
+        return;
+    }
+    if (this.outofRange() && (this.enemy || this.manual)) {
+        this.regroup();
+        return;
+    }
 
     if (!this.manual) {
         if (this.enemy) {
             var enemy = this.gameServer.CONTROLLER_LIST[this.enemy];
-            if (!enemy || this.outofRange(enemy)) {
+            if (!enemy) {
                 this.regroup();
                 return;
             }
@@ -119,7 +134,6 @@ Bot.prototype.getTarget = function () {
             target = player;
         }
     }
-
     else if (this.manualCoord) {
         target = this.manualCoord;
     }
@@ -174,10 +188,14 @@ Bot.prototype.shootShard = function (player) {
 };
 
 
-Bot.prototype.outofRange = function (enemy) {
+Bot.prototype.outofRange = function () {
     var player = this.gameServer.CONTROLLER_LIST[this.owner];
-    return Math.abs(player.x - enemy.x) > 300 &&
-        Math.abs(player.y - enemy.y) > 300
+    return Math.abs(player.x - this.x) > 1000 &&
+        Math.abs(player.y - this.y) > 1000
+};
+
+Bot.prototype.inRange = function (target) {
+    return Math.abs(target.x - this.x) < 5 && Math.abs(target.y - this.y) < 5;
 };
 
 function getName(name) {
@@ -185,7 +203,7 @@ function getName(name) {
         return "unnamed bot";
     }
     return name;
-};
+}
 
 
 module.exports = Bot;

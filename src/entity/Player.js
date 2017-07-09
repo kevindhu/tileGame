@@ -11,6 +11,7 @@ function Player(id, name, faction, gameServer) {
     this.type = "Player";
     this.radius = 10;
     this.maxSpeed = 10;
+    this.selectedCount = 0;
     this.bots = [];
     this.shards = [];
     this.init();
@@ -44,6 +45,11 @@ Player.prototype.removeBot = function (bot) {
     this.bots.splice(index, 1);
 };
 
+Player.prototype.selectBot = function (bot) {
+    bot.becomeSelected();
+    this.selectedCount++;
+};
+
 
 Player.prototype.isTarget = function (x, y) {
     var target = null;
@@ -58,26 +64,48 @@ Player.prototype.isTarget = function (x, y) {
             console.log("DETECTED ENEMY");
             target = controller;
         }
-    });
+    }.bind(this));
+    if (!target) {
+        this.gameServer.homeTree.find(bound, function (home) {
+            if (home.faction !== this.faction) {
+                console.log("DETECTED HOME ENEMY");
+                target = home;
+            }
+        }.bind(this));
+    }
     return target;
 };
 
 Player.prototype.moveBots = function (x, y) {
     var target = this.isTarget(this.x + x, this.y + y);
 
+    //make an array to go to
+    var row = Math.floor(Math.sqrt(this.selectedCount)) + 1;
+
+    var index = 0;
     for (var i = 0; i < this.bots.length; i++) {
         var bot = this.gameServer.CONTROLLER_LIST[this.bots[i]];
+        var rIndex, cIndex;
+        if (!bot) {
+            return;
+        }
         if (bot.selected) {
             if (target) {
                 bot.setEnemy(target);
             } else {
-                bot.setManual(this.x + x, this.y + y);
+                rIndex = index % row;
+                cIndex = Math.floor(index / row);
+                bot.setManual(this.x + x + 100 * rIndex, this.y + y + 100 * cIndex);
+                index++;
             }
         }
+
     }
+
 };
 
 Player.prototype.resetSelect = function () {
+    this.selectedCount = 0;
     for (var i = 0; i < this.bots.length; i++) {
         var bot = this.gameServer.CONTROLLER_LIST[this.bots[i]];
         bot.removeSelect();
@@ -87,7 +115,9 @@ Player.prototype.resetSelect = function () {
 Player.prototype.groupBots = function () { //get all bots back to player
     for (var i = 0; i < this.bots.length; i++) {
         var bot = this.gameServer.CONTROLLER_LIST[this.bots[i]];
-        bot.regroup();
+        if (bot.selected) {
+            bot.regroup();
+        }
     }
 };
 
