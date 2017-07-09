@@ -352,12 +352,20 @@ function drawScene(data) {
         ctx2.font = "20px Arial";
         ctx2.fillStyle = "#000000";
         for (var id in CONTROLLER_LIST) {
-            var controller = CONTROLLER_LIST[id];
+            var controller = CONTROLLER_LIST[id], i;
             ctx2.beginPath();
 
             //draw player object
             if (controller.type === "Player") {
-                ctx2.arc(controller.x, controller.y, 30, 0, 2 * Math.PI, false);
+                var radius = 30;
+                ctx2.moveTo(controller.x + radius, controller.y);
+                for (i = 0.3; i <= 2 * Math.PI - 0.4; i+= 0.4) {
+                    theta = i + getRandom(0,1)/7;
+                    x = radius * Math.cos(theta);
+                    y = radius * Math.sin(theta);
+                    ctx2.lineTo(controller.x + x, controller.y + y);
+                }
+                ctx2.lineTo(controller.x + radius, controller.y);
                 ctx2.fill();
             } else {
                 var x, y, theta;
@@ -367,18 +375,18 @@ function drawScene(data) {
                 x = radius * Math.cos(theta);
                 y = radius * Math.sin(theta);
                 ctx2.moveTo(controller.x + x, controller.y + y);
-                for (var i = 1; i <= 3; i++) {
-                    theta = 2 * Math.PI / 3 * i + controller.theta;
-                    if (i === 3) {
-                        radius = 20;
-                    }
-                    else {
-                        radius = 10;
-                    }
+                radius = 10;
+                for (i = 1; i <= 2; i++) {
+                    theta = 2 * Math.PI / 3 * i + controller.theta + getRandom(0,1)/8;
                     x = radius * Math.cos(theta);
                     y = radius * Math.sin(theta);
                     ctx2.lineTo(controller.x + x, controller.y + y);
                 }
+                radius = 20;
+                theta = controller.theta;
+                x = radius * Math.cos(theta);
+                y = radius * Math.sin(theta);
+                ctx2.lineTo(controller.x + x, controller.y + y);
                 ctx2.fill();
             }
 
