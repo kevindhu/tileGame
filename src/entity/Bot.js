@@ -136,6 +136,7 @@ Bot.prototype.getTarget = function () {
     }
     else if (this.manualCoord) {
         target = this.manualCoord;
+        target.type = "manual";
     }
     return target;
 };
@@ -195,7 +196,11 @@ Bot.prototype.outofRange = function () {
 };
 
 Bot.prototype.inRange = function (target) {
-    return Math.abs(target.x - this.x) < 5 && Math.abs(target.y - this.y) < 5;
+    if (target.type === "manual") {
+        return Math.abs(target.x - this.x) < 5 && Math.abs(target.y - this.y) < 5;
+    } else {
+        return Math.abs(target.x - this.x) < 100 && Math.abs(target.y - this.y) < 100;
+    }
 };
 
 function getName(name) {

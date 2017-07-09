@@ -96,8 +96,11 @@ Controller.prototype.ricochet = function (controller) {
     if (yAdd < 0) {
         yAdd = 4;
     }
+
+
     var xImpulse = (4 - xAdd)/10;
     var yImpulse = (4 - yAdd)/10;
+
 
 
     if (controller.x > this.x) {
