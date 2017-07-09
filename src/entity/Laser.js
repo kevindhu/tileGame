@@ -1,4 +1,5 @@
 const entityConfig = require('./entityConfig');
+var EntityFunctions = require('./EntityFunctions');
 var lerp = require('lerp');
 
 function Laser(owner, target, gameServer) {
@@ -19,6 +20,9 @@ function Laser(owner, target, gameServer) {
 
 Laser.prototype.init = function () {
     this.gameServer.LASER_LIST[this.id] = this;
+    //TODO: add x,y for lasers lol
+    this.chunk = EntityFunctions.findChunk(gameServer, this);
+    this.gameServer.CHUNKS[this.chunk].LASER_LIST[this.id] = this;
     this.packetHandler.addLaserPackets(this);
 };
 
@@ -55,6 +59,7 @@ Laser.prototype.checkStatus = function () {
 
 Laser.prototype.onDelete = function () {
     delete this.gameServer.LASER_LIST[this.id];
+    delete this.gameServer.CHUNKS[this.chunk].LASER_LIST[this.id];
     this.packetHandler.deleteLaserPackets(this);
 };
 

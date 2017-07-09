@@ -1,9 +1,10 @@
 const entityConfig = require('./entityConfig');
+var EntityFunctions = require('./EntityFunctions');
 
 function Tile(x, y, gameServer) {
     this.gameServer = gameServer;
     this.packetHandler = gameServer.packetHandler;
-    
+
     this.id = Math.random();
     this.x = x;
     this.y = y;
@@ -21,6 +22,8 @@ Tile.prototype.init = function () {
     this.addQuadItem();
     this.gameServer.tileTree.insert(this.quadItem);
     this.gameServer.TILE_LIST[this.id] = this;
+    this.chunk = EntityFunctions.findChunk(this.gameServer, this);
+    this.gameServer.CHUNKS[this.chunk].TILE_LIST[this.id] = this;
 };
 
 

@@ -1,5 +1,6 @@
 const entityConfig = require('./entityConfig');
 const Arithmetic = require('../modules/Arithmetic');
+var EntityFunctions = require('./EntityFunctions');
 var Player = require('./Player');
 var Bot = require('./Bot');
 var SuperBot = require("./SuperBot");
@@ -21,6 +22,9 @@ Faction.prototype.init = function () {
     this.getInitCoords();
     this.addHeadquarter();
     this.gameServer.FACTION_LIST[this.name] = this;
+    this.chunk = EntityFunctions.findChunk(this.gameServer, this);
+    this.gameServer.CHUNKS[this.chunk].FACTION_LIST[this.name] = this;
+
     this.packetHandler.addFactionPackets(this);
 };
 
@@ -147,6 +151,7 @@ Faction.prototype.checkStatus = function () {
 
 Faction.prototype.onDelete = function () {
     delete this.gameServer.FACTION_LIST[this.name];
+    delete this.gameServer.CHUNKS[this.chunk].FACTION_LIST[this.name];
     this.packetHandler.deleteFactionPackets(this);
 };
 

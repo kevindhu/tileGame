@@ -35,6 +35,8 @@ Home.prototype.mainInit = function () {
         this.addAllNeighbors();
     }
     this.gameServer.HOME_LIST[this.id] = this;
+    this.chunk = EntityFunctions.findChunk(this.gameServer, this);
+    this.gameServer.CHUNKS[this.chunk].HOME_LIST[this.id] = this;
     this.addQuadItem();
     this.gameServer.homeTree.insert(this.quadItem);
     this.packetHandler.addHomePackets(this);
@@ -159,6 +161,7 @@ Home.prototype.onDelete = function () {
 
     this.gameServer.homeTree.remove(this.quadItem);
     delete this.gameServer.HOME_LIST[this.id];
+    delete this.gameServer.CHUNKS[this.chunk].FACTION_LIST[this.id];
     this.packetHandler.deleteHomePackets(this);
 };
 

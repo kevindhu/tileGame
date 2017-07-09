@@ -1,5 +1,6 @@
 var Entity = require('./entity');
 var QuadNode = require('./modules/QuadNode');
+var Chunk = require('./Chunk');
 var PacketHandler = require('./PacketHandler');
 const entityConfig = require('./entity/entityConfig');
 const Arithmetic = require('./modules/Arithmetic');
@@ -7,11 +8,13 @@ const PORT = process.env.PORT || 2000;
 
 function GameServer() {
     this.packetHandler = new PacketHandler(this);
-    this.TILE_LIST = {};
     this.INIT_SOCKET_LIST = {};
     this.SOCKET_LIST = {};
-    this.CONTROLLER_LIST = {};
+    this.CHUNKS = {};
+
     this.FACTION_LIST = {};
+    this.TILE_LIST = {};
+    this.CONTROLLER_LIST = {};
     this.HOME_LIST = {};
     this.LASER_LIST = {};
 
@@ -19,7 +22,6 @@ function GameServer() {
     this.SHOOTING_SHARD_LIST = {};
     this.PLAYER_SHARD_LIST = {};
     this.HOME_SHARD_LIST = {};
-
 
     this.controllerTree = null;
     this.shardTree = null;
@@ -37,6 +39,13 @@ function GameServer() {
 }
 
 /** SERVER INIT METHODS **/
+GameServer.prototype.initChunks = function () {
+    for (var i = 0; i < entityConfig.CHUNKS; i++) {
+        this.CHUNKS[i] = new Chunk(i,this);
+    }
+};
+
+
 GameServer.prototype.initTiles = function () {
     this.tileTree = new QuadNode({
         minx: this.minx,
@@ -317,6 +326,7 @@ GameServer.prototype.start = function () {
     console.log('Started Server!');
 
     /** INIT SERVER OBJECTS **/
+    this.initChunks();
     this.initTiles();
     this.initShards();
     this.initControllers();

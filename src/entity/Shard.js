@@ -1,4 +1,5 @@
 const entityConfig = require('./entityConfig');
+var EntityFunctions = require('./EntityFunctions');
 var lerp = require('lerp');
 
 function Shard(x, y, gameServer) {
@@ -34,6 +35,8 @@ function Shard(x, y, gameServer) {
 Shard.prototype.init = function () {
     this.addQuadItem();
     this.gameServer.shardTree.insert(this.quadItem);
+    this.chunk = EntityFunctions.findChunk(this.gameServer, this);
+    this.gameServer.CHUNKS[this.chunk].STATIC_SHARD_LIST[this.id] = this;
     this.gameServer.STATIC_SHARD_LIST[this.id] = this;
     this.packetHandler.addShardPackets(this);
 };
@@ -47,10 +50,15 @@ Shard.prototype.limbo = function () {
     this.gameServer.shardTree.remove(this.quadItem);
     this.gameServer.shootingShardTree.remove(this.quadItem);
 
+    delete this.gameServer.CHUNKS[this.chunk].STATIC_SHARD_LIST[this.id];
+    delete this.gameServer.CHUNKS[this.chunk].PLAYER_SHARD_LIST[this.id];
+    delete this.gameServer.CHUNKS[this.chunk].SHOOTING_SHARD_LIST[this.id];
+    delete this.gameServer.CHUNKS[this.chunk].HOME_SHARD_LIST[this.id];
+
+    delete this.gameServer.STATIC_SHARD_LIST[this.id];
     delete this.gameServer.PLAYER_SHARD_LIST[this.id];
     delete this.gameServer.SHOOTING_SHARD_LIST[this.id];
     delete this.gameServer.HOME_SHARD_LIST[this.id];
-    delete this.gameServer.STATIC_SHARD_LIST[this.id];
 };
 
 Shard.prototype.setName = function (name) {
@@ -165,6 +173,31 @@ Shard.prototype.updatePosition = function () {
             break;
     }
     this.packetHandler.updateShardsPackets(this);
+};
+
+Shard.prototype.updateChunk = function () {
+    var newChunk = EntityFunctions.findChunk(this.gameServer, this);
+    if (newChunk !== this.chunk) {
+        //delete old chunk shard
+        switch (this.type) {
+            case "shooting":
+            case "tempShooting":
+                delete this.gameServer.CHUNKS[this.chunk].SHOOTING_SHARD_LIST[this.id];
+                this.chunk = newChunk;
+                this.gameServer.CHUNKS[this.chunk].SHOOTING_SHARD_LIST[this.id] = this;
+                break;
+            case "player":
+                delete this.gameServer.CHUNKS[this.chunk].PLAYER_SHARD_LIST[this.id];
+                this.chunk = newChunk;
+                this.gameServer.CHUNKS[this.chunk].PLAYER_SHARD_LIST[this.id] = this;
+                break;
+            case "home":
+                delete this.gameServer.CHUNKS[this.chunk].HOME_SHARD_LIST[this.id];
+                this.chunk = newChunk;
+                this.gameServer.CHUNKS[this.chunk].HOME_SHARD_LIST[this.id] = this;
+                break;
+        }
+    }
 };
 
 Shard.prototype.useSupply = function () {

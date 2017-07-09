@@ -1,5 +1,7 @@
 const entityConfig = require('./entityConfig');
+var EntityFunctions = require('./EntityFunctions');
 const Arithmetic = require('../modules/Arithmetic');
+
 var lerp = require('lerp');
 
 function Controller(id, faction, gameServer) {
@@ -31,6 +33,8 @@ function Controller(id, faction, gameServer) {
 Controller.prototype.init = function () {
     this.addQuadItem();
     this.gameServer.CONTROLLER_LIST[this.id] = this;
+    this.chunk = EntityFunctions.findChunk(this.gameServer, this);
+    this.gameServer.CHUNKS[this.chunk].CONTROLLER_LIST[this.id] = this;
     this.gameServer.packetHandler.addControllerPackets(this);
 };
 
@@ -38,7 +42,9 @@ Controller.prototype.init = function () {
 Controller.prototype.onDelete = function () {
     this.gameServer.controllerTree.remove(this.quadItem);
     this.gameServer.FACTION_LIST[this.faction].removeController(this);
+
     delete this.gameServer.CONTROLLER_LIST[this.id];
+    delete this.gameServer.CHUNKS[this.chunk].CONTROLLER_LIST[this.id];
     this.packetHandler.deleteControllerPackets(this);
 };
 
@@ -54,6 +60,7 @@ Controller.prototype.update = function () {
     this.checkCollisions();
     this.updatePosition();
     this.updateQuadItem();
+    this.updateChunk();
 
     if (tile) {
         if (tile.faction === this.faction) {
@@ -69,6 +76,15 @@ Controller.prototype.update = function () {
     this.packetHandler.updateControllersPackets(this);
 };
 
+
+Controller.prototype.updateChunk = function () {
+    var newChunk = EntityFunctions.findChunk(this.gameServer, this);
+    if (newChunk !== this.chunk) {
+        delete this.gameServer.CHUNKS[this.chunk].CONTROLLER_LIST[this.id];
+        this.chunk = newChunk;
+        this.gameServer.CHUNKS[this.chunk].CONTROLLER_LIST[this.id] = this;
+    }
+};
 
 Controller.prototype.checkCollisions = function () {
     if (this.type === "Bot") {
