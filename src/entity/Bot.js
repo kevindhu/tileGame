@@ -28,7 +28,7 @@ Bot.prototype.update = function () {
     Bot.super_.prototype.update.apply(this);
 };
 
-Bot.prototype.setManual = function (x,y) {
+Bot.prototype.setManual = function (x, y) {
     this.manual = true;
     this.manualCoord = {
         x: x,
@@ -67,34 +67,16 @@ Bot.prototype.removeEnemy = function () {
 
 Bot.prototype.updateControls = function () {
     var target;
-    var player = this.gameServer.CONTROLLER_LIST[this.owner];
 
     this.pressingUp = false;
     this.pressingDown = false;
     this.pressingLeft = false;
     this.pressingRight = false;
 
-    if (!player) {
-        return;
-    }
+    target = this.getTarget();
+    if (!target) {return;}
+    this.getTheta(target);
 
-    if (!this.manual) {
-        if (this.enemy) {
-            var enemy = this.gameServer.CONTROLLER_LIST[this.enemy];
-            if (!enemy || this.outofRange(enemy)) {
-                this.regroup();
-                return;
-            }
-            target = enemy;
-        } else {
-            target = player;
-        }
-    }
-    else if (this.manualCoord) {
-        target = this.manualCoord;
-    }
-
-    this.theta = Math.atan((this.y - target.y)/(this.x - target.x));
     this.maxXSpeed = Math.abs(10 * Math.cos(this.theta));
     this.maxYSpeed = Math.abs(10 * Math.sin(this.theta));
 
@@ -112,6 +94,37 @@ Bot.prototype.updateControls = function () {
     }
 };
 
+
+Bot.prototype.getTheta = function (target) {
+    this.theta = Math.atan((this.y - target.y) / (this.x - target.x));
+
+    if (this.y - target.y > 0 && this.x - target.x > 0 || this.y - target.y < 0 && this.x - target.x > 0) {
+        this.theta += Math.PI;
+    }
+};
+
+Bot.prototype.getTarget = function () {
+    var player = this.gameServer.CONTROLLER_LIST[this.owner];
+    var target;
+
+    if (!this.manual) {
+        if (this.enemy) {
+            var enemy = this.gameServer.CONTROLLER_LIST[this.enemy];
+            if (!enemy || this.outofRange(enemy)) {
+                this.regroup();
+                return;
+            }
+            target = enemy;
+        } else {
+            target = player;
+        }
+    }
+
+    else if (this.manualCoord) {
+        target = this.manualCoord;
+    }
+    return target;
+};
 
 Bot.prototype.updatePosition = function () {
     this.updateControls();

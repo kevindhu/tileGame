@@ -3,6 +3,7 @@ var c2 = document.getElementById("draftCanvas");
 var c3 = document.getElementById("c3");
 var c4 = document.getElementById("c4");
 
+
 c2.style.display = "none";
 c3.style.display = "none";
 c4.style.display = "none";
@@ -57,6 +58,8 @@ var Controller = function (controllerInfo) {
     this.health = controllerInfo.health;
     this.selected = controllerInfo.selected;
     this.owner = controllerInfo.owner;
+    this.theta = controllerInfo.theta;
+    this.type = controllerInfo.type;
 };
 var Tile = function (tileInfo) {
     this.id = tileInfo.id;
@@ -240,6 +243,7 @@ function updateEntities(packet) {
         controller.y = controllerInfo.y;
         controller.health = controllerInfo.health;
         controller.selected = controllerInfo.selected;
+        controller.theta = controllerInfo.theta;
     };
 
     switch (packet.class) {
@@ -350,8 +354,35 @@ function drawScene(data) {
         for (var id in CONTROLLER_LIST) {
             var controller = CONTROLLER_LIST[id];
             ctx2.beginPath();
-            ctx2.arc(controller.x, controller.y, 30, 0, 2 * Math.PI, false);
-            ctx2.fill();
+
+            //draw player object
+            if (controller.type === "Player") {
+                ctx2.arc(controller.x, controller.y, 30, 0, 2 * Math.PI, false);
+                ctx2.fill();
+            } else {
+                var x, y, theta;
+                var radius = 20;
+
+                theta = controller.theta;
+                x = radius * Math.cos(theta);
+                y = radius * Math.sin(theta);
+                ctx2.moveTo(controller.x + x, controller.y + y);
+                for (var i = 1; i <= 3; i++) {
+                    theta = 2 * Math.PI / 3 * i + controller.theta;
+                    if (i === 3) {
+                        radius = 20;
+                    }
+                    else {
+                        radius = 10;
+                    }
+                    x = radius * Math.cos(theta);
+                    y = radius * Math.sin(theta);
+                    ctx2.lineTo(controller.x + x, controller.y + y);
+                }
+                ctx2.fill();
+            }
+
+
             ctx2.fillText(controller.name, controller.x, controller.y + 30);
             ctx2.fillRect(controller.x - controller.health * 10 / 2, controller.y + 10,
                 controller.health * 10, 10);
@@ -704,8 +735,7 @@ canvas.addEventListener("mousedown", function (event) {
 });
 
 
-
-document.addEventListener('contextmenu', function(e) {
+document.addEventListener('contextmenu', function (e) {
     e.preventDefault();
 }, false);
 
@@ -718,7 +748,6 @@ canvas.addEventListener("mouseup", function (event) {
         var minY = (ARROW.preY - c2.height / 2) / scaleFactor;
         var maxX = (ARROW.postX - c2.width / 2) / scaleFactor;
         var maxY = (ARROW.postY - c2.height / 2) / scaleFactor;
-        console.log("SELECT BOTS");
         socket.emit("selectBots", {
             minX: minX,
             minY: minY,

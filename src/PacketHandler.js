@@ -138,11 +138,13 @@ PacketHandler.prototype.addControllerPackets = function (controller, ifInit) {
         class: "controllerInfo",
         owner: controller.owner,
         id: controller.id,
+        type: controller.type,
         name: controller.name,
         x: controller.x,
         y: controller.y,
         health: controller.health,
-        selected: controller.selected
+        selected: controller.selected,
+        theta: controller.theta
     };
     if (ifInit) {
         return info;
@@ -282,7 +284,8 @@ PacketHandler.prototype.updateControllersPackets = function (controller) {
         x: controller.x,
         y: controller.y,
         health: controller.health,
-        selected: controller.selected
+        selected: controller.selected,
+        theta: controller.theta
     });
 };
 

@@ -8,7 +8,6 @@ function Controller(id, faction, gameServer) {
     this.packetHandler = gameServer.packetHandler;
 
     this.faction = faction.name;
-
     this.radius = 50;
 
     this.stationary = true;
@@ -20,6 +19,7 @@ function Controller(id, faction, gameServer) {
     this.timer = 0;
     this.xSpeed = 0;
     this.ySpeed = 0;
+    this.theta = 0;
     this.selected = false;
 
     this.pressingRight = false;
