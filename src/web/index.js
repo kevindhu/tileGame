@@ -145,6 +145,7 @@ function packetHandler(data) {
 }
 
 function addEntities(packet) {
+    console.log("ADDING OMG");
     if (!socket.verified) {
         socket.emit("verify", {});
         socket.verified = true;

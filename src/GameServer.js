@@ -122,7 +122,7 @@ GameServer.prototype.initNewClients = function () {
         }
         else if (socket.stage <= entityConfig.STAGES) {
             this.packetHandler.sendInitPackets(socket);
-            socket.timer = 3;
+            socket.timer = 1;
         }
         else {
             delete this.INIT_SOCKET_LIST[id];
@@ -331,7 +331,7 @@ GameServer.prototype.start = function () {
 
         socket.id = Math.random();
         socket.timer = 0;
-        socket.life = 20;
+        socket.life = 10;
         socket.verified = false;
         socket.stage = 0;
 

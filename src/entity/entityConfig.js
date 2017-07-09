@@ -26,7 +26,7 @@ var large  = function () {
     TILES_INPUT = 2000;
     SHARDS = 2000;
     BORDER_WIDTH = 1000;
-    STAGES = 5;
+    STAGES = 100;
 };
 
 
@@ -35,7 +35,7 @@ var superLarge  = function () {
     TILES_INPUT = 200000;
     SHARDS = 10000;
     BORDER_WIDTH = 5000;
-    STAGES = 50;
+    STAGES = 500;
 };
 
 large();
