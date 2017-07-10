@@ -20,12 +20,12 @@ function Faction(name, gameServer) {
 
 Faction.prototype.init = function () {
     this.getInitCoords();
-    this.addHeadquarter();
     this.gameServer.FACTION_LIST[this.name] = this;
     this.chunk = EntityFunctions.findChunk(this.gameServer, this);
     this.gameServer.CHUNKS[this.chunk].FACTION_LIST[this.name] = this;
-
     this.packetHandler.addFactionPackets(this);
+
+    this.addHeadquarter();
 };
 
 Faction.prototype.getInitCoords = function () {

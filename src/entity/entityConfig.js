@@ -28,7 +28,7 @@ var large  = function () {
     CHUNKS = 9;
     WIDTH = 10000;
     TILES_INPUT = 2000;
-    SHARDS = 2000;
+    SHARDS = 200;
     BORDER_WIDTH = 1000;
     STAGES = 100;
 };

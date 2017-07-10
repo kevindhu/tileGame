@@ -2,60 +2,20 @@ const entityConfig = require('./entity/entityConfig');
 const Arithmetic = require('./modules/Arithmetic');
 function PacketHandler(gameServer) {
     this.gameServer = gameServer;
+    this.CHUNK_PACKETS = {};
     this.masterPacket = [];
-
+    this.initChunkPackets();
 }
 
+PacketHandler.prototype.initChunkPackets = function () {
+    for (var i = 0; i < entityConfig.CHUNKS; i++) {
+        this.CHUNK_PACKETS[i] = [];
+    }
+};
+
 PacketHandler.prototype.sendInitPackets = function (socket) {
-    var stage = socket.stage;
-    if (stage === 0) {
-        socket.emit('addFactionsUI', this.addFactionsUIPacket()); //make more streamlined?
-        socket.emit('updateEntities', this.createInitPacket(stage, socket.id));
-    }
-    else {
-        socket.emit('updateEntities', this.createInitPacket(stage));
-    }
-    socket.stage++;
+    socket.emit('addFactionsUI', this.addFactionsUIPacket()); //make more streamlined?
 };
-
-
-PacketHandler.prototype.createInitPacket = function (stage, id) {
-    console.log(stage);
-    var initPacket = [];
-    var populate = function (list, call, stage) {
-        var size = Object.size(list);
-        var count = 0;
-        var bound = [size * stage / entityConfig.STAGES - 5,
-            size * (stage + 1) / entityConfig.STAGES + 5];
-        for (var i in list) {
-            if (count >= bound[0] && count < bound[1]) { // delta of 5 for overlap
-                var entity = list[i];
-                initPacket.push(call(entity, true));
-            }
-            count++;
-        }
-    };
-
-    populate(this.gameServer.CONTROLLER_LIST, this.addControllerPackets, stage);
-
-    populate(this.gameServer.HOME_SHARD_LIST, this.addShardPackets, stage);
-    populate(this.gameServer.PLAYER_SHARD_LIST, this.addShardPackets, stage);
-    populate(this.gameServer.STATIC_SHARD_LIST, this.addShardPackets, stage);
-
-    populate(this.gameServer.TILE_LIST, this.addTilePackets, stage);
-    populate(this.gameServer.HOME_LIST, this.addHomePackets, stage);
-    populate(this.gameServer.FACTION_LIST, this.addFactionPackets, stage);
-
-    if (id) {
-        initPacket.push({
-            master: "add",
-            class: "selfId",
-            selfId: id
-        });
-    }
-    return initPacket;
-};
-
 
 //TODO: optimize this with addUIPacket to make it cleaner
 PacketHandler.prototype.addFactionsUIPacket = function () {
@@ -66,8 +26,46 @@ PacketHandler.prototype.addFactionsUIPacket = function () {
     return {factions: factionsPacket};
 };
 
+PacketHandler.prototype.sendChunkInitPackets = function (socket, chunk) {
+    socket.emit('updateEntities', this.createChunkPacket(chunk, socket.id));
+};
+
+
+PacketHandler.prototype.createChunkPacket = function (chunk, id) {
+    var initPacket = [];
+    var populate = function (list, call) {
+        var count = 0;
+        for (var i in list) {
+            var entity = list[i];
+            initPacket.push(call(entity, true));
+            count++;
+        }
+    };
+
+    populate(this.gameServer.CHUNKS[chunk].CONTROLLER_LIST, this.addControllerPackets);
+
+    populate(this.gameServer.CHUNKS[chunk].HOME_SHARD_LIST, this.addShardPackets);
+    populate(this.gameServer.CHUNKS[chunk].PLAYER_SHARD_LIST, this.addShardPackets);
+    populate(this.gameServer.CHUNKS[chunk].STATIC_SHARD_LIST, this.addShardPackets);
+
+    populate(this.gameServer.CHUNKS[chunk].TILE_LIST, this.addTilePackets);
+    populate(this.gameServer.CHUNKS[chunk].HOME_LIST, this.addHomePackets);
+    populate(this.gameServer.CHUNKS[chunk].FACTION_LIST, this.addFactionPackets);
+
+    if (id) {
+        initPacket.push({
+            master: "add",
+            class: "selfId",
+            selfId: id
+        });
+    }
+    return initPacket;
+
+};
+
+
 PacketHandler.prototype.addShardAnimationPackets = function (shard) {
-    this.masterPacket.push(
+    this.CHUNK_PACKETS[shard.chunk].push(
         {
             master: "add",
             class: "animationInfo",
@@ -80,7 +78,7 @@ PacketHandler.prototype.addShardAnimationPackets = function (shard) {
 };
 
 PacketHandler.prototype.removeHomeAnimationPackets = function (home) {
-    this.masterPacket.push(
+    this.CHUNK_PACKETS[home.chunk].push(
         {
             master: "delete",
             class: "animationInfo",
@@ -93,7 +91,7 @@ PacketHandler.prototype.removeHomeAnimationPackets = function (home) {
 };
 
 PacketHandler.prototype.addHomeAnimationPackets = function (home) {
-    this.masterPacket.push(
+    this.CHUNK_PACKETS[home.chunk].push(
         {
             master: "add",
             class: "animationInfo",
@@ -106,7 +104,7 @@ PacketHandler.prototype.addHomeAnimationPackets = function (home) {
 };
 
 PacketHandler.prototype.addBracketPackets = function (player, tile) {
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[tile.chunk].push({
         master: "add",
         class: "bracketInfo",
         playerId: player.id,
@@ -123,7 +121,7 @@ PacketHandler.prototype.addUIPackets = function (player, home, action) {
         homeId = home.id;
     }
 
-    this.masterPacket.push(
+    this.CHUNK_PACKETS[player.chunk].push(
         {
             master: "add",
             class: "UIInfo",
@@ -132,6 +130,7 @@ PacketHandler.prototype.addUIPackets = function (player, home, action) {
             action: action
         });
 };
+
 
 PacketHandler.prototype.addControllerPackets = function (controller, ifInit) {
     var info = {
@@ -151,7 +150,7 @@ PacketHandler.prototype.addControllerPackets = function (controller, ifInit) {
         return info;
     }
     else {
-        this.masterPacket.push(info);
+        this.CHUNK_PACKETS[controller.chunk].push(info);
     }
 };
 
@@ -169,7 +168,7 @@ PacketHandler.prototype.addFactionPackets = function (faction, ifInit) {
         return info;
     }
     else {
-        this.masterPacket.push(info);
+        this.CHUNK_PACKETS[faction.chunk].push(info);
     }
 };
 
@@ -187,7 +186,7 @@ PacketHandler.prototype.addShardPackets = function (shard, ifInit) {
         return info;
     }
     else {
-        this.masterPacket.push(info);
+        this.CHUNK_PACKETS[shard.chunk].push(info);
     }
 };
 
@@ -205,7 +204,7 @@ PacketHandler.prototype.addTilePackets = function (tile, ifInit) {
 };
 
 PacketHandler.prototype.addLaserPackets = function (laser, ifInit) {
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[laser.chunk].push({
         master: "add",
         class: "laserInfo",
         id: laser.id,
@@ -235,13 +234,13 @@ PacketHandler.prototype.addHomePackets = function (home, ifInit) {
         return info;
     }
     else {
-        this.masterPacket.push(info);
+        this.CHUNK_PACKETS[home.chunk].push(info);
     }
 };
 
 
 PacketHandler.prototype.updateHomePackets = function (home) {
-    this.masterPacket.push(
+    this.CHUNK_PACKETS[home.chunk].push(
         {
             master: "update",
             class: "homeInfo",
@@ -257,7 +256,7 @@ PacketHandler.prototype.updateHomePackets = function (home) {
 };
 
 PacketHandler.prototype.updateFactionPackets = function (faction) {
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[faction.chunk].push({
         master: "update",
         class: "factionInfo",
         id: faction.id,
@@ -268,7 +267,7 @@ PacketHandler.prototype.updateFactionPackets = function (faction) {
 };
 
 PacketHandler.prototype.updateTilesPackets = function (tile) {
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[tile.chunk].push({
         master: "update",
         class: "tileInfo",
         id: tile.id,
@@ -278,7 +277,7 @@ PacketHandler.prototype.updateTilesPackets = function (tile) {
 };
 
 PacketHandler.prototype.updateControllersPackets = function (controller) {
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[controller.chunk].push({
         master: "update",
         class: "controllerInfo",
         id: controller.id,
@@ -291,7 +290,7 @@ PacketHandler.prototype.updateControllersPackets = function (controller) {
 };
 
 PacketHandler.prototype.updateShardsPackets = function (shard) {
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[shard.chunk].push({
         master: "update",
         class: "shardInfo",
         name: shard.name,
@@ -306,7 +305,7 @@ PacketHandler.prototype.deleteUIPackets = function (player, action) {
     if (!player.id) {
         var meme = player.id.sdf;
     }
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[player.chunk].push({
         master: "delete",
         class: "UIInfo",
         id: player.id,
@@ -315,7 +314,7 @@ PacketHandler.prototype.deleteUIPackets = function (player, action) {
 };
 
 PacketHandler.prototype.deleteBracketPackets = function (player) {
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[player.chunk].push({
         master: "delete",
         class: "bracketInfo",
         id: player.id
@@ -323,7 +322,7 @@ PacketHandler.prototype.deleteBracketPackets = function (player) {
 };
 
 PacketHandler.prototype.deleteControllerPackets = function (controller) {
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[controller.chunk].push({
         master: "delete",
         class: "controllerInfo",
         id: controller.id
@@ -331,7 +330,7 @@ PacketHandler.prototype.deleteControllerPackets = function (controller) {
 };
 
 PacketHandler.prototype.deleteLaserPackets = function (laser) {
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[laser.chunk].push({
         master: "delete",
         class: "laserInfo",
         id: laser.id
@@ -339,7 +338,7 @@ PacketHandler.prototype.deleteLaserPackets = function (laser) {
 };
 
 PacketHandler.prototype.deleteFactionPackets = function (faction) {
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[faction.chunk].push({
         master: "delete",
         class: "factionInfo",
         id: faction.id
@@ -347,16 +346,15 @@ PacketHandler.prototype.deleteFactionPackets = function (faction) {
 };
 
 PacketHandler.prototype.deleteHomePackets = function (home) {
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[home.chunk].push({
         master: "delete",
         class: "homeInfo",
         id: home.id
     });
 };
 
-
 PacketHandler.prototype.deleteShardPackets = function (shard) {
-    this.masterPacket.push({
+    this.CHUNK_PACKETS[shard.chunk].push({
         master: "delete",
         class: "shardInfo",
         id: shard.id
@@ -367,16 +365,48 @@ PacketHandler.prototype.deleteShardPackets = function (shard) {
 PacketHandler.prototype.sendPackets = function () {
     for (var index in this.gameServer.SOCKET_LIST) {
         var socket = this.gameServer.SOCKET_LIST[index];
-
-        socket.emit('updateEntities', this.masterPacket);
-        socket.emit('drawScene', {});
+        if (socket.player) {
+            var chunks = this.findChunks(socket);
+            for (var i = 0; i < chunks.length; i++) {
+                var packet = this.CHUNK_PACKETS[chunks[i]];
+                socket.emit('updateEntities', packet);
+            }
+            socket.emit('drawScene', {});
+        }
     }
     this.resetPackets();
 };
 
+PacketHandler.prototype.findChunks = function (socket) {
+    var rowLength = Math.sqrt(entityConfig.CHUNKS);
+    var chunks = [];
+
+    for (var i = 0; i < 9; i++) {
+        var chunk = socket.player.chunk;
+        var xIndex = i % 3 - 1;
+        var yIndex = Math.floor(i / 3) - 1;
+
+        while (!(chunk % rowLength + xIndex).between(0, rowLength - 1) ||
+        !(Math.floor(chunk / rowLength) + yIndex).between(0, rowLength - 1)) {
+            i++;
+            if (i > 8) {
+                return chunks;
+            }
+            xIndex = i % 3 - 1;
+            yIndex = Math.floor(i / 3) - 1;
+        }
+        chunk += xIndex + rowLength * yIndex;
+        chunks.push(chunk);
+    }
+    return chunks;
+};
+
 
 PacketHandler.prototype.resetPackets = function () {
-    this.masterPacket = [];
+    var id;
+    for (id in this.CHUNK_PACKETS) {
+        this.CHUNK_PACKETS[id] = [];
+    }
 };
 
 

@@ -41,7 +41,7 @@ function GameServer() {
 /** SERVER INIT METHODS **/
 GameServer.prototype.initChunks = function () {
     for (var i = 0; i < entityConfig.CHUNKS; i++) {
-        this.CHUNKS[i] = new Chunk(i,this);
+        this.CHUNKS[i] = new Chunk(i, this);
     }
 };
 
@@ -115,23 +115,37 @@ GameServer.prototype.initNewClients = function () {
             delete this.INIT_SOCKET_LIST[id];
         }
 
-
         if (!socket.verified) {
             socket.life -= 1;
-            console.log("LIFE LEFT: " + socket.life);
             if (socket.life === 0) {
                 console.log("DETECTED ROGUE CLIENT!");
                 socket.disconnect();
             }
         }
 
-
         if (socket.timer !== 0) {
             socket.timer -= 1;
         }
-        else if (socket.stage <= entityConfig.STAGES) {
-            this.packetHandler.sendInitPackets(socket);
-            socket.timer = 1;
+        else if (socket.stage <= 8) {
+            var rowLength = Math.sqrt(entityConfig.CHUNKS);
+            var chunk = socket.player.chunk;
+            var xIndex = socket.stage % 3 - 1;
+            var yIndex = Math.floor(socket.stage / 3) - 1;
+
+            while (!(chunk % rowLength + xIndex).between(0, rowLength - 1) ||
+            !(Math.floor(chunk / rowLength) + yIndex).between(0, rowLength - 1)) {
+                socket.stage ++;
+                if (socket.stage > 8) {
+                    return;
+                }
+                xIndex = socket.stage % 3 - 1;
+                yIndex = Math.floor(socket.stage / 3) - 1;
+            }
+            chunk += xIndex + rowLength * yIndex;
+            console.log("INITING CHUNK #" + chunk);
+            this.packetHandler.sendChunkInitPackets(socket, chunk);
+            socket.timer = 2;
+            socket.stage++;
         }
         else {
             delete this.INIT_SOCKET_LIST[id];
@@ -346,20 +360,22 @@ GameServer.prototype.start = function () {
         socket.stage = 0;
 
         this.SOCKET_LIST[socket.id] = socket;
-        this.INIT_SOCKET_LIST[socket.id] = socket;
+        this.packetHandler.sendInitPackets(socket);
 
         console.log("Client #" + socket.id + " has joined the server");
 
         socket.on("verify", function (data) {
             if (!socket.verified) {
-                console.log("VERIFIED BITCH");
+                console.log("VERIFIED CLIENT");
             }
             socket.verified = true;
         }.bind(this));
 
         socket.on('newPlayer', function (data) {
-            console.log("NEW PLAYER FOR SOCKET " + socket.id);
             player = this.createPlayer(socket, data);
+            socket.player = player;
+            console.log("PLAYER CHUNK IS: " + socket.player.chunk);
+            this.INIT_SOCKET_LIST[socket.id] = socket;
         }.bind(this));
 
         socket.on('newColor', function (data) {
@@ -522,6 +538,10 @@ Object.size = function (obj) {
         if (obj.hasOwnProperty(key)) size++;
     }
     return size;
+};
+
+Number.prototype.between = function (min, max) {
+    return this >= min && this <= max;
 };
 
 module.exports = GameServer;

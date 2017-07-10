@@ -145,7 +145,6 @@ function packetHandler(data) {
 }
 
 function addEntities(packet) {
-    console.log("ADDING OMG");
     if (!socket.verified) {
         socket.emit("verify", {});
         socket.verified = true;
@@ -159,7 +158,7 @@ function addEntities(packet) {
             array.push(list[packet.id]);
         }
     };
-
+    console.log(packet.class);
     switch (packet.class) {
         case "tileInfo":
             addEntity(packet, TILE_LIST, Tile);
@@ -194,6 +193,7 @@ function addEntities(packet) {
             break;
         case "selfId":
             selfId = packet.selfId;
+            console.log(selfId);
             break;
     }
 
