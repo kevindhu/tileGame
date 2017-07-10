@@ -19,9 +19,9 @@ function Laser(owner, target, gameServer) {
 
 
 Laser.prototype.init = function () {
+    this.updatePosition();
     this.gameServer.LASER_LIST[this.id] = this;
-    //TODO: add x,y for lasers lol
-    this.chunk = EntityFunctions.findChunk(gameServer, this);
+    this.chunk = EntityFunctions.findChunk(this.gameServer, this);
     this.gameServer.CHUNKS[this.chunk].LASER_LIST[this.id] = this;
     this.packetHandler.addLaserPackets(this);
 };
@@ -33,9 +33,16 @@ Laser.prototype.update = function () {
         this.onDelete();
         return;
     }
+    this.updatePosition();
     target.decreaseHealth(0.1);
     this.useSupply();
     this.checkStatus();
+};
+
+Laser.prototype.updatePosition = function () {
+    var owner = this.gameServer.CONTROLLER_LIST[this.owner];
+    this.x = owner.x;
+    this.y = owner.y;
 };
 
 

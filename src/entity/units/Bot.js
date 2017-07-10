@@ -123,7 +123,7 @@ Bot.prototype.getTarget = function () {
     }
     if (this.outofRange() && (this.enemy || this.manual)) {
         this.regroup();
-        return;
+        return null;
     }
 
     if (!this.manual) {
@@ -200,8 +200,8 @@ Bot.prototype.shootShard = function (player) {
 
 Bot.prototype.outofRange = function () {
     var player = this.gameServer.CONTROLLER_LIST[this.owner];
-    return Math.abs(player.x - this.x) > 1000 &&
-        Math.abs(player.y - this.y) > 1000
+    return Math.abs(player.x - this.x) > 500 &&
+        Math.abs(player.y - this.y) > 500
 };
 
 Bot.prototype.inRange = function (target) {

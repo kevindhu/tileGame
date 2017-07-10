@@ -50,7 +50,7 @@ PacketHandler.prototype.createChunkPacket = function (chunk, id) {
 
     populate(this.gameServer.CHUNKS[chunk].TILE_LIST, this.addTilePackets);
     populate(this.gameServer.CHUNKS[chunk].HOME_LIST, this.addHomePackets);
-    populate(this.gameServer.CHUNKS[chunk].FACTION_LIST, this.addFactionPackets);
+    populate(this.gameServer.FACTION_LIST, this.addFactionPackets);
 
     if (id) {
         initPacket.push({
@@ -83,7 +83,6 @@ PacketHandler.prototype.deleteChunkPacket = function (chunk) {
 
     populate(this.gameServer.CHUNKS[chunk].TILE_LIST, this.deleteTilePackets);
     populate(this.gameServer.CHUNKS[chunk].HOME_LIST, this.deleteHomePackets);
-    //populate(this.gameServer.CHUNKS[chunk].FACTION_LIST, this.deleteFactionPackets);
     //don't want to delete factions, they are still in the leaderboard!
 
     return deletePacket;
@@ -197,7 +196,7 @@ PacketHandler.prototype.addFactionPackets = function (faction, ifInit) {
         return info;
     }
     else {
-        this.CHUNK_PACKETS[faction.chunk].push(info);
+        this.masterPacket.push(info);
     }
 };
 
@@ -353,8 +352,6 @@ PacketHandler.prototype.deleteBracketPackets = function (player) {
 
 
 
-
-
 PacketHandler.prototype.deleteControllerPackets = function (controller, chunk) {
     var info = {
         master: "delete",
@@ -453,10 +450,10 @@ PacketHandler.prototype.sendPackets = function () {
                     socket.emit('updateEntities', this.deleteChunkPacket(id));
                 }
             }
+            socket.emit('updateEntities', this.masterPacket);
             var chunks = player.findNeighboringChunks();
             for (id in chunks) {
-                var packet = this.CHUNK_PACKETS[id];
-                socket.emit('updateEntities', packet);
+                socket.emit('updateEntities', this.CHUNK_PACKETS[id]);
             }
             socket.emit('drawScene', {});
         }
@@ -494,6 +491,7 @@ PacketHandler.prototype.resetPackets = function () {
     for (id in this.CHUNK_PACKETS) {
         this.CHUNK_PACKETS[id] = [];
     }
+    this.masterPacket = [];
 };
 
 

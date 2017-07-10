@@ -1,6 +1,5 @@
 const entityConfig = require('../entityConfig');
 const Arithmetic = require('../../modules/Arithmetic');
-var lerp = require('lerp');
 var EntityFunctions = require('../EntityFunctions');
 var Controller = require('./Controller');
 var Bot = require('./Bot');
@@ -47,6 +46,7 @@ SuperBot.prototype.shootLaser = function (player) {
         return new Laser(this, player, this.gameServer);
     }
 };
+
 
 
 

@@ -278,8 +278,8 @@ GameServer.prototype.checkCollisions = function () {
 
 GameServer.prototype.updateControllers = function () {
     for (var id in this.CONTROLLER_LIST) {
-        var player = this.CONTROLLER_LIST[id];
-        player.update();
+        var controller = this.CONTROLLER_LIST[id];
+        controller.update();
     }
 };
 

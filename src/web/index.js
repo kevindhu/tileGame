@@ -718,7 +718,7 @@ function lerp(a, b, ratio) {
 
 
 var keys = [];
-var scaleFactor = 1.5;
+var scaleFactor = 1;
 
 document.onkeydown = function (event) {
     keys[event.keyCode] = true;

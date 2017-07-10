@@ -93,7 +93,7 @@ Controller.prototype.checkCollisions = function () {
         this.gameServer.controllerTree.find(this.quadItem.bound, function (controller) {
             if (controller.faction !== this.faction) {
                 this.shootShard(controller);
-                //this.shootLaser(controller);
+                this.shootLaser(controller);
             }
             else if (controller.faction && controller.id !== this.id && this.xSpeed < 5 && this.ySpeed < 5) {
                 this.ricochet(controller);
