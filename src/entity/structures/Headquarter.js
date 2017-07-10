@@ -1,7 +1,7 @@
-const entityConfig = require('./entityConfig');
-const Arithmetic = require('../modules/Arithmetic');
+const entityConfig = require('../entityConfig');
+const Arithmetic = require('../../modules/Arithmetic');
 var Home = require('./Home');
-var EntityFunctions = require('./EntityFunctions');
+var EntityFunctions = require('../EntityFunctions');
 
 
 function Headquarter(faction, x, y, gameServer) {

@@ -1,5 +1,5 @@
-const entityConfig = require('./entityConfig');
-var EntityFunctions = require('./EntityFunctions');
+const entityConfig = require('../entityConfig');
+var EntityFunctions = require('../EntityFunctions');
 var lerp = require('lerp');
 
 function Shard(x, y, gameServer) {

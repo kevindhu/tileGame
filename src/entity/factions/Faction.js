@@ -1,12 +1,12 @@
-const entityConfig = require('./entityConfig');
-const Arithmetic = require('../modules/Arithmetic');
-var EntityFunctions = require('./EntityFunctions');
-var Player = require('./Player');
-var Bot = require('./Bot');
-var SuperBot = require("./SuperBot");
-var Headquarter = require('./Headquarter');
-var Tower = require('./Tower');
-var Sentinel = require('./Sentinel');
+const entityConfig = require('../entityConfig');
+const Arithmetic = require('../../modules/Arithmetic');
+var EntityFunctions = require('../EntityFunctions');
+var Player = require('../units/Player');
+var Bot = require('../units/Bot');
+var SuperBot = require("../units/SuperBot");
+var Headquarter = require('../structures/Headquarter');
+var Tower = require('../structures/Tower');
+var Sentinel = require('../structures/Sentinel');
 
 function Faction(name, gameServer) {
     this.id = Math.random();

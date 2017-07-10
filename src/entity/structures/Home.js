@@ -1,6 +1,6 @@
-const entityConfig = require('./entityConfig');
-const Arithmetic = require('../modules/Arithmetic');
-var EntityFunctions = require('./EntityFunctions');
+const entityConfig = require('../entityConfig');
+const Arithmetic = require('../../modules/Arithmetic');
+var EntityFunctions = require('../EntityFunctions');
 
 function Home(faction, x, y, gameServer) {
     this.gameServer = gameServer;

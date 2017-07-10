@@ -1,6 +1,6 @@
-const entityConfig = require('./entityConfig');
-const Arithmetic = require('../modules/Arithmetic');
-var EntityFunctions = require('./EntityFunctions');
+const entityConfig = require('../entityConfig');
+const Arithmetic = require('../../modules/Arithmetic');
+var EntityFunctions = require('../EntityFunctions');
 var Controller = require('./Controller');
 var lerp = require('lerp');
 
@@ -146,6 +146,8 @@ Player.prototype.update = function () {
 
 Player.prototype.updateMaxSpeed = function () {
     this.maxSpeed = 10 * Math.pow(0.9, this.shards.length);
+    this.maxXSpeed = this.maxSpeed;
+    this.maxYSpeed = this.maxSpeed;
 };
 
 
@@ -294,6 +296,9 @@ Player.prototype.reset = function () {
     this.xSpeed = 0;
     this.ySpeed = 0;
     this.health = 5;
+    this.stationary = false;
+    this.updateQuadItem();
+    console.log("UPDATED QUAD ITEM");
 };
 
 

@@ -1,5 +1,5 @@
-const entityConfig = require('./entityConfig');
-var EntityFunctions = require('./EntityFunctions');
+const entityConfig = require('../entityConfig');
+var EntityFunctions = require('../EntityFunctions');
 
 function Tile(x, y, gameServer) {
     this.gameServer = gameServer;

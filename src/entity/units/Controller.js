@@ -1,6 +1,6 @@
-const entityConfig = require('./entityConfig');
-var EntityFunctions = require('./EntityFunctions');
-const Arithmetic = require('../modules/Arithmetic');
+const entityConfig = require('../entityConfig');
+var EntityFunctions = require('../EntityFunctions');
+const Arithmetic = require('../../modules/Arithmetic');
 
 var lerp = require('lerp');
 
@@ -16,6 +16,7 @@ function Controller(id, faction, gameServer) {
     this.x = faction.x;
     this.y = faction.y;
     this.health = 5;
+    this.maxSpeed = 10;
     this.maxXSpeed = 10;
     this.maxYSpeed = 10;
     this.timer = 0;

@@ -1,9 +1,9 @@
 module.exports = {
-    Player: require('./Player'),
-    Tile: require('./Tile'),
-    Shard: require('./Shard'),
-    Headquarter: require('./Headquarter'),
-    Sentinel: require('./Sentinel'),
-    Tower: require('./Tower'),
-    Faction: require('./Faction')
+    Player: require('./units/Player'),
+    Tile: require('./terrain/Tile'),
+    Shard: require('./projectiles/Shard'),
+    Headquarter: require('./structures/Headquarter'),
+    Sentinel: require('./structures/Sentinel'),
+    Tower: require('./structures/Tower'),
+    Faction: require('./factions/Faction')
 };

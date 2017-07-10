@@ -1,9 +1,9 @@
-const entityConfig = require('./entityConfig');
-const Arithmetic = require('../modules/Arithmetic');
+const entityConfig = require('../entityConfig');
+const Arithmetic = require('../../modules/Arithmetic');
 var lerp = require('lerp');
-var EntityFunctions = require('./EntityFunctions');
+var EntityFunctions = require('../EntityFunctions');
 var Controller = require('./Controller');
-var Shard = require('./Shard');
+var Shard = require('../projectiles/Shard');
 
 function Bot(id, name, faction, gameServer, player) {
     Bot.super_.call(this, id, faction, gameServer);
@@ -79,12 +79,16 @@ Bot.prototype.updateControls = function () {
     }
     this.getTheta(target);
 
-    this.maxXSpeed = Math.abs(10 * Math.cos(this.theta));
-    this.maxYSpeed = Math.abs(10 * Math.sin(this.theta));
+    this.maxXSpeed = Math.abs(this.maxSpeed * Math.cos(this.theta));
+    this.maxYSpeed = Math.abs(this.maxSpeed * Math.sin(this.theta));
 
     if (this.inRange(target)) {
-        this.theta = 0;
-        return;
+        if (target.type === "Player") {
+            this.theta = 0;
+            return;
+        } else {
+            return;
+        }
     }
 
     if (target.x < this.x) {
@@ -126,8 +130,11 @@ Bot.prototype.getTarget = function () {
         if (this.enemy) {
             var enemy = this.gameServer.CONTROLLER_LIST[this.enemy];
             if (!enemy) {
-                this.regroup();
-                return;
+                enemy = this.gameServer.HOME_LIST[this.enemy];
+                if (!enemy) {
+                    this.regroup();
+                    return;
+                }
             }
             target = enemy;
         } else {
@@ -152,7 +159,9 @@ Bot.prototype.onDeath = function () {
 
 Bot.prototype.onDelete = function () {
     var player = this.gameServer.CONTROLLER_LIST[this.owner];
-    player.removeBot(this);
+    if (player) {
+        player.removeBot(this);
+    }
     Bot.super_.prototype.onDelete.apply(this);
 };
 

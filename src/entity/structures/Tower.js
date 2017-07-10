@@ -1,8 +1,8 @@
-const entityConfig = require('./entityConfig');
-const Arithmetic = require('../modules/Arithmetic');
-var EntityFunctions = require('./EntityFunctions');
+const entityConfig = require('../entityConfig');
+const Arithmetic = require('../../modules/Arithmetic');
+var EntityFunctions = require('../EntityFunctions');
 var Home = require('./Home');
-var Shard = require('./Shard');
+var Shard = require('../projectiles/Shard');
 
 function Tower(faction, x, y, gameServer, home) {
     Tower.super_.call(this, faction, x, y, gameServer);
