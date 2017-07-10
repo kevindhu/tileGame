@@ -123,6 +123,10 @@ GameServer.prototype.initNewClients = function () {
             }
         }
 
+        if (!socket.player) {
+            return;
+        }
+
         if (socket.timer !== 0) {
             socket.timer -= 1;
         }
@@ -142,7 +146,6 @@ GameServer.prototype.initNewClients = function () {
                 yIndex = Math.floor(socket.stage / 3) - 1;
             }
             chunk += xIndex + rowLength * yIndex;
-            console.log("INITING CHUNK #" + chunk);
             this.packetHandler.sendChunkInitPackets(socket, chunk);
             socket.timer = 2;
             socket.stage++;
@@ -360,6 +363,7 @@ GameServer.prototype.start = function () {
         socket.stage = 0;
 
         this.SOCKET_LIST[socket.id] = socket;
+        this.INIT_SOCKET_LIST[socket.id] = socket;
         this.packetHandler.sendInitPackets(socket);
 
         console.log("Client #" + socket.id + " has joined the server");
@@ -375,7 +379,6 @@ GameServer.prototype.start = function () {
             player = this.createPlayer(socket, data);
             socket.player = player;
             console.log("PLAYER CHUNK IS: " + socket.player.chunk);
-            this.INIT_SOCKET_LIST[socket.id] = socket;
         }.bind(this));
 
         socket.on('newColor', function (data) {

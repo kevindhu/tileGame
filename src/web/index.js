@@ -145,10 +145,6 @@ function packetHandler(data) {
 }
 
 function addEntities(packet) {
-    if (!socket.verified) {
-        socket.emit("verify", {});
-        socket.verified = true;
-    }
     var addEntity = function (packet, list, Entity, array) {
         if (!packet) {
             return;
@@ -158,7 +154,6 @@ function addEntities(packet) {
             array.push(list[packet.id]);
         }
     };
-    console.log(packet.class);
     switch (packet.class) {
         case "tileInfo":
             addEntity(packet, TILE_LIST, Tile);
@@ -193,7 +188,6 @@ function addEntities(packet) {
             break;
         case "selfId":
             selfId = packet.selfId;
-            console.log(selfId);
             break;
     }
 
@@ -319,6 +313,11 @@ function deleteEntities(packet) {
 }
 
 function addFactionstoUI(data) {
+    if (!socket.verified) {
+        console.log("VERIFIED");
+        socket.emit("verify", {});
+        socket.verified = true;
+    }
     var factions = document.getElementById('factions');
     var packet = data.factions;
 
@@ -428,7 +427,6 @@ function drawScene(data) {
             var shard = SHARD_LIST[id];
 
             if (inBounds(selfPlayer, shard.x, shard.y) && shard.visible) {
-                console.log("DRAWING SHARD");
                 ctx2.beginPath();
                 ctx2.fillStyle = "#008000";
                 if (shard.name !== null) {

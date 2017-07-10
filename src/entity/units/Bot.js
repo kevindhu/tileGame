@@ -83,39 +83,33 @@ Bot.prototype.updateControls = function () {
     this.maxYSpeed = Math.abs(this.maxSpeed * Math.sin(this.theta));
 
     if (this.inRange(target)) {
-        if (target.type === "Player") {
-            this.theta = 0;
-            return;
-        } else {
-            return;
+        switch (target.type) {
+            case "owner":
+            case "manual":
+                this.theta = 0;
+                break;
+            case "enemy":
+                this.theta = Math.random();
         }
+        return;
     }
 
-    if (target.x < this.x) {
-        this.pressingLeft = true;
-    }
-    else if (target.x > this.x) {
-        this.pressingRight = true;
-    }
-    if (target.y < this.y) {
-        this.pressingUp = true;
-    }
-    else if (target.y > this.y) {
-        this.pressingDown = true;
-    }
+    (target.object.x < this.x) ? this.pressingLeft = true : this.pressingRight = true;
+    (target.object.y < this.y) ? this.pressingUp = true : this.pressingDown = true;
 };
 
 
 Bot.prototype.getTheta = function (target) {
-    this.theta = Math.atan((this.y - target.y) / (this.x - target.x));
+    var object = target.object;
+    this.theta = Math.atan((this.y - object.y) / (this.x - object.x));
 
-    if (this.y - target.y > 0 && this.x - target.x > 0 || this.y - target.y < 0 && this.x - target.x > 0) {
+    if (this.y - object.y > 0 && this.x - object.x > 0 || this.y - object.y < 0 && this.x - object.x > 0) {
         this.theta += Math.PI;
     }
 };
 
 Bot.prototype.getTarget = function () {
-    var target;
+    var target = {};
     var player = this.gameServer.CONTROLLER_LIST[this.owner];
 
     if (!player) {
@@ -128,21 +122,28 @@ Bot.prototype.getTarget = function () {
 
     if (!this.manual) {
         if (this.enemy) {
-            var enemy = this.gameServer.CONTROLLER_LIST[this.enemy];
-            if (!enemy) {
-                enemy = this.gameServer.HOME_LIST[this.enemy];
-                if (!enemy) {
-                    this.regroup();
-                    return;
-                }
+            var enemy;
+            var controller = this.gameServer.CONTROLLER_LIST[this.enemy];
+            var home = this.gameServer.HOME_LIST[this.enemy];
+            if (controller) {
+                enemy = controller;
             }
-            target = enemy;
+            else if (home) {
+                enemy = home;
+            }
+            else {
+                this.regroup();
+                return;
+            }
+            target.object = enemy;
+            target.type = "enemy";
         } else {
-            target = player;
+            target.object = player;
+            target.type = "owner";
         }
     }
     else if (this.manualCoord) {
-        target = this.manualCoord;
+        target.object = this.manualCoord;
         target.type = "manual";
     }
     return target;
@@ -197,6 +198,15 @@ Bot.prototype.shootShard = function (player) {
     this.packetHandler.updateHomePackets(this);
 };
 
+Bot.prototype.inRange = function (target) {
+    var object = target.object;
+    if (target.type === "manual") {
+        return Math.abs(object.x - this.x) < 5 && Math.abs(object.y - this.y) < 5;
+    } else {
+        return Math.abs(object.x - this.x) < 100 && Math.abs(object.y - this.y) < 100;
+    }
+};
+
 
 Bot.prototype.outofRange = function () {
     var player = this.gameServer.CONTROLLER_LIST[this.owner];
@@ -204,13 +214,6 @@ Bot.prototype.outofRange = function () {
         Math.abs(player.y - this.y) > 500
 };
 
-Bot.prototype.inRange = function (target) {
-    if (target.type === "manual") {
-        return Math.abs(target.x - this.x) < 5 && Math.abs(target.y - this.y) < 5;
-    } else {
-        return Math.abs(target.x - this.x) < 100 && Math.abs(target.y - this.y) < 100;
-    }
-};
 
 function getName(name) {
     if (name === "") {

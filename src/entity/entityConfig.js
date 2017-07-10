@@ -5,21 +5,24 @@ var SHARDS = 0;
 var BORDER_WIDTH = 0;
 
 
-var medium = function () {
+
+var small = function () {
     CHUNKS = 1;
+    WIDTH = 2000;
+    TILES_INPUT = 60;
+    SHARDS = 35;
+    BORDER_WIDTH = 100;
+};
+
+
+var medium = function () {
+    CHUNKS = 4;
     WIDTH = 5000;
     TILES_INPUT = 1000;
     SHARDS = 200;
     BORDER_WIDTH = 300;
 };
 
-var small = function () {
-    CHUNKS = 4;
-    WIDTH = 2000;
-    TILES_INPUT = 60;
-    SHARDS = 35;
-    BORDER_WIDTH = 100;
-};
 
 var large  = function () {
     CHUNKS = 9;
@@ -38,7 +41,7 @@ var superLarge  = function () {
     BORDER_WIDTH = 50000;
 };
 
-small();
+superLarge();
 
 
 var tileRoot = Math.floor(Math.sqrt(TILES_INPUT));

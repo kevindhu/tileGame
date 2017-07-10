@@ -18,7 +18,6 @@ function findChunk(gameServer, entity) {
 
     var xIndex = Math.floor(entity.x / chunkWidth);
     var yIndex = Math.floor(entity.y / chunkWidth);
-
     return row * yIndex + xIndex;
 }
 

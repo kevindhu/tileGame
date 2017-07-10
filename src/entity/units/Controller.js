@@ -23,8 +23,8 @@ function Controller(id, faction, gameServer) {
     this.xSpeed = 0;
     this.ySpeed = 0;
     this.theta = 0;
-    this.selected = false;
 
+    this.selected = false;
     this.pressingRight = false;
     this.pressingLeft = false;
     this.pressingUp = false;
@@ -77,7 +77,6 @@ Controller.prototype.update = function () {
     this.packetHandler.updateControllersPackets(this);
 };
 
-
 Controller.prototype.updateChunk = function () {
     var newChunk = EntityFunctions.findChunk(this.gameServer, this);
     if (newChunk !== this.chunk) {
@@ -103,7 +102,6 @@ Controller.prototype.checkCollisions = function () {
     }
 };
 
-
 Controller.prototype.ricochet = function (controller) {
     var xAdd = Math.abs(controller.x - this.x) / 20;
     var yAdd = Math.abs(controller.y - this.y) / 20;
@@ -115,23 +113,12 @@ Controller.prototype.ricochet = function (controller) {
         yAdd = 4;
     }
 
-
     var xImpulse = (4 - xAdd)/10;
     var yImpulse = (4 - yAdd)/10;
 
-    if (controller.x > this.x) {
-        this.xSpeed -= xImpulse;
-    }
-    else {
-        this.xSpeed += xImpulse;
-    }
 
-    if (controller.y > this.y) {
-        this.ySpeed -= yImpulse;
-    }
-    else {
-        this.ySpeed += yImpulse;
-    }
+    this.xSpeed += (controller.x > this.x) ? -xImpulse: xImpulse;
+    this.ySpeed += (controller.y > this.y) ? -yImpulse: yImpulse;
 };
 
 Controller.prototype.shootLaser = function () {
