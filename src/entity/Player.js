@@ -206,6 +206,48 @@ Player.prototype.increaseHealth = function (amount) {
 };
 
 
+Player.prototype.updateChunk = function () {
+    var oldChunks = this.findNeighboringChunks();
+    Player.super_.prototype.updateChunk.apply(this);
+    var newChunks = this.findNeighboringChunks();
+    this.chunkAdd = this.findChunkDifference(newChunks, oldChunks);
+    this.chunkDelete = this.findChunkDifference(oldChunks, newChunks);
+};
+
+Player.prototype.findChunkDifference = function (chunks1, chunks2) {
+    var delta = {};
+    for (var id in chunks1) {
+        if (chunks2[id] === undefined) {
+            delta[id] = id;
+        }
+    }
+    return delta;
+};
+
+Player.prototype.findNeighboringChunks = function () {
+    var rowLength = Math.sqrt(entityConfig.CHUNKS);
+    var chunks = {};
+
+    for (var i = 0; i < 9; i++) {
+        var chunk = this.chunk;
+        var xIndex = i % 3 - 1;
+        var yIndex = Math.floor(i / 3) - 1;
+
+        while (!(chunk % rowLength + xIndex).between(0, rowLength - 1) ||
+        !(Math.floor(chunk / rowLength) + yIndex).between(0, rowLength - 1)) {
+            i++;
+            if (i > 8) {
+                return chunks;
+            }
+            xIndex = i % 3 - 1;
+            yIndex = Math.floor(i / 3) - 1;
+        }
+        chunk += xIndex + rowLength * yIndex;
+        chunks[chunk] = chunk;
+    }
+    return chunks;
+};
+
 Player.prototype.dropRandomShard = function () {
     var shard = this.getRandomShard();
     this.dropShard(shard);

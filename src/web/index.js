@@ -293,6 +293,8 @@ function deleteEntities(packet) {
         case "homeInfo":
             deleteEntity(packet, HOME_LIST);
             break;
+        case "tileInfo":
+            deleteEntity(packet, TILE_LIST);
         case "factionInfo":
             deleteEntity(packet, FACTION_LIST, FACTION_ARRAY);
             break;
@@ -426,6 +428,7 @@ function drawScene(data) {
             var shard = SHARD_LIST[id];
 
             if (inBounds(selfPlayer, shard.x, shard.y) && shard.visible) {
+                console.log("DRAWING SHARD");
                 ctx2.beginPath();
                 ctx2.fillStyle = "#008000";
                 if (shard.name !== null) {
@@ -678,7 +681,7 @@ function drawScene(data) {
 
     translateScene();
     ctx.drawImage(c2, 0, 0);
-    //drawMiniMap();
+    drawMiniMap();
     drawScoreBoard();
 }
 

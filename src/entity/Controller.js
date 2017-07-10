@@ -80,6 +80,7 @@ Controller.prototype.update = function () {
 Controller.prototype.updateChunk = function () {
     var newChunk = EntityFunctions.findChunk(this.gameServer, this);
     if (newChunk !== this.chunk) {
+        console.log("NEW CHUNK!");
         delete this.gameServer.CHUNKS[this.chunk].CONTROLLER_LIST[this.id];
         this.chunk = newChunk;
         this.gameServer.CHUNKS[this.chunk].CONTROLLER_LIST[this.id] = this;
@@ -91,7 +92,7 @@ Controller.prototype.checkCollisions = function () {
         this.gameServer.controllerTree.find(this.quadItem.bound, function (controller) {
             if (controller.faction !== this.faction) {
                 this.shootShard(controller);
-                this.shootLaser(controller);
+                //this.shootLaser(controller);
             }
             else if (controller.faction && controller.id !== this.id && this.xSpeed < 5 && this.ySpeed < 5) {
                 this.ricochet(controller);

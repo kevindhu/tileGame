@@ -64,6 +64,34 @@ PacketHandler.prototype.createChunkPacket = function (chunk, id) {
 };
 
 
+PacketHandler.prototype.deleteChunkPacket = function (chunk) {
+    var deletePacket = [];
+    var populate = function (list, call) {
+        var count = 0;
+        for (var i in list) {
+            var entity = list[i];
+            deletePacket.push(call(entity, true));
+            count++;
+        }
+    };
+
+    populate(this.gameServer.CHUNKS[chunk].CONTROLLER_LIST, this.deleteControllerPackets);
+
+    populate(this.gameServer.CHUNKS[chunk].HOME_SHARD_LIST, this.deleteShardPackets);
+    populate(this.gameServer.CHUNKS[chunk].PLAYER_SHARD_LIST, this.deleteShardPackets);
+    populate(this.gameServer.CHUNKS[chunk].STATIC_SHARD_LIST, this.deleteShardPackets);
+
+    populate(this.gameServer.CHUNKS[chunk].TILE_LIST, this.deleteTilePackets);
+    populate(this.gameServer.CHUNKS[chunk].HOME_LIST, this.deleteHomePackets);
+    //populate(this.gameServer.CHUNKS[chunk].FACTION_LIST, this.deleteFactionPackets);
+    //don't want to delete factions, they are still in the leaderboard!
+
+    return deletePacket;
+
+};
+
+
+
 PacketHandler.prototype.addShardAnimationPackets = function (shard) {
     this.CHUNK_PACKETS[shard.chunk].push(
         {
@@ -321,54 +349,112 @@ PacketHandler.prototype.deleteBracketPackets = function (player) {
     });
 };
 
-PacketHandler.prototype.deleteControllerPackets = function (controller) {
-    this.CHUNK_PACKETS[controller.chunk].push({
+
+
+
+
+
+PacketHandler.prototype.deleteControllerPackets = function (controller, chunk) {
+    var info = {
         master: "delete",
         class: "controllerInfo",
         id: controller.id
-    });
+    };
+    if (chunk) {
+        return info;
+    } else {
+        this.CHUNK_PACKETS[controller.chunk].push(info);
+    }
 };
 
-PacketHandler.prototype.deleteLaserPackets = function (laser) {
-    this.CHUNK_PACKETS[laser.chunk].push({
+PacketHandler.prototype.deleteLaserPackets = function (laser, chunk) {
+    var info = {
         master: "delete",
         class: "laserInfo",
         id: laser.id
-    });
+    };
+    if (chunk) {
+        return info;
+    } else {
+        this.CHUNK_PACKETS[laser.chunk].push(info);
+    }
 };
 
-PacketHandler.prototype.deleteFactionPackets = function (faction) {
-    this.CHUNK_PACKETS[faction.chunk].push({
+PacketHandler.prototype.deleteFactionPackets = function (faction, chunk) {
+    var info = {
         master: "delete",
         class: "factionInfo",
         id: faction.id
-    });
+    };
+    if (chunk) {
+        return info;
+    } else {
+        this.CHUNK_PACKETS[faction.chunk].push(info);
+    }
 };
 
-PacketHandler.prototype.deleteHomePackets = function (home) {
-    this.CHUNK_PACKETS[home.chunk].push({
+PacketHandler.prototype.deleteTilePackets = function (tile, chunk) {
+    var info = {
+        master: "delete",
+        class: "tileInfo",
+        id: tile.id
+    };
+    if (chunk) {
+        return info;
+    }
+    this.CHUNK_PACKETS[tile.chunk].push(info);
+};
+
+PacketHandler.prototype.deleteHomePackets = function (home, chunk) {
+    var info = {
         master: "delete",
         class: "homeInfo",
         id: home.id
-    });
+    };
+    if (chunk) {
+        return info;
+    }
+    this.CHUNK_PACKETS[home.chunk].push(info);
 };
 
-PacketHandler.prototype.deleteShardPackets = function (shard) {
-    this.CHUNK_PACKETS[shard.chunk].push({
+PacketHandler.prototype.deleteShardPackets = function (shard, chunk) {
+    var info = {
         master: "delete",
         class: "shardInfo",
         id: shard.id
-    });
+    };
+    if (chunk) {
+        return info;
+    }
+    this.CHUNK_PACKETS[shard.chunk].push(info);
 };
 
 
+
+
+
+
+
 PacketHandler.prototype.sendPackets = function () {
+    var id;
     for (var index in this.gameServer.SOCKET_LIST) {
         var socket = this.gameServer.SOCKET_LIST[index];
         if (socket.player) {
-            var chunks = this.findChunks(socket);
-            for (var i = 0; i < chunks.length; i++) {
-                var packet = this.CHUNK_PACKETS[chunks[i]];
+            var player = socket.player;
+
+            if (player.chunkAdd) {
+                for (id in player.chunkAdd) {
+                    socket.emit('updateEntities',this.createChunkPacket(id));
+                }
+            }
+            if (player.chunkDelete) {
+                for (id in player.chunkDelete) {
+                    socket.emit('updateEntities', this.deleteChunkPacket(id));
+                }
+            }
+            var chunks = player.findNeighboringChunks();
+            for (id in chunks) {
+                var packet = this.CHUNK_PACKETS[id];
                 socket.emit('updateEntities', packet);
             }
             socket.emit('drawScene', {});

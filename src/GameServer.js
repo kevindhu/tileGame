@@ -290,7 +290,7 @@ GameServer.prototype.updateProjectiles = function () {
 
 GameServer.prototype.updateShards = function () {
     var id, shard;
-    this.spawnShards();
+    //this.spawnShards();
     this.checkCollisions();
 
     for (id in this.PLAYER_SHARD_LIST) {

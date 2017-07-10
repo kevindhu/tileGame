@@ -3,7 +3,6 @@ var WIDTH = 0;
 var TILES_INPUT = 0;
 var SHARDS = 0;
 var BORDER_WIDTH = 0;
-var STAGES = 0;
 
 
 var medium = function () {
@@ -12,7 +11,6 @@ var medium = function () {
     TILES_INPUT = 1000;
     SHARDS = 200;
     BORDER_WIDTH = 300;
-    STAGES = 3;
 };
 
 var small = function () {
@@ -21,7 +19,6 @@ var small = function () {
     TILES_INPUT = 40;
     SHARDS = 35;
     BORDER_WIDTH = 100;
-    STAGES = 2;
 };
 
 var large  = function () {
@@ -30,17 +27,15 @@ var large  = function () {
     TILES_INPUT = 2000;
     SHARDS = 200;
     BORDER_WIDTH = 1000;
-    STAGES = 100;
 };
 
 
 var superLarge  = function () {
-    CHUNKS = 100;
-    WIDTH = 100000;
-    TILES_INPUT = 200000;
-    SHARDS = 10000;
-    BORDER_WIDTH = 5000;
-    STAGES = 500;
+    CHUNKS = 2500;
+    WIDTH = 400000;
+    TILES_INPUT = 1000000;
+    SHARDS = 100000;
+    BORDER_WIDTH = 50000;
 };
 
 large();
@@ -57,5 +52,4 @@ module.exports = {
     SHARDS: SHARDS,
     SHARD_WIDTH: SHARD_WIDTH,
     BORDER_WIDTH: BORDER_WIDTH,
-    STAGES: STAGES
 };
