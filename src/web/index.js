@@ -463,6 +463,7 @@ function drawScene(data) {
             var home = HOME_LIST[id];
             if (home.neighbors) {
                 for (var i = 0; i < home.neighbors.length; i++) {
+                    console.log(home.neighbors)
                     var neighbor = HOME_LIST[home.neighbors[i]];
                     ctx2.moveTo(home.x, home.y);
                     ctx2.strokeStyle = "#912381";

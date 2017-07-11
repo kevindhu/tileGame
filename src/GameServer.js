@@ -222,7 +222,10 @@ GameServer.prototype.checkControllerCollision = function (controller) {
                     oldOwner.removeShard(shard);
                 }
                 if (shard.name === null) {
-                    this.packetHandler.deleteUIPackets(controller, "home info");
+                    var home = this.HOME_LIST[controller.viewing];
+                    if (home) {
+                        home.removeViewer(controller);
+                    }
                     this.packetHandler.addUIPackets(controller, null, "name shard");
                 }
                 controller.addShard(shard);
@@ -245,7 +248,7 @@ GameServer.prototype.checkControllerCollision = function (controller) {
                     else {
                         controller.timer = 15;
                     }
-                    this.packetHandler.addUIPackets(controller, home, "home info");
+                    home.addViewer(controller);
                 }
             }
         }.bind(this));
@@ -370,7 +373,7 @@ GameServer.prototype.start = function () {
 
         socket.on("verify", function (data) {
             if (!socket.verified) {
-                console.log("VERIFIED CLIENT");
+                console.log("Verified Client #" + socket.id);
             }
             socket.verified = true;
         }.bind(this));
@@ -430,9 +433,9 @@ GameServer.prototype.start = function () {
                         faction.addTower(player);
                     }
                     break;
-                case 66:
+                case 78:
                     if (data.state) {
-                        faction.addBot(player);
+                        faction.addBarracks(player);
                     }
                     break;
                 case 67:
@@ -475,15 +478,10 @@ GameServer.prototype.start = function () {
             this.findBots(boundary);
         }.bind(this));
 
-        socket.on('removeHomeShard', function (data) {
-            var shard = this.HOME_SHARD_LIST[data.id];
-            var HQ = shard.home;
-
-            HQ.removeShard(shard);
-            player.addShard(shard);
-            this.packetHandler.addUIPackets(player, HQ, "home info");
+        socket.on('makeBot', function (data) {
+            var barracks = this.HOME_LIST[data.home];
+            barracks.makeBot(player, data.shard);
         }.bind(this));
-
         socket.on('disconnect', function () {
             console.log("Client #" + socket.id + " has left the server");
             if (player) {

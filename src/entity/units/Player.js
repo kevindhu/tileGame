@@ -14,11 +14,20 @@ function Player(id, name, faction, gameServer) {
     this.selectedCount = 0;
     this.bots = [];
     this.shards = [];
+    this.viewing = null;
     this.init();
 }
 
 EntityFunctions.inherits(Player, Controller);
 
+
+Player.prototype.addView = function (home) {
+    this.viewing = home.id;
+};
+
+Player.prototype.removeView = function () {
+    this.viewing = null;
+};
 
 Player.prototype.onDelete = function () {
     this.dropAllShards();
@@ -136,7 +145,7 @@ Player.prototype.update = function () {
     var faction = this.gameServer.FACTION_LIST[this.faction];
 
     if (tile) {
-        if (this.shards.length > 1 && faction.isNeighboringFaction(tile) && !tile.faction) {
+        if (this.shards.length > 1 && faction.isNeighboringFaction(tile,2) && !tile.faction) {
             this.packetHandler.addBracketPackets(this, tile);
         }
     }

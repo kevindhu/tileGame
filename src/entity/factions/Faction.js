@@ -7,6 +7,7 @@ var SuperBot = require("../units/SuperBot");
 var Headquarter = require('../structures/Headquarter');
 var Tower = require('../structures/Tower');
 var Sentinel = require('../structures/Sentinel');
+var Barracks = require('../structures/Barracks');
 
 function Faction(name, gameServer) {
     this.id = Math.random();
@@ -60,8 +61,8 @@ Faction.prototype.addPlayer = function (id, playerName) {
 };
 
 
-Faction.prototype.addBot = function (player) {
-    var bot = new Bot(Math.random(), "shitBot", this, this.gameServer, player);
+Faction.prototype.addBot = function (home, player, shard) {
+    var bot = new Bot(shard.name, player, home, this, this.gameServer);
     player.addBot(bot);
     this.controllers.push(bot.id);
     return bot;
@@ -86,13 +87,16 @@ Faction.prototype.addHeadquarter = function () {
 Faction.prototype.addSentinel = function (player) {
     var tile = this.gameServer.getEntityTile(player);
     if (tile !== null && !tile.home &&
-        Math.abs(tile.x + tile.length / 2 - player.x) < (tile.length ) &&
-        Math.abs(tile.y + tile.length / 2 - player.y) < (tile.length ) &&
+        Math.abs(tile.x + tile.length / 2 - player.x) < (tile.length) &&
+        Math.abs(tile.y + tile.length / 2 - player.y) < (tile.length) &&
         player.shards.length >= 2) {
 
-        if (this.isNeighboringFaction(tile)) {
+        var neighbor = this.isNeighboringFaction(tile, 2);
+        if (neighbor) {
             var sentinel = new Sentinel(this, tile.x + tile.length / 2,
                 tile.y + tile.length / 2, this.gameServer);
+            sentinel.addNeighbor(neighbor);
+            neighbor.addNeighbor(sentinel);
 
             for (var i = player.shards.length - 1; i >= 0; i--) {
                 var shard = this.gameServer.PLAYER_SHARD_LIST[player.shards[i]];
@@ -109,17 +113,32 @@ Faction.prototype.addSentinel = function (player) {
 };
 
 
+Faction.prototype.addBarracks = function (player) {
+    var tile = this.gameServer.getEntityTile(player);
+    var parent = this.isNeighboringFaction(tile, 1);
+    if (parent &&
+        player.shards.length >= 1) {
+        var barracks = new Barracks(this, player.x, player.y, this.gameServer, parent);
+        parent.addChild(barracks);
+
+        for (var i = player.shards.length - 1; i >= 0; i--) {
+            var shard = this.gameServer.PLAYER_SHARD_LIST[player.shards[i]];
+            player.removeShard(shard);
+            barracks.addShard(shard);
+        }
+    }
+};
+
+
+
+
 Faction.prototype.addTower = function (player) {
     var tile = this.gameServer.getEntityTile(player);
-    if (tile !== null &&
-        tile.home !== null &&
-        tile.faction === player.faction &&
+    var parent = this.isNeighboringFaction(tile, 1);
+    if (parent &&
         player.shards.length >= 2) {
-
-        var home = this.gameServer.HOME_LIST[tile.home];
-        var tower = new Tower(this, player.x, player.y, this.gameServer, home);
-
-        home.addChild(tower);
+        var tower = new Tower(this, player.x, player.y, this.gameServer, parent);
+        parent.addChild(tower);
 
         for (var i = player.shards.length - 1; i >= 0; i--) {
             var shard = this.gameServer.PLAYER_SHARD_LIST[player.shards[i]];
@@ -156,33 +175,28 @@ Faction.prototype.onDelete = function () {
 };
 
 
-
-Faction.prototype.isNeighboringFaction = function (tile) {
+Faction.prototype.isNeighboringFaction = function (tile, range) { //has to neighbor sentinel or HQ
     var check;
     var coords = {};
 
     if (tile.faction === this.faction) { //not neighbor, but is part of the faction
         return false;
     }
-    for (var i = -1; i <= 1; i++) {
-        coords['x'] = tile.x + tile.length / 2 + tile.length * i;
-        coords['y'] = tile.y + tile.length / 2;
-        check = this.gameServer.getEntityTile(coords);
-        if (check && check.faction === this.name) {
-            return true;
-        }
-    }
-    for (var j = -1; j <= 1; j++) {
-        coords['x'] = tile.x + tile.length / 2;
-        coords['y'] = tile.y + tile.length / 2 + tile.length * j;
-        check = this.gameServer.getEntityTile(coords);
-        if (check && check.faction === this.name) {
-            return true;
+    for (var i = -range; i <= range; i++) {
+        for (var j = -range; j <= range; j++) {
+            coords['x'] = tile.x + tile.length / 2 + tile.length * i;
+            coords['y'] = tile.y + tile.length / 2 + tile.length * j;
+            check = this.gameServer.getEntityTile(coords);
+            if (check && check.faction === this.name) {
+                var home = this.gameServer.HOME_LIST[check.home];
+                if (home.type === "Headquarter" || home.type === "Sentinel") {
+                    return home;
+                }
+            }
         }
     }
     return false;
 };
-
 
 
 module.exports = Faction;

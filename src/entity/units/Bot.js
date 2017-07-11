@@ -5,14 +5,16 @@ var EntityFunctions = require('../EntityFunctions');
 var Controller = require('./Controller');
 var Shard = require('../projectiles/Shard');
 
-function Bot(id, name, faction, gameServer, player) {
-    Bot.super_.call(this, id, faction, gameServer);
+function Bot(name, player, home, faction, gameServer) {
     this.id = Math.random();
+    Bot.super_.call(this, this.id, faction, gameServer);
     this.name = getName(name);
     this.owner = player.id;
     this.radius = 40;
     this.emptyShard = null;
     this.type = "Bot";
+    this.x = home.x;
+    this.y = home.y;
     this.timer = 0;
     this.theta = 0;
     this.manual = false;

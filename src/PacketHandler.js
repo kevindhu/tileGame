@@ -173,7 +173,6 @@ PacketHandler.prototype.addControllerPackets = function (controller, ifInit) {
         selected: controller.selected,
         theta: controller.theta
     };
-    console.log(controller.type);
     if (ifInit) {
         return info;
     }

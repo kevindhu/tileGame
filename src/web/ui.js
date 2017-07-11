@@ -139,12 +139,16 @@ function addShards(list, home) {
         var shard = SHARD_LIST[home.shards[i]];
         entry.id = shard.id;
 
-        (function (_id) {
-            entry.addEventListener("click", function () {
-                //socket.emit("removeHomeShard", {id: _id});
-            });
-        })(entry.id);
-
+        if (home.type === "Barracks") {
+            (function (_id) {
+                entry.addEventListener("click", function () {
+                    socket.emit('makeBot', {
+                        shard: _id,
+                        home: home.id
+                    });
+                });
+            })(entry.id);
+        }
 
         entry.appendChild(document.createTextNode(shard.name));
         list.appendChild(entry);

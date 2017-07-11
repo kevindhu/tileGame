@@ -17,6 +17,7 @@ function Home(faction, x, y, gameServer) {
 
     this.children = [];
     this.shards = [];
+    this.viewers = [];
 
     this.level = 0;
     this.radius = 10;
@@ -25,6 +26,11 @@ function Home(faction, x, y, gameServer) {
 }
 
 Home.prototype.mainInit = function () {
+    this.gameServer.HOME_LIST[this.id] = this;
+    this.chunk = EntityFunctions.findChunk(this.gameServer, this);
+    this.gameServer.CHUNKS[this.chunk].HOME_LIST[this.id] = this;
+    this.addQuadItem();
+
     var tile = this.gameServer.getEntityTile(this);
     if (!tile.hasHome()) {
         tile.setHome(this);
@@ -32,16 +38,11 @@ Home.prototype.mainInit = function () {
         this.packetHandler.updateTilesPackets(tile);
     }
     if (this.type !== "Tower") {
-        this.addAllNeighbors();
+        //this.addAllNeighbors();
     }
-    this.gameServer.HOME_LIST[this.id] = this;
-    this.chunk = EntityFunctions.findChunk(this.gameServer, this);
-    this.gameServer.CHUNKS[this.chunk].HOME_LIST[this.id] = this;
-    this.addQuadItem();
     this.gameServer.homeTree.insert(this.quadItem);
     this.packetHandler.addHomePackets(this);
 };
-
 
 Home.prototype.addAllNeighbors = function () {
     var coords = {};
@@ -55,9 +56,11 @@ Home.prototype.addAllNeighbors = function () {
                 coords['y'] = tile.y + tile.length / 2 + tile.length * j;
                 check = this.gameServer.getEntityTile(coords);
                 if (check && check.faction === this.faction) {
-                    this.neighbors.push(check.home);
                     var neighbor = this.gameServer.HOME_LIST[check.home];
-                    neighbor.addNeighbor(this);
+                    if (neighbor && neighbor.id !== this.id) {
+                        this.addNeighbor(neighbor);
+                        neighbor.addNeighbor(this);
+                    }
                 }
             }
         }
@@ -81,7 +84,6 @@ Home.prototype.removeChild = function (home) {
     var index = this.children.indexOf(home.id);
     this.children.splice(index, 1);
 };
-
 
 
 Home.prototype.removeNeighbor = function (home) {
@@ -129,6 +131,19 @@ Home.prototype.getRandomShard = function () {
 };
 
 
+Home.prototype.addViewer = function (player) {
+    this.viewers.push(player.id);
+    player.addView(this);
+    this.packetHandler.addUIPackets(player, this, "home info");
+};
+
+Home.prototype.removeViewer = function (player) {
+    var index = this.viewers.indexOf(player.id);
+    this.viewers.splice(index, 1);
+    player.removeView();
+    this.packetHandler.deleteUIPackets(player, "home info");
+};
+
 Home.prototype.shootShard = function (player) {
 };
 
@@ -138,6 +153,14 @@ Home.prototype.removeShard = function (shard) {
     this.shards.splice(index, 1);
     this.updateLevel();
     this.packetHandler.updateHomePackets(this);
+    this.updateUIs();
+};
+
+Home.prototype.updateUIs = function () {
+    for (var i = 0; i<this.viewers.length; i++) {
+        var player = this.gameServer.CONTROLLER_LIST[this.viewers[i]];
+        this.packetHandler.addUIPackets(player, this, "home info");
+    }
 };
 
 Home.prototype.getSupply = function () {
@@ -191,6 +214,7 @@ Home.prototype.addShard = function (shard) {
     this.updateLevel();
     this.packetHandler.addHomeAnimationPackets(this);
     this.packetHandler.updateHomePackets(this);
+    this.updateUIs();
 };
 
 Home.prototype.addChild = function (home) {
@@ -223,7 +247,6 @@ Home.prototype.updateLevel = function () {
         this.updateQuadItem();
     }
 };
-
 
 
 Home.prototype.addQuadItem = function () {

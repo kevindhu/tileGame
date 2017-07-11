@@ -41,7 +41,7 @@ var superLarge  = function () {
     BORDER_WIDTH = 50000;
 };
 
-superLarge();
+small();
 
 
 var tileRoot = Math.floor(Math.sqrt(TILES_INPUT));
