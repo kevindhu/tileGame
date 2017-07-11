@@ -58,7 +58,8 @@ Controller.prototype.update = function () {
     if (this.laserTimer && this.laserTimer > 0) {
         this.laserTimer -= 1;
     }
-    this.checkCollisions();
+    this.findEnemies();
+    this.findFriendlies();
     this.updatePosition();
     this.updateQuadItem();
     this.updateChunk();
@@ -87,32 +88,44 @@ Controller.prototype.updateChunk = function () {
     }
 };
 
-Controller.prototype.checkCollisions = function () {
+Controller.prototype.findEnemies = function () {
     if (this.type === "Bot") {
-        this.gameServer.controllerTree.find(this.quadItem.bound, function (controller) {
+        var shootRange = {
+            minx: this.x - 100,
+            miny: this.y - 100,
+            maxx: this.x + 100,
+            maxy: this.y + 100
+        };
+        this.gameServer.controllerTree.find(shootRange, function (controller) {
             if (controller.faction !== this.faction) {
                 this.shootShard(controller);
-                this.shootLaser(controller);
+                //this.shootLaser(controller);
             }
-            else if (controller.faction && controller.id !== this.id && this.xSpeed < 5 && this.ySpeed < 5) {
-                this.ricochet(controller);
-            }
-
         }.bind(this))
     }
 };
 
+
+Controller.prototype.findFriendlies = function () {
+    if (this.type === "Bot") {
+        this.gameServer.controllerTree.find(this.quadItem.bound, function (controller) {
+            if (controller.faction && controller.id !== this.id && this.xSpeed < 5 && this.ySpeed < 5) {
+                this.ricochet(controller);
+            }
+        }.bind(this))
+    }
+};
+
+
 Controller.prototype.ricochet = function (controller) {
     var xAdd = Math.abs(controller.x - this.x) / 20;
     var yAdd = Math.abs(controller.y - this.y) / 20;
-
     if (xAdd < 0) {
         xAdd = 4;
     }
     if (yAdd < 0) {
         yAdd = 4;
     }
-
     var xImpulse = (4 - xAdd)/10;
     var yImpulse = (4 - yAdd)/10;
 

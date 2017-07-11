@@ -45,6 +45,7 @@ SuperBot.prototype.shootLaser = function (player) {
         this.laserTimer = 100;
         return new Laser(this, player, this.gameServer);
     }
+    this.recoil();
 };
 
 

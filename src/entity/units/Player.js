@@ -191,7 +191,8 @@ Player.prototype.removeShard = function (shard) {
 
 Player.prototype.transformEmptyShard = function (name) {
     if (this.emptyShard !== null) {
-        this.gameServer.PLAYER_SHARD_LIST[this.emptyShard].setName(name);
+        var shard = this.gameServer.PLAYER_SHARD_LIST[this.emptyShard];
+        shard.setName(name);
         this.emptyShard = null;
     }
 };

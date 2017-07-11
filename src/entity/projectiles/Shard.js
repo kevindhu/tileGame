@@ -63,6 +63,7 @@ Shard.prototype.limbo = function () {
 
 Shard.prototype.setName = function (name) {
     this.name = name;
+    this.packetHandler.updateShardsPackets(this);
 };
 
 Shard.prototype.setHome = function (home) {

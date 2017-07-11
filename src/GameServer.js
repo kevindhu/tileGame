@@ -202,10 +202,10 @@ GameServer.prototype.checkShardCollision = function (shard) {
 
 GameServer.prototype.checkControllerCollision = function (controller) {
     var controllerBound = {
-        minx: controller.x - entityConfig.SHARD_WIDTH,
-        miny: controller.y - entityConfig.SHARD_WIDTH,
-        maxx: controller.x + entityConfig.SHARD_WIDTH,
-        maxy: controller.y + entityConfig.SHARD_WIDTH
+        minx: controller.x - 50,
+        miny: controller.y - 50,
+        maxx: controller.x + 50,
+        maxy: controller.y + 50
     };
 
     if (controller.type === "Player") {

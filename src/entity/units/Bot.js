@@ -4,6 +4,7 @@ var lerp = require('lerp');
 var EntityFunctions = require('../EntityFunctions');
 var Controller = require('./Controller');
 var Shard = require('../projectiles/Shard');
+var Laser = require('../projectiles/Laser');
 
 function Bot(name, player, home, faction, gameServer) {
     this.id = Math.random();
@@ -17,6 +18,7 @@ function Bot(name, player, home, faction, gameServer) {
     this.y = home.y;
     this.timer = 0;
     this.theta = 0;
+    this.laserTimer = 0;
     this.manual = false;
     this.manualCoord = null;
     this.enemy = null;
@@ -70,6 +72,7 @@ Bot.prototype.removeEnemy = function () {
 Bot.prototype.updateControls = function () {
     var target;
 
+    this.canShoot = false;
     this.pressingUp = false;
     this.pressingDown = false;
     this.pressingLeft = false;
@@ -79,10 +82,6 @@ Bot.prototype.updateControls = function () {
     if (!target) {
         return;
     }
-    this.getTheta(target.object);
-
-    this.maxXSpeed = Math.abs(this.maxSpeed * Math.cos(this.theta));
-    this.maxYSpeed = Math.abs(this.maxSpeed * Math.sin(this.theta));
 
     if (this.inRange(target)) {
         switch (target.type) {
@@ -93,8 +92,16 @@ Bot.prototype.updateControls = function () {
             case "enemy":
                 //this.theta = Math.random();
         }
+        this.canShoot = true;
         return;
     }
+
+    console.log("NOT STATIC");
+
+    this.getTheta(target.object);
+
+    this.maxXSpeed = Math.abs(this.maxSpeed * Math.cos(this.theta));
+    this.maxYSpeed = Math.abs(this.maxSpeed * Math.sin(this.theta));
 
     (target.object.x < this.x) ? this.pressingLeft = true : this.pressingRight = true;
     (target.object.y < this.y) ? this.pressingUp = true : this.pressingDown = true;
@@ -155,7 +162,24 @@ Bot.prototype.updatePosition = function () {
 };
 
 Bot.prototype.onDeath = function () {
+    this.createCorpse();
     this.onDelete();
+};
+
+Bot.prototype.createCorpse = function () {
+    var home = this.gameServer.HOME_LIST[this.home];
+    var corpse =  new Shard(this.x, this.y, this.gameServer);
+    corpse.setName("deadBoi");
+};
+
+
+Bot.prototype.shootLaser = function (player) {
+    if (this.laserTimer <= 0) {
+        this.laserTimer = 100;
+        return new Laser(this, player, this.gameServer);
+    }
+    this.getTheta(player);
+    this.recoil(0.1);
 };
 
 Bot.prototype.onDelete = function () {
@@ -184,13 +208,16 @@ Bot.prototype.addShard = function (shard) {
 
 
 Bot.prototype.shootShard = function (player) {
+    if (!this.canShoot) {
+        return;
+    }
     if (this.timer !== 0) {
         this.timer--;
         return;
     }
     this.timer = 20;
     this.getTheta(player);
-    this.recoil();
+    this.recoil(2);
 
     var shardClone = new Shard(this.x, this.y, this.gameServer);
     shardClone.setName("defaultBullet");
@@ -201,16 +228,16 @@ Bot.prototype.shootShard = function (player) {
 };
 
 
-Bot.prototype.recoil = function () {
-    this.xSpeed -= 2 * Math.abs(this.maxSpeed * Math.cos(this.theta));
-    this.ySpeed -= 2 * Math.abs(this.maxSpeed * Math.sin(this.theta));
+Bot.prototype.recoil = function (magnitude) {
+    this.xSpeed -= magnitude * this.maxSpeed * Math.cos(this.theta);
+    this.ySpeed -= magnitude * this.maxSpeed * Math.sin(this.theta);
 };
 
 
 Bot.prototype.inRange = function (target) {
     var object = target.object;
     if (target.type === "manual") {
-        return Math.abs(object.x - this.x) < 5 && Math.abs(object.y - this.y) < 5;
+        return Math.abs(object.x - this.x) < 10 && Math.abs(object.y - this.y) < 10;
     } else {
         return Math.abs(object.x - this.x) < 100 && Math.abs(object.y - this.y) < 100;
     }
@@ -230,6 +257,8 @@ function getName(name) {
     }
     return name;
 }
+
+
 
 
 module.exports = Bot;
