@@ -31,6 +31,7 @@ Home.prototype.mainInit = function () {
     this.gameServer.CHUNKS[this.chunk].HOME_LIST[this.id] = this;
     this.addQuadItem();
 
+    this.polluteNeighbors();
     var tile = this.gameServer.getEntityTile(this);
     if (!tile.hasHome()) {
         tile.setHome(this);
@@ -44,25 +45,24 @@ Home.prototype.mainInit = function () {
     this.packetHandler.addHomePackets(this);
 };
 
-Home.prototype.addAllNeighbors = function () {
+Home.prototype.polluteNeighbors = function () {
     var coords = {};
-    var tile = this.gameServer.TILE_LIST[this.tile];
+    var tile = this.gameServer.getEntityTile(this);
     var check;
 
     for (var i = -1; i <= 1; i++) {
         for (var j = -1; j <= 1; j++) {
-            if (!(i === 0 && j === 0)) {
-                coords['x'] = tile.x + tile.length / 2 + tile.length * i;
-                coords['y'] = tile.y + tile.length / 2 + tile.length * j;
-                check = this.gameServer.getEntityTile(coords);
-                if (check && check.faction === this.faction) {
-                    var neighbor = this.gameServer.HOME_LIST[check.home];
-                    if (neighbor && neighbor.id !== this.id) {
-                        this.addNeighbor(neighbor);
-                        neighbor.addNeighbor(this);
-                    }
-                }
+            coords['x'] = tile.x + tile.length / 2 + tile.length * i;
+            coords['y'] = tile.y + tile.length / 2 + tile.length * j;
+            check = this.gameServer.getEntityTile(coords);
+            if (check && !check.faction) {
+                check.setColor({
+                    r: 123,
+                    g: 123,
+                    b: 512
+                });
             }
+
         }
     }
 };
@@ -74,6 +74,7 @@ Home.prototype.removeAllNeighbors = function () {
         neighbor.removeNeighbor(this);
     }
 };
+
 
 Home.prototype.addNeighbor = function (home) {
     this.neighbors.push(home.id);
@@ -157,7 +158,7 @@ Home.prototype.removeShard = function (shard) {
 };
 
 Home.prototype.updateUIs = function () {
-    for (var i = 0; i<this.viewers.length; i++) {
+    for (var i = 0; i < this.viewers.length; i++) {
         var player = this.gameServer.CONTROLLER_LIST[this.viewers[i]];
         this.packetHandler.addUIPackets(player, this, "home info");
     }
