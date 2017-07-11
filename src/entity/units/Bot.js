@@ -79,7 +79,7 @@ Bot.prototype.updateControls = function () {
     if (!target) {
         return;
     }
-    this.getTheta(target);
+    this.getTheta(target.object);
 
     this.maxXSpeed = Math.abs(this.maxSpeed * Math.cos(this.theta));
     this.maxYSpeed = Math.abs(this.maxSpeed * Math.sin(this.theta));
@@ -91,7 +91,7 @@ Bot.prototype.updateControls = function () {
                 this.theta = 0;
                 break;
             case "enemy":
-                this.theta = Math.random();
+                //this.theta = Math.random();
         }
         return;
     }
@@ -102,10 +102,8 @@ Bot.prototype.updateControls = function () {
 
 
 Bot.prototype.getTheta = function (target) {
-    var object = target.object;
-    this.theta = Math.atan((this.y - object.y) / (this.x - object.x));
-
-    if (this.y - object.y > 0 && this.x - object.x > 0 || this.y - object.y < 0 && this.x - object.x > 0) {
+    this.theta = Math.atan((this.y - target.y) / (this.x - target.x));
+    if (this.y - target.y > 0 && this.x - target.x > 0 || this.y - target.y < 0 && this.x - target.x > 0) {
         this.theta += Math.PI;
     }
 };
@@ -191,14 +189,23 @@ Bot.prototype.shootShard = function (player) {
         return;
     }
     this.timer = 20;
+    this.getTheta(player);
+    this.recoil();
 
     var shardClone = new Shard(this.x, this.y, this.gameServer);
-    shardClone.setName("ass");
+    shardClone.setName("defaultBullet");
     shardClone.becomeHomeShooting(this, (player.x - this.x) / 4,
         (player.y - this.y) / 4, true);
 
     this.packetHandler.updateHomePackets(this);
 };
+
+
+Bot.prototype.recoil = function () {
+    this.xSpeed -= 2 * Math.abs(this.maxSpeed * Math.cos(this.theta));
+    this.ySpeed -= 2 * Math.abs(this.maxSpeed * Math.sin(this.theta));
+};
+
 
 Bot.prototype.inRange = function (target) {
     var object = target.object;

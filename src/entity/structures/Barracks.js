@@ -63,6 +63,9 @@ Barracks.prototype.addBigQuadItem = function () {
 Barracks.prototype.makeBot = function (player, id) {
     if (this.getSupply() > 0) {
         var shard = this.gameServer.HOME_SHARD_LIST[id];
+        if (!shard) {
+            return;
+        }
         shard.useSupply();
         if (shard.supply === 0) {
             this.removeShard(shard);

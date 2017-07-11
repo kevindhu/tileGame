@@ -438,11 +438,6 @@ GameServer.prototype.start = function () {
                         faction.addBarracks(player);
                     }
                     break;
-                case 67:
-                    if (data.state) {
-                        faction.addSuperBot(player);
-                    }
-                    break;
                 case 86:
                     if (data.state) {
                         {
