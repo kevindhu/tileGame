@@ -1,5 +1,7 @@
-document.documentElement.style.overflow = 'hidden';  // firefox, chrome
-document.body.scroll = "no";
+$(document).ready(function () {
+    document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+    document.body.scroll = "no";
+});
 
 var canvas = document.getElementById("bigCanvas");
 canvas.style.visibility = "hidden";
@@ -7,7 +9,6 @@ var nameButton = document.getElementById("nameSubmit");
 var playerNameInput = document.getElementById("playerNameInput");
 var factionNameInput = document.getElementById("factionNameInput");
 var playerNamer = document.getElementById("player_namer");
-
 var selectedShards = [];
 
 playerNamer.style.display = "block";
@@ -81,6 +82,15 @@ function openHomeUI(home) {
     var buildBaseButton = document.getElementById('build_base');
     var shardsList = document.getElementById('shards_list');
     var colorPicker = document.getElementById('color_picker');
+    var buildHome = function () {
+        console.log(home.id);
+        socket.emit('buildHome', {
+            home: home.id,
+            shards: selectedShards
+        })
+    };
+
+    selectedShards = [];
 
     homeLevel.innerHTML = "";
     homeHealth.innerHTML = "";
@@ -97,13 +107,13 @@ function openHomeUI(home) {
     homeType.innerHTML = home.type;
 
     if (home.shards.length !== 0) {
+        var buildBaseButtonNew = buildBaseButton.cloneNode(true);
+        buildBaseButton.parentNode.replaceChild(buildBaseButtonNew, buildBaseButton);
+        buildBaseButton = buildBaseButtonNew;
+
         buildBaseButton.style.visibility = "visible";
-        buildBaseButton.addEventListener('click', function () {
-            socket.emit('buildHome', {
-                home: home.id,
-                shards: selectedShards
-            })
-        });
+        buildBaseButton.addEventListener('click',buildHome)
+
     }
     else {
         buildBaseButton.style.visibility = "hidden";
@@ -113,6 +123,7 @@ function openHomeUI(home) {
     addColorPicker(colorPicker, home);
 
 }
+
 
 function closeUI(action) {
     var shardNamer = document.getElementById('shard_namer');
@@ -144,7 +155,6 @@ function sendShardName() {
 
 function addShards(list, home) {
     list.innerHTML = "";
-    selectedShards = [];
     for (var i = 0; i < home.shards.length; i++) {
         var entry = document.createElement('li');
         var shard = SHARD_LIST[home.shards[i]];
@@ -163,7 +173,6 @@ function addShards(list, home) {
         else {
             (function (_id) {
                 entry.addEventListener("click", function () {
-                    console.log("ADDING " + _id);
                     selectedShards.push(_id);
                 });
             })(entry.id);
