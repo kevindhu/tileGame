@@ -202,15 +202,15 @@ GameServer.prototype.checkShardCollision = function (shard) {
 
 GameServer.prototype.checkControllerCollision = function (controller) {
     var controllerBound = {
-        minx: controller.x - 50,
-        miny: controller.y - 50,
-        maxx: controller.x + 50,
-        maxy: controller.y + 50
+        minx: controller.x - controller.radius,
+        miny: controller.y - controller.radius,
+        maxx: controller.x + controller.radius,
+        maxy: controller.y + controller.radius
     };
 
     if (controller.type === "Player") {
         //player + static/player shard collision
-        this.shardTree.find(controllerBound, function (shard) {
+            this.shardTree.find(controllerBound, function (shard) {
             if (controller.faction !== shard.faction && shard.timer <= 0) {
                 if (controller.emptyShard !== null) {
                     controller.transformEmptyShard("unnamed");
@@ -296,7 +296,7 @@ GameServer.prototype.updateProjectiles = function () {
 
 GameServer.prototype.updateShards = function () {
     var id, shard;
-    //this.spawnShards();
+    this.spawnShards();
     this.checkCollisions();
 
     for (id in this.PLAYER_SHARD_LIST) {
@@ -477,6 +477,19 @@ GameServer.prototype.start = function () {
             var barracks = this.HOME_LIST[data.home];
             barracks.makeBot(player, data.shard);
         }.bind(this));
+
+        socket.on('buildHome', function (data) {
+            var home = this.HOME_LIST[data.home];
+            var shard;
+            for (var i = 0; i<data.shards.length; i++) {
+                shard = this.HOME_SHARD_LIST[data.shards[i]];
+                if (shard) {
+                    home.buildBase(shard);
+                }
+            }
+        }.bind(this));
+
+
         socket.on('disconnect', function () {
             console.log("Client #" + socket.id + " has left the server");
             if (player) {

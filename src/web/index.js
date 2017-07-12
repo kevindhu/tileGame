@@ -1,20 +1,19 @@
-var canvas = document.getElementById("bigCanvas");
-var c2 = document.getElementById("draftCanvas");
-var c3 = document.getElementById("c3");
-var c4 = document.getElementById("c4");
+var mainCanvas = document.getElementById("bigCanvas");
+var draftCanvas = document.getElementById("draftCanvas");
+var mMap = document.getElementById("mMap");
+var mMapRot = document.getElementById("mMapRot");
 
+draftCanvas.style.display = "none";
+mMap.style.display = "none";
+mMapRot.style.display = "none";
 
-c2.style.display = "none";
-c3.style.display = "none";
-c4.style.display = "none";
+draftCanvas.width = mainCanvas.width;
+draftCanvas.height = mainCanvas.height;
 
-c2.width = canvas.width;
-c2.height = canvas.height;
-
-var ctx = canvas.getContext("2d");
-var ctx2 = c2.getContext("2d");
-var ctx3 = c3.getContext("2d");
-var ctx4 = c4.getContext("2d");
+var mainCtx = mainCanvas.getContext("2d");
+var draftCtx = draftCanvas.getContext("2d");
+var mMapCtx = mMap.getContext("2d");
+var mMapCtxRot = mMapRot.getContext("2d");
 
 var socket = io();
 socket.verified = false;
@@ -87,6 +86,7 @@ var Home = function (homeInfo) {
     this.type = homeInfo.type;
     this.radius = homeInfo.radius;
     this.shards = homeInfo.shards;
+    this.power = homeInfo.power;
     this.level = homeInfo.level;
     this.hasColor = homeInfo.hasColor;
     this.health = homeInfo.health;
@@ -98,10 +98,10 @@ var Arrow = function (x, y) {
     this.postX = x;
     this.postY = y;
     this.deltaX = function () {
-        return this.postX - canvas.width / 2;
+        return this.postX - mainCanvas.width / 2;
     };
     this.deltaY = function () {
-        return this.postY - canvas.height / 2;
+        return this.postY - mainCanvas.height / 2;
     }
 };
 var Bracket = function (bracketInfo) {
@@ -216,6 +216,7 @@ function updateEntities(packet) {
         home.shards = homeInfo.shards;
         home.level = homeInfo.level;
         home.radius = homeInfo.radius;
+        home.power = homeInfo.power;
         home.health = homeInfo.health;
         home.hasColor = homeInfo.hasColor;
         home.neighbors = homeInfo.neighbors;
@@ -346,29 +347,29 @@ function drawScene(data) {
     }
 
     var inBounds = function (player, x, y) {
-        return x < (player.x + canvas.width) && x > (player.x - 5 / 4 * canvas.width)
-            && y < (player.y + canvas.width) && y > (player.y - 5 / 4 * canvas.width);
+        return x < (player.x + mainCanvas.width) && x > (player.x - 5 / 4 * mainCanvas.width)
+            && y < (player.y + mainCanvas.width) && y > (player.y - 5 / 4 * mainCanvas.width);
     };
 
     var drawControllers = function () {
-        ctx2.font = "20px Arial";
-        ctx2.fillStyle = "#000000";
+        draftCtx.font = "20px Arial";
+        draftCtx.fillStyle = "#000000";
         for (var id in CONTROLLER_LIST) {
             var controller = CONTROLLER_LIST[id], i;
-            ctx2.beginPath();
+            draftCtx.beginPath();
 
             //draw player object
             if (controller.type === "Player") {
                 var radius = 30;
-                ctx2.moveTo(controller.x + radius, controller.y);
+                draftCtx.moveTo(controller.x + radius, controller.y);
                 for (i = 0.3; i <= 2 * Math.PI - 0.4; i += 0.4) {
                     theta = i + getRandom(0, 1) / 7;
                     x = radius * Math.cos(theta);
                     y = radius * Math.sin(theta);
-                    ctx2.lineTo(controller.x + x, controller.y + y);
+                    draftCtx.lineTo(controller.x + x, controller.y + y);
                 }
-                ctx2.lineTo(controller.x + radius, controller.y);
-                ctx2.fill();
+                draftCtx.lineTo(controller.x + radius, controller.y);
+                draftCtx.fill();
             } else { //bot
                 var x, y, theta, startX, startY;
                 var smallRadius = 12;
@@ -377,25 +378,25 @@ function drawScene(data) {
                 theta = controller.theta;
                 startX = bigRadius * Math.cos(theta);
                 startY = bigRadius * Math.sin(theta);
-                ctx2.lineTo(controller.x + startX, controller.y + startY);
+                draftCtx.lineTo(controller.x + startX, controller.y + startY);
                 for (i = 1; i <= 2; i++) {
                     theta = 2 * Math.PI / 3 * i + controller.theta + getRandom(0, 1) / 8;
                     x = smallRadius * Math.cos(theta);
                     y = smallRadius * Math.sin(theta);
-                    ctx2.lineTo(controller.x + x, controller.y + y);
+                    draftCtx.lineTo(controller.x + x, controller.y + y);
                 }
                 theta = controller.theta;
-                ctx2.lineTo(controller.x + startX, controller.y + startY);
-                ctx2.fill();
+                draftCtx.lineTo(controller.x + startX, controller.y + startY);
+                draftCtx.fill();
             }
 
-            ctx2.fillText(controller.name, controller.x, controller.y + 30);
-            ctx2.fillRect(controller.x - controller.health * 10 / 2, controller.y + 10,
+            draftCtx.fillText(controller.name, controller.x, controller.y + 30);
+            draftCtx.fillRect(controller.x - controller.health * 10 / 2, controller.y + 10,
                 controller.health * 10, 10);
             if (controller.selected && controller.owner === selfPlayer.id) {
-                ctx2.lineWidth = 5;
-                ctx2.strokeStyle = "#1d55af";
-                ctx2.stroke();
+                draftCtx.lineWidth = 5;
+                draftCtx.strokeStyle = "#1d55af";
+                draftCtx.stroke();
             }
         }
     };
@@ -411,12 +412,12 @@ function drawScene(data) {
                         b: Math.round(getRandom(200, 212))
                     };
                 }
-                ctx2.fillStyle = "rgb(" +
+                draftCtx.fillStyle = "rgb(" +
                     tile.color.r + "," +
                     tile.color.g + "," +
                     tile.color.b +
                     ")";
-                ctx2.fillRect(tile.x, tile.y, tile.length, tile.length);
+                draftCtx.fillRect(tile.x, tile.y, tile.length, tile.length);
             }
         }
     };
@@ -427,15 +428,15 @@ function drawScene(data) {
             var shard = SHARD_LIST[id];
 
             if (inBounds(selfPlayer, shard.x, shard.y) && shard.visible) {
-                ctx2.beginPath();
-                ctx2.fillStyle = "#008000";
+                draftCtx.beginPath();
+                draftCtx.fillStyle = "#008000";
                 if (shard.name !== null) {
-                    ctx2.font = "30px Arial";
-                    ctx2.fillText(shard.name, shard.x, shard.y);
+                    draftCtx.font = "30px Arial";
+                    draftCtx.fillText(shard.name, shard.x, shard.y);
                 }
-                ctx2.arc(shard.x, shard.y, 5, 0, 2 * Math.PI, false);
-                ctx2.fill();
-                ctx2.closePath();
+                draftCtx.arc(shard.x, shard.y, 5, 0, 2 * Math.PI, false);
+                draftCtx.fill();
+                draftCtx.closePath();
             }
         }
     };
@@ -447,12 +448,12 @@ function drawScene(data) {
             target = CONTROLLER_LIST[laser.target];
             owner = CONTROLLER_LIST[laser.owner];
             if (target && owner && inBounds(selfPlayer, owner.x, owner.y)) {
-                ctx2.beginPath();
-                ctx2.moveTo(owner.x, owner.y);
-                ctx2.strokeStyle = "#912222";
-                ctx2.lineWidth = 10;
-                ctx2.lineTo(target.x, target.y);
-                ctx2.stroke();
+                draftCtx.beginPath();
+                draftCtx.moveTo(owner.x, owner.y);
+                draftCtx.strokeStyle = "#912222";
+                draftCtx.lineWidth = 10;
+                draftCtx.lineTo(target.x, target.y);
+                draftCtx.stroke();
             }
         }
     };
@@ -465,11 +466,11 @@ function drawScene(data) {
                 for (var i = 0; i < home.neighbors.length; i++) {
                     console.log(home.neighbors)
                     var neighbor = HOME_LIST[home.neighbors[i]];
-                    ctx2.moveTo(home.x, home.y);
-                    ctx2.strokeStyle = "#912381";
-                    ctx2.lineWidth = 10;
-                    ctx2.lineTo(neighbor.x, neighbor.y);
-                    ctx2.stroke();
+                    draftCtx.moveTo(home.x, home.y);
+                    draftCtx.strokeStyle = "#912381";
+                    draftCtx.lineWidth = 10;
+                    draftCtx.lineTo(neighbor.x, neighbor.y);
+                    draftCtx.stroke();
                 }
             }
         }
@@ -479,57 +480,57 @@ function drawScene(data) {
         for (var id in HOME_LIST) {
             var home = HOME_LIST[id];
 
-            ctx2.beginPath();
+            draftCtx.beginPath();
             if (home.neighbors.length >= 4) {
-                ctx2.fillStyle = "#4169e1";
+                draftCtx.fillStyle = "#4169e1";
             } else {
-                ctx2.fillStyle = "#003290";
+                draftCtx.fillStyle = "#003290";
             }
-            ctx2.strokeStyle = "rgba(255,30, 1, 0.1)";
-            ctx2.lineWidth = 20;
+            draftCtx.strokeStyle = "rgba(255,30, 1, 0.1)";
+            draftCtx.lineWidth = 20;
 
-            ctx2.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
-            ctx2.fill();
-            ctx2.stroke();
+            draftCtx.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
+            draftCtx.fill();
+            draftCtx.stroke();
 
             if (home.owner !== null) {
-                ctx2.fillText(home.shards.length, home.x, home.y + 40);
+                draftCtx.fillText(home.shards.length, home.x, home.y + 40);
             }
-            ctx2.closePath();
+            draftCtx.closePath();
         }
     };
 
     var drawFactions = function () {
         for (var id in FACTION_LIST) {
             var faction = FACTION_LIST[id];
-            ctx2.font = faction.size * 30 + "px Arial";
-            ctx2.textAlign = "center";
-            ctx2.fillText(faction.name, faction.x, faction.y);
+            draftCtx.font = faction.size * 30 + "px Arial";
+            draftCtx.textAlign = "center";
+            draftCtx.fillText(faction.name, faction.x, faction.y);
         }
     };
 
     var drawBracket = function () {
         if (BRACKET) {
-            ctx2.fillStyle = "rgba(100,211,211,0.6)";
-            ctx2.fillRect(BRACKET.x, BRACKET.y, BRACKET.length, BRACKET.length);
+            draftCtx.fillStyle = "rgba(100,211,211,0.6)";
+            draftCtx.fillRect(BRACKET.x, BRACKET.y, BRACKET.length, BRACKET.length);
         }
     };
 
     var drawArrow = function () {
         if (ARROW && ARROW.postX) {
-            ctx2.beginPath();
-            ctx2.strokeStyle = "#521522";
+            draftCtx.beginPath();
+            draftCtx.strokeStyle = "#521522";
 
-            var preX = selfPlayer.x + (ARROW.preX - c2.width / 2) / scaleFactor;
-            var preY = selfPlayer.y + (ARROW.preY - c2.height / 2) / scaleFactor;
+            var preX = selfPlayer.x + (ARROW.preX - draftCanvas.width / 2) / scaleFactor;
+            var preY = selfPlayer.y + (ARROW.preY - draftCanvas.height / 2) / scaleFactor;
 
-            var postX = selfPlayer.x + (ARROW.postX - c2.width / 2) / scaleFactor;
-            var postY = selfPlayer.y + (ARROW.postY - c2.height / 2) / scaleFactor;
+            var postX = selfPlayer.x + (ARROW.postX - draftCanvas.width / 2) / scaleFactor;
+            var postY = selfPlayer.y + (ARROW.postY - draftCanvas.height / 2) / scaleFactor;
 
-            ctx2.fillRect(preX, preY, postX - preX, postY - preY);
+            draftCtx.fillRect(preX, preY, postX - preX, postY - preY);
 
-            ctx2.arc(postX, postY, 3, 0, 2 * Math.PI, true);
-            ctx2.stroke();
+            draftCtx.arc(postX, postY, 3, 0, 2 * Math.PI, true);
+            draftCtx.stroke();
         }
     };
 
@@ -542,12 +543,12 @@ function drawScene(data) {
                 if (!home) {
                     return;
                 }
-                ctx2.beginPath();
-                ctx2.lineWidth = 3 * animation.timer;
-                ctx2.strokeStyle = "#012CCC";
-                ctx2.arc(home.x, home.y, home.radius, 0, animation.timer / 1.2, true);
-                ctx2.stroke();
-                ctx2.closePath();
+                draftCtx.beginPath();
+                draftCtx.lineWidth = 3 * animation.timer;
+                draftCtx.strokeStyle = "#012CCC";
+                draftCtx.arc(home.x, home.y, home.radius, 0, animation.timer / 1.2, true);
+                draftCtx.stroke();
+                draftCtx.closePath();
             }
 
             if (animation.type === "removeShard") {
@@ -556,25 +557,25 @@ function drawScene(data) {
                     delete ANIMATION_LIST[id];
                     return;
                 }
-                ctx2.beginPath();
-                ctx2.lineWidth = 15 - animation.timer;
-                ctx2.strokeStyle = "rgba(255, 0, 0, " + animation.timer * 10 / 100 + ")";
-                ctx2.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
-                ctx2.stroke();
-                ctx2.closePath();
+                draftCtx.beginPath();
+                draftCtx.lineWidth = 15 - animation.timer;
+                draftCtx.strokeStyle = "rgba(255, 0, 0, " + animation.timer * 10 / 100 + ")";
+                draftCtx.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
+                draftCtx.stroke();
+                draftCtx.closePath();
             }
 
             if (animation.type === "shardDeath") {
-                ctx2.font = 60 - animation.timer + "px Arial";
-                ctx2.save();
-                ctx2.translate(animation.x, animation.y);
-                ctx2.rotate(-Math.PI / 50 * animation.theta);
-                ctx2.textAlign = "center";
-                ctx2.fillStyle = "rgba(0, 0, 0, " + animation.timer * 10 / 100 + ")";
-                ctx2.fillText(animation.name, 0, 15);
-                ctx2.restore();
+                draftCtx.font = 60 - animation.timer + "px Arial";
+                draftCtx.save();
+                draftCtx.translate(animation.x, animation.y);
+                draftCtx.rotate(-Math.PI / 50 * animation.theta);
+                draftCtx.textAlign = "center";
+                draftCtx.fillStyle = "rgba(0, 0, 0, " + animation.timer * 10 / 100 + ")";
+                draftCtx.fillText(animation.name, 0, 15);
+                draftCtx.restore();
 
-                ctx2.fillStyle = "#000000";
+                draftCtx.fillStyle = "#000000";
                 animation.theta = lerp(animation.theta, 0, 0.08);
                 animation.x = lerp(animation.x, animation.endX, 0.1);
                 animation.y = lerp(animation.y, animation.endY, 0.1);
@@ -589,16 +590,16 @@ function drawScene(data) {
 
 
     var translateScene = function () {
-        ctx2.setTransform(1, 0, 0, 1, 0, 0);
+        draftCtx.setTransform(1, 0, 0, 1, 0, 0);
         if (keys[17] && keys[38] && scaleFactor < 2) {
             scaleFactor += 0.2;
         }
         if (keys[17] && keys[40] && scaleFactor > 0.7) {
             scaleFactor -= 0.2;
         }
-        ctx2.translate(canvas.width / 2, canvas.height / 2);
-        ctx2.scale(scaleFactor, scaleFactor);
-        ctx2.translate(-selfPlayer.x, -selfPlayer.y);
+        draftCtx.translate(mainCanvas.width / 2, mainCanvas.height / 2);
+        draftCtx.scale(scaleFactor, scaleFactor);
+        draftCtx.translate(-selfPlayer.x, -selfPlayer.y);
     };
 
     var drawMiniMap = function () {
@@ -607,7 +608,7 @@ function drawScene(data) {
             if (tileLength === 0 || !selfPlayer) {
                 return;
             }
-            var imgData = ctx.createImageData(tileLength, tileLength);
+            var imgData = mainCtx.createImageData(tileLength, tileLength);
             var tile;
             var tileRGB;
             var i = 0;
@@ -633,17 +634,17 @@ function drawScene(data) {
                 imgData.data[i + 3] = 255;
                 i += 4;
             }
-            imgData = scaleImageData(imgData, 2, ctx);
+            imgData = scaleImageData(imgData, 2, mainCtx);
 
-            ctx3.putImageData(imgData, 0, 0);
+            mMapCtx.putImageData(imgData, 0, 0);
 
-            ctx4.rotate(90 * Math.PI / 180);
-            ctx4.scale(1, -1);
-            ctx4.drawImage(c3, 0, 0);
-            ctx4.scale(1, -1);
-            ctx4.rotate(270 * Math.PI / 180);
+            mMapCtxRot.rotate(90 * Math.PI / 180);
+            mMapCtxRot.scale(1, -1);
+            mMapCtxRot.drawImage(mMap, 0, 0);
+            mMapCtxRot.scale(1, -1);
+            mMapCtxRot.rotate(270 * Math.PI / 180);
 
-            serverMap = c4;
+            serverMap = mMapRot;
             mapTimer = 25;
         }
 
@@ -651,21 +652,21 @@ function drawScene(data) {
             mapTimer -= 1;
         }
 
-        ctx.drawImage(serverMap, 100, 400);
+        mainCtx.drawImage(serverMap, 100, 400);
     };
 
 
     var drawScoreBoard = function () {
         for (var i = FACTION_ARRAY.length - 1; i >= 0; i--) {
             var faction = FACTION_ARRAY[i];
-            ctx.font = "30px Arial";
-            ctx.fillText(faction.name, canvas.width * 3 / 4, 10 + (FACTION_ARRAY.length - i) * 30);
+            mainCtx.font = "30px Arial";
+            mainCtx.fillText(faction.name, mainCanvas.width * 3 / 4, 10 + (FACTION_ARRAY.length - i) * 30);
         }
     };
 
-    ctx.clearRect(0, 0, 11000, 11000);
-    ctx2.clearRect(0, 0, 11000, 11000);
-    ctx3.clearRect(0, 0, 500, 500);
+    mainCtx.clearRect(0, 0, 11000, 11000);
+    draftCtx.clearRect(0, 0, 11000, 11000);
+    mMapCtx.clearRect(0, 0, 500, 500);
     drawTiles();
     drawControllers();
     drawShards();
@@ -679,7 +680,7 @@ function drawScene(data) {
     drawArrow();
 
     translateScene();
-    ctx.drawImage(c2, 0, 0);
+    mainCtx.drawImage(draftCanvas, 0, 0);
     drawMiniMap();
     drawScoreBoard();
 }
@@ -690,9 +691,9 @@ function factionSort(a, b) {
 }
 
 
-function scaleImageData(imageData, scale, ctx) {
-    var scaled = ctx.createImageData(imageData.width * scale, imageData.height * scale);
-    var subLine = ctx.createImageData(scale, 1).data;
+function scaleImageData(imageData, scale, mainCtx) {
+    var scaled = mainCtx.createImageData(imageData.width * scale, imageData.height * scale);
+    var subLine = mainCtx.createImageData(scale, 1).data;
     for (var row = 0; row < imageData.height; row++) {
         for (var col = 0; col < imageData.width; col++) {
             var sourcePixel = imageData.data.subarray(
@@ -730,12 +731,12 @@ document.onkeyup = function (event) {
 };
 
 
-canvas.addEventListener("mousedown", function (event) {
+mainCanvas.addEventListener("mousedown", function (event) {
     if (event.button === 2) {
         rightClick = true;
     } else if (CONTROLLER_LIST[selfId]) {
-        ARROW = new Arrow(event.x / canvas.offsetWidth * 1000,
-            event.y / canvas.offsetHeight * 500);
+        ARROW = new Arrow(event.x / mainCanvas.offsetWidth * 1000,
+            event.y / mainCanvas.offsetHeight * 500);
     }
 });
 
@@ -744,15 +745,15 @@ document.addEventListener('contextmenu', function (e) {
     e.preventDefault();
 }, false);
 
-canvas.addEventListener("mouseup", function (event) {
+mainCanvas.addEventListener("mouseup", function (event) {
     if (!rightClick) {
-        ARROW.postX = event.x / canvas.offsetWidth * 1000;
-        ARROW.postY = event.y / canvas.offsetHeight * 500;
+        ARROW.postX = event.x / mainCanvas.offsetWidth * 1000;
+        ARROW.postY = event.y / mainCanvas.offsetHeight * 500;
 
-        var minX = (ARROW.preX - c2.width / 2) / scaleFactor;
-        var minY = (ARROW.preY - c2.height / 2) / scaleFactor;
-        var maxX = (ARROW.postX - c2.width / 2) / scaleFactor;
-        var maxY = (ARROW.postY - c2.height / 2) / scaleFactor;
+        var minX = (ARROW.preX - draftCanvas.width / 2) / scaleFactor;
+        var minY = (ARROW.preY - draftCanvas.height / 2) / scaleFactor;
+        var maxX = (ARROW.postX - draftCanvas.width / 2) / scaleFactor;
+        var maxY = (ARROW.postY - draftCanvas.height / 2) / scaleFactor;
         socket.emit("selectBots", {
             minX: minX,
             minY: minY,
@@ -761,10 +762,10 @@ canvas.addEventListener("mouseup", function (event) {
         });
     }
     else {
-        var x = event.x / canvas.offsetWidth * 1000;
-        var y = event.y / canvas.offsetHeight * 500;
-        maxX = (x - c2.width / 2) / scaleFactor;
-        maxY = (y - c2.height / 2) / scaleFactor;
+        var x = event.x / mainCanvas.offsetWidth * 1000;
+        var y = event.y / mainCanvas.offsetHeight * 500;
+        maxX = (x - draftCanvas.width / 2) / scaleFactor;
+        maxY = (y - draftCanvas.height / 2) / scaleFactor;
 
         socket.emit("botCommand", {
             x: maxX,
@@ -777,10 +778,10 @@ canvas.addEventListener("mouseup", function (event) {
 });
 
 
-canvas.addEventListener("mousemove", function (event) {
+mainCanvas.addEventListener("mousemove", function (event) {
     if (ARROW) {
-        ARROW.postX = event.x / canvas.offsetWidth * 1000;
-        ARROW.postY = event.y / canvas.offsetHeight * 500;
+        ARROW.postX = event.x / mainCanvas.offsetWidth * 1000;
+        ARROW.postY = event.y / mainCanvas.offsetHeight * 500;
     }
 });
 

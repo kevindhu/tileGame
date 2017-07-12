@@ -1,55 +1,57 @@
 <head>
-<meta name="viewport" content="minimal-ui, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport"
+          content="minimal-ui, width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 
 <body>
-    <ul id="player_namer" class='Namer'>
-        <p> -- tileGame -- </p>
-        <input type="text" name="name" id="playerNameInput" autofocus="autofocus" placeholder="choose your name">
-        <input type="text" id="factionNameInput" list="factions" placeholder="choose your faction">
-        <datalist id="factions"></datalist>
+<ul id="player_namer" class='Namer'>
+    <p> -- tileGame -- </p>
+    <input type="text" name="name" id="playerNameInput" autofocus="autofocus" placeholder="choose your name">
+    <input type="text" id="factionNameInput" list="factions" placeholder="choose your faction">
+    <datalist id="factions"></datalist>
 
-        <button type="button" id="nameSubmit">Submit</button>
-    </ul>
+    <button type="button" id="nameSubmit">Submit</button>
+</ul>
 
-    <canvas id="draftCanvas"></canvas>
-    <canvas id="bigCanvas" width="1000" height="500"></canvas>
-    <canvas id="c3" width="500" height="500"></canvas>
-    <canvas id="c4" width="500" height="500"></canvas>
-
-
-
-    <ul id="shard_namer" class='Info'>
-        <p>Name the shard: </p>
-        <input type="text" id="textInput" size="30" />
-        <input type="button" value="Send" onclick="sendShardName();" id="nameShardButton" />
-    </ul>
-
-    <ul id="home_info" class='Namer'>
-        <li id = "info_main">
-            <a>BUILDING INFO: </a> <br>
-            <a> ------------------</a> <br>
-            <a> TYPE : </a><a id = "home_type"></a> <br>
-            <a> LEVEL : </a><a id = "home_level"></a> <br>
-            <a> HEALTH : </a><a id = "home_health"></a> <br>
-            <a> FACTION : </a><a id = "home_faction_name"></a> <br>
-            <ol id="shards_list"></ol>
-            <input type="button" value="Close" onclick="closeUI('home info');" />
-        </li>
-
-        <li id = "color_picker">
-            <canvas id="color_canvas"></canvas>
-            <a id="prompt">CHOOSE YOUR COLOR!!!</a>
-            <input type="text" id="color_input"/>
-            <input type="button" value="SUBMIT" id="color_submit_button"/>
-        </li>
-    </ul>
+<canvas id="draftCanvas"></canvas>
+<canvas id="bigCanvas" width="1000" height="500"></canvas>
+<canvas id="mMap" width="500" height="500"></canvas>
+<canvas id="mMapRot" width="500" height="500"></canvas>
 
 
-    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.2.1.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.js"></script>
-    <script type="text/javascript" src="index.js"></script>
-    <script type="text/javascript" src="ui.js"></script>
-    <script type="text/javascript" src="zoom.js"></script>
-    <link rel="stylesheet" type="text/css" href="style.css">
+<ul id="shard_namer" class='Info'>
+    <p>Name the shard: </p>
+    <input type="text" id="textInput" size="30"/>
+    <input type="button" value="Send" onclick="sendShardName();" id="nameShardButton"/>
+</ul>
+
+<ul id="home_info" class='Namer'>
+    <li id="info_main">
+        <a>BUILDING INFO: </a> <br>
+        <a> ------------------</a> <br>
+        <a> TYPE : </a><a id="home_type"></a> <br>
+        <a> LEVEL : </a><a id="home_level"></a> <br>
+        <a> HEALTH : </a><a id="home_health"></a> <br>
+        <a> FACTION : </a><a id="home_faction_name"></a> <br>
+        <a> POWER : </a><a id="home_power"></a> <br>
+        <ol id="shards_list"></ol>
+        <input type="button" value="BUILD BASE" id="build_base"/>
+        <input type="button" value="Close" onclick="closeUI('home info');"/>
+    </li>
+
+    <li id="color_picker">
+        <canvas id="color_canvas"></canvas>
+        <a id="prompt">CHOOSE YOUR COLOR!!!</a>
+        <input type="text" id="color_input"/>
+        <input type="button" value="SUBMIT" id="color_submit_button"/>
+    </li>
+</ul>
+
+
+<script type="text/javascript" src="index.js"></script>
+<script type="text/javascript" src="ui.js"></script>
+<script type="text/javascript" src="zoom.js"></script>
 </body>

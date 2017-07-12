@@ -96,8 +96,6 @@ Bot.prototype.updateControls = function () {
         return;
     }
 
-    console.log("NOT STATIC");
-
     this.getTheta(target.object);
 
     this.maxXSpeed = Math.abs(this.maxSpeed * Math.cos(this.theta));

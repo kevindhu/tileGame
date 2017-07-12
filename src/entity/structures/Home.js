@@ -19,6 +19,7 @@ function Home(faction, x, y, gameServer) {
     this.shards = [];
     this.viewers = [];
 
+    this.power = 0;
     this.level = 0;
     this.radius = 10;
     this.health = 1;
@@ -57,9 +58,9 @@ Home.prototype.polluteNeighbors = function () {
             check = this.gameServer.getEntityTile(coords);
             if (check && !check.faction) {
                 check.setColor({
-                    r: 123,
-                    g: 123,
-                    b: 512
+                    r: Math.round(Arithmetic.getRandomInt(205, 220)),
+                    g: Math.round(Arithmetic.getRandomInt(205, 220)),
+                    b: Math.round(Arithmetic.getRandomInt(205, 220))
                 });
             }
 
@@ -90,7 +91,6 @@ Home.prototype.removeChild = function (home) {
 Home.prototype.removeNeighbor = function (home) {
     var index = this.neighbors.indexOf(home.id);
     this.neighbors.splice(index, 1);
-    this.updateLevel();
     this.packetHandler.updateHomePackets(this);
 };
 
@@ -152,7 +152,6 @@ Home.prototype.removeShard = function (shard) {
     shard.home = null;
     var index = this.shards.indexOf(shard.id);
     this.shards.splice(index, 1);
-    this.updateLevel();
     this.packetHandler.updateHomePackets(this);
     this.updateUIs();
 };
@@ -212,8 +211,16 @@ Home.prototype.giveShard = function (home) {
 Home.prototype.addShard = function (shard) {
     shard.becomeHome(this);
     this.shards.push(shard.id);
-    this.updateLevel();
     this.packetHandler.addHomeAnimationPackets(this);
+    this.packetHandler.updateHomePackets(this);
+    this.updateUIs();
+};
+
+Home.prototype.buildBase = function (shard) {
+    this.power ++;
+    this.updateLevel();
+    this.removeShard(shard);
+    shard.onDelete();
     this.packetHandler.updateHomePackets(this);
     this.updateUIs();
 };
@@ -223,7 +230,7 @@ Home.prototype.addChild = function (home) {
 };
 
 Home.prototype.updateLevel = function () {
-    if (this.getSupply() < 2) {
+    if (this.power < 2) {
         if (this.level !== 0) {
             this.health = 1;
         }
@@ -231,7 +238,7 @@ Home.prototype.updateLevel = function () {
         this.radius = 10;
         this.updateQuadItem();
     }
-    else if (this.getSupply() < 4) {
+    else if (this.power < 2) {
         if (this.level < 1) {
             this.health = 1;
         }
@@ -239,7 +246,7 @@ Home.prototype.updateLevel = function () {
         this.radius = 30;
         this.updateQuadItem();
     }
-    else if (this.getSupply() > 6 && this.level < 2) {
+    else if (this.power > 4 && this.level < 2) {
         if (this.level < 1) {
             this.health = 10;
         }

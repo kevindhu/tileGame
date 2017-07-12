@@ -1,16 +1,14 @@
-var canvas = document.getElementById("bigCanvas");
-canvas.style.visibility = "hidden";
-
 document.documentElement.style.overflow = 'hidden';  // firefox, chrome
 document.body.scroll = "no";
 
-
-
+var canvas = document.getElementById("bigCanvas");
+canvas.style.visibility = "hidden";
 var nameButton = document.getElementById("nameSubmit");
 var playerNameInput = document.getElementById("playerNameInput");
 var factionNameInput = document.getElementById("factionNameInput");
 var playerNamer = document.getElementById("player_namer");
 
+var selectedShards = [];
 
 playerNamer.style.display = "block";
 
@@ -52,7 +50,6 @@ function openUI(info) {
 }
 
 function openShardNamerUI() {
-    console.log("OPENING SHARD UI");
     var shardNamer = document.getElementById('shard_namer');
     var textInput = document.getElementById("textInput");
     var nameShardButton = document.getElementById("nameShardButton");
@@ -74,16 +71,21 @@ function openShardNamerUI() {
     shardNamer.style.display = 'block';
 }
 
-
 function openHomeUI(home) {
     var homeInfo = document.getElementById('home_info');
     var homeLevel = document.getElementById('home_level');
     var homeHealth = document.getElementById('home_health');
+    var homePower = document.getElementById('home_power');
     var homeFaction = document.getElementById('home_faction_name');
     var homeType = document.getElementById('home_type');
+    var buildBaseButton = document.getElementById('build_base');
+    var shardsList = document.getElementById('shards_list');
+    var colorPicker = document.getElementById('color_picker');
+
     homeLevel.innerHTML = "";
     homeHealth.innerHTML = "";
     homeFaction.innerHTML = "";
+    homePower.innerHTML = "";
     homeType.innerHTML = "";
 
     homeInfo.style.display = 'block';
@@ -91,12 +93,21 @@ function openHomeUI(home) {
     homeLevel.innerHTML = home.level;
     homeHealth.innerHTML = home.health;
     homeFaction.innerHTML = home.id;
+    homePower.innerHTML = home.power;
     homeType.innerHTML = home.type;
 
-
-    var shardsList = document.getElementById('shards_list');
-    var colorPicker = document.getElementById('color_picker');
-    shardsList.innerHTML = "";
+    if (home.shards.length !== 0) {
+        buildBaseButton.style.visibility = "visible";
+        buildBaseButton.addEventListener('click', function () {
+            socket.emit('buildHome', {
+                home: home.id,
+                shards: selectedShards
+            })
+        });
+    }
+    else {
+        buildBaseButton.style.visibility = "hidden";
+    }
 
     addShards(shardsList, home);
     addColorPicker(colorPicker, home);
@@ -118,7 +129,6 @@ function closeUI(action) {
     }
 }
 
-
 function sendShardName() {
     var text = document.getElementById("textInput").value;
     if (text !== null) {
@@ -132,8 +142,9 @@ function sendShardName() {
     closeUI("name shard");
 }
 
-
 function addShards(list, home) {
+    list.innerHTML = "";
+    selectedShards = [];
     for (var i = 0; i < home.shards.length; i++) {
         var entry = document.createElement('li');
         var shard = SHARD_LIST[home.shards[i]];
@@ -149,12 +160,19 @@ function addShards(list, home) {
                 });
             })(entry.id);
         }
+        else {
+            (function (_id) {
+                entry.addEventListener("click", function () {
+                    console.log("ADDING " + _id);
+                    selectedShards.push(_id);
+                });
+            })(entry.id);
+        }
 
         entry.appendChild(document.createTextNode(shard.name));
         list.appendChild(entry);
     }
 }
-
 
 function addColorPicker(colorPicker, home) {
     var colorCanvas = document.getElementById("color_canvas");
@@ -173,9 +191,9 @@ function addColorPicker(colorPicker, home) {
     colors.src = 'colors.jpg';
     colors.onload = function () {
         colorCtx.fillStyle = "#333eee";
-        colorCtx.fillRect(0,0,colorCanvas.width/2, colorCanvas.height/2);
+        colorCtx.fillRect(0, 0, colorCanvas.width / 2, colorCanvas.height / 2);
         colorCtx.fillStyle = "#623eee";
-        colorCtx.fillRect(colorCanvas.width/2,colorCanvas.height/2, colorCanvas.width, colorCanvas.height);
+        colorCtx.fillRect(colorCanvas.width / 2, colorCanvas.height / 2, colorCanvas.width, colorCanvas.height);
     };
 
     colorCanvas.addEventListener('mouseup', function (event) {
@@ -192,7 +210,6 @@ function addColorPicker(colorPicker, home) {
             }
         });
     });
-
 
 
     colorSubmitButton.addEventListener("click", function () {
