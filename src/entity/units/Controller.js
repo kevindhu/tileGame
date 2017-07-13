@@ -100,7 +100,14 @@ Controller.prototype.findEnemies = function () {
         this.gameServer.controllerTree.find(shootRange, function (controller) {
             if (controller.faction !== this.faction) {
                 this.shootShard(controller);
-                //this.shootLaser(controller);
+                this.shootLaser(controller);
+            }
+        }.bind(this))
+
+        this.gameServer.homeTree.find(shootRange, function (home) {
+            if (home.faction !== this.faction) {
+                this.shootShard(home);
+                this.shootLaser(home);
             }
         }.bind(this))
     }

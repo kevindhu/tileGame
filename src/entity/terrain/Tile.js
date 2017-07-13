@@ -38,7 +38,7 @@ Tile.prototype.setColor = function (color) {
 
 
 Tile.prototype.removeHome = function () {
-    this.color = null;
+    this.setRandomColor();
     this.home = null;
     this.faction = null;
     this.packetHandler.updateTilesPackets(this);

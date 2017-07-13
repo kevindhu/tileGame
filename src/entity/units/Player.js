@@ -41,13 +41,6 @@ Player.prototype.onDelete = function () {
 Player.prototype.shootShard = function (controller) {
 };
 
-Player.prototype.shootShard = function (x, y) {
-    if (this.getRandomShard()) {
-        var shard = this.PLAYER_SHARD_LIST[this.getRandomShard()];
-        this.removeShard(shard);
-        shard.becomePlayerShooting(this, x, y);
-    }
-};
 
 Player.prototype.addBot = function (bot) {
     this.bots.push(bot.id);
@@ -74,7 +67,7 @@ Player.prototype.isTarget = function (x, y) {
     };
     this.gameServer.controllerTree.find(bound, function (controller) {
         if (controller.faction !== this.faction) {
-            console.log("DETECTED ENEMY");
+            console.log("DETECTED CONTROLLER ENEMY");
             target = controller;
         }
     }.bind(this));

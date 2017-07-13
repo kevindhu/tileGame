@@ -454,7 +454,6 @@ GameServer.prototype.start = function () {
                 return;
             }
             player.moveBots(data.x, data.y);
-            //player.shootShard(data.x,data.y);
         }.bind(this));
 
         socket.on("selectBots", function (data) {
