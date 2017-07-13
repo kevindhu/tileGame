@@ -652,10 +652,11 @@ function drawScene(data) {
 
 
     var drawScoreBoard = function () {
+        mainCtx.fillText("LEADERBOARD:", mainCanvas.width * 3 / 4, 40);
         for (var i = FACTION_ARRAY.length - 1; i >= 0; i--) {
             var faction = FACTION_ARRAY[i];
             mainCtx.font = "30px Arial";
-            mainCtx.fillText(faction.name, mainCanvas.width * 3 / 4, 10 + (FACTION_ARRAY.length - i) * 30);
+            mainCtx.fillText(faction.name, mainCanvas.width * 3 / 4, 40 + (FACTION_ARRAY.length - i) * 30);
         }
     };
 

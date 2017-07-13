@@ -212,21 +212,14 @@ GameServer.prototype.checkControllerCollision = function (controller) {
         //player + static/player shard collision
             this.shardTree.find(controllerBound, function (shard) {
             if (controller.faction !== shard.faction && shard.timer <= 0) {
-                if (controller.emptyShard !== null) {
-                    controller.transformEmptyShard("unnamed");
-                    this.packetHandler.deleteUIPackets(controller, "name shard");
-                }
                 //if shard already owned
                 if (shard.owner !== null) {
                     var oldOwner = this.CONTROLLER_LIST[shard.owner];
                     oldOwner.removeShard(shard);
                 }
-                if (shard.name === null) {
-                    var home = this.HOME_LIST[controller.viewing];
-                    if (home) {
-                        home.removeViewer(controller);
-                    }
-                    this.packetHandler.addUIPackets(controller, null, "name shard");
+                var home = this.HOME_LIST[controller.viewing];
+                if (home) {
+                    home.removeViewer(controller);
                 }
                 controller.addShard(shard);
             }
@@ -452,7 +445,7 @@ GameServer.prototype.start = function () {
 
         socket.on('textInput', function (data) {
             if (player) {
-                player.transformEmptyShard(data.word);
+                player.addShardNamer(data.word);
             }
         }.bind(this));
 

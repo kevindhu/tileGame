@@ -13,6 +13,13 @@ var selectedShards = [];
 
 playerNamer.style.display = "block";
 
+var shardNamerPrompt = document.getElementById('shard_namer_prompt');
+shardNamerPrompt.addEventListener("click", function () {
+    console.log("SHARD NAMER PROMPT CLICKED!");
+    openShardNamerUI();
+});
+
+
 playerNameInput.addEventListener("keyup", function (event) {
     event.preventDefault();
     if (event.keyCode === 13) {

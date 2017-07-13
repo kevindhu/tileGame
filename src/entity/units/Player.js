@@ -7,13 +7,13 @@ var lerp = require('lerp');
 function Player(id, name, faction, gameServer) {
     Player.super_.call(this, id, faction, gameServer);
     this.name = getName(name);
-    this.emptyShard = null;
     this.type = "Player";
     this.radius = 10;
     this.maxSpeed = 10;
     this.selectedCount = 0;
     this.bots = [];
     this.shards = [];
+    this.shardNamer = "unnamed";
     this.viewing = null;
     this.init();
 }
@@ -85,6 +85,10 @@ Player.prototype.isTarget = function (x, y) {
     return target;
 };
 
+Player.prototype.addShardNamer = function (name) {
+    this.shardNamer = name;
+};
+
 Player.prototype.moveBots = function (x, y) {
     var target = this.isTarget(this.x + x, this.y + y);
 
@@ -145,7 +149,7 @@ Player.prototype.update = function () {
     var faction = this.gameServer.FACTION_LIST[this.faction];
 
     if (tile) {
-        if (this.shards.length > 1 && faction.isNeighboringFaction(tile,2) && !tile.faction) {
+        if (this.shards.length > 1 && faction.isNeighboringFaction(tile, 2) && !tile.faction) {
             this.packetHandler.addBracketPackets(this, tile);
         }
     }
@@ -169,7 +173,7 @@ Player.prototype.getRandomShard = function () {
 Player.prototype.addShard = function (shard) {
     this.increaseHealth(1);
     if (shard.name === null) {
-        this.emptyShard = shard.id;
+        this.transformEmptyShard(shard);
     }
     this.shards.push(shard.id);
     shard.becomePlayer(this);
@@ -178,10 +182,6 @@ Player.prototype.addShard = function (shard) {
 };
 
 Player.prototype.removeShard = function (shard) {
-    if (shard.id === this.emptyShard) {
-        this.packetHandler.deleteUIPackets(this, "name shard");
-        this.emptyShard = null;
-    }
     var index = this.shards.indexOf(shard.id);
     this.shards.splice(index, 1);
     this.updateMaxSpeed();
@@ -189,12 +189,8 @@ Player.prototype.removeShard = function (shard) {
     this.packetHandler.deleteBracketPackets(this);
 };
 
-Player.prototype.transformEmptyShard = function (name) {
-    if (this.emptyShard !== null) {
-        var shard = this.gameServer.PLAYER_SHARD_LIST[this.emptyShard];
-        shard.setName(name);
-        this.emptyShard = null;
-    }
+Player.prototype.transformEmptyShard = function (shard) {
+    shard.setName(this.shardNamer);
 };
 
 Player.prototype.decreaseHealth = function (amount) {
@@ -274,11 +270,6 @@ Player.prototype.dropShard = function (shard) {
 };
 
 Player.prototype.dropAllShards = function () {
-    if (this.emptyShard !== null) {
-        var emptyShard = this.gameServer.PLAYER_SHARD_LIST[this.emptyShard];
-        this.dropShard(emptyShard);
-    }
-
     for (var i = this.shards.length - 1; i >= 0; i--) {
         var shard = this.gameServer.PLAYER_SHARD_LIST[this.shards[i]];
         this.dropShard(shard);
