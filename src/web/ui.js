@@ -86,16 +86,30 @@ function openHomeUI(home) {
     var homePower = document.getElementById('home_power');
     var homeFaction = document.getElementById('home_faction_name');
     var homeType = document.getElementById('home_type');
-    var buildBaseButton = document.getElementById('build_base');
+    var buildBaseButton = document.getElementById('build_home_button');
+    var makeBotsButton = document.getElementById('make_bots_button');
+    var buildArmor = document.getElementById('build_armor');
+    var buildSpeed = document.getElementById('build_speed');
+    var buildDamage = document.getElementById('build_damage');
     var shardsList = document.getElementById('shards_list');
     var colorPicker = document.getElementById('color_picker');
     var buildHome = function () {
-        console.log(home.id);
+        console.log("BUILDING THE HOME");
         socket.emit('buildHome', {
             home: home.id,
             shards: selectedShards
         })
     };
+
+    var makeBots = function () {
+        console.log("MAKING BOTS");
+        socket.emit('makeBots', {
+            home: home.id,
+            shards: selectedShards
+        });
+    };
+
+
 
     selectedShards = [];
 
@@ -114,21 +128,36 @@ function openHomeUI(home) {
     homeType.innerHTML = home.type;
 
     if (home.shards.length !== 0) {
-        var buildBaseButtonNew = buildBaseButton.cloneNode(true);
-        buildBaseButton.parentNode.replaceChild(buildBaseButtonNew, buildBaseButton);
-        buildBaseButton = buildBaseButtonNew;
+        buildBaseButton = resetButton(buildBaseButton);
+        if (home.type === "Barracks") {
+            makeBotsButton = resetButton(makeBotsButton);
+            buildArmor = resetButton(buildArmor);
+            buildSpeed = resetButton(buildSpeed);
+            buildDamage = resetButton(buildDamage);
+        }
 
-        buildBaseButton.style.visibility = "visible";
-        buildBaseButton.addEventListener('click',buildHome)
-
+        buildBaseButton.addEventListener('click', buildHome);
+        makeBotsButton.addEventListener('click', makeBots);
+        buildArmor.addEventListener('click', buildBotArmor);
+        buildSpeed.addEventListener('click', buildBotSpeed);
+        buildDamage.addEventListener('click', buildBotDamage);
     }
     else {
         buildBaseButton.style.visibility = "hidden";
+        makeBotsButton.style.visibility = "hidden";
     }
 
     addShards(shardsList, home);
     addColorPicker(colorPicker, home);
 
+}
+
+function resetButton(button) {
+    var buttonNew = button.cloneNode(true);
+    button.parentNode.replaceChild(buttonNew, button);
+    button = buttonNew;
+    button.style.visibility = "visible";
+    return button;
 }
 
 
@@ -167,23 +196,12 @@ function addShards(list, home) {
         var shard = SHARD_LIST[home.shards[i]];
         entry.id = shard.id;
 
-        if (home.type === "Barracks") {
-            (function (_id) {
-                entry.addEventListener("click", function () {
-                    socket.emit('makeBot', {
-                        shard: _id,
-                        home: home.id
-                    });
-                });
-            })(entry.id);
-        }
-        else {
-            (function (_id) {
-                entry.addEventListener("click", function () {
-                    selectedShards.push(_id);
-                });
-            })(entry.id);
-        }
+        (function (_id) {
+            entry.addEventListener("click", function () {
+                selectedShards.push(_id);
+            });
+        })(entry.id);
+
 
         entry.appendChild(document.createTextNode(shard.name));
         list.appendChild(entry);

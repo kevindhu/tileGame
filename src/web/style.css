@@ -1,6 +1,13 @@
 a {
     text-decoration: none;
+    font-family: "Arial Narrow", Arial, sans-serif;
 }
+
+p {
+    text-decoration: none;
+    font-family: "Arial Narrow", Arial, sans-serif;
+}
+
 ul {
     list-style-type: none;
 }

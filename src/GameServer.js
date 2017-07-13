@@ -465,9 +465,15 @@ GameServer.prototype.start = function () {
             this.findBots(boundary);
         }.bind(this));
 
-        socket.on('makeBot', function (data) {
+        socket.on('makeBots', function (data) {
             var barracks = this.HOME_LIST[data.home];
-            barracks.makeBot(player, data.shard);
+            var shard;
+            for (var i = 0; i<data.shards.length; i++) {
+                shard = this.HOME_SHARD_LIST[data.shards[i]];
+                if (shard) {
+                    barracks.makeBot(player, shard);
+                }
+            }
         }.bind(this));
 
         socket.on('buildHome', function (data) {
