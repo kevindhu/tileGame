@@ -5,7 +5,7 @@ $(document).ready(function () {
 
 var canvas = document.getElementById("bigCanvas");
 canvas.style.visibility = "hidden";
-var nameButton = document.getElementById("nameSubmit");
+var nameBtn = document.getElementById("nameSubmit");
 var playerNameInput = document.getElementById("playerNameInput");
 var factionNameInput = document.getElementById("factionNameInput");
 var playerNamer = document.getElementById("player_namer");
@@ -15,7 +15,6 @@ playerNamer.style.display = "block";
 
 var shardNamerPrompt = document.getElementById('shard_namer_prompt');
 shardNamerPrompt.addEventListener("click", function () {
-    console.log("SHARD NAMER PROMPT CLICKED!");
     openShardNamerUI();
 });
 
@@ -30,11 +29,11 @@ playerNameInput.addEventListener("keyup", function (event) {
 factionNameInput.addEventListener("keyup", function (event) {
     event.preventDefault();
     if (event.keyCode === 13) {
-        nameButton.click();
+        nameBtn.click();
     }
 });
 
-nameButton.addEventListener("click", function () {
+nameBtn.addEventListener("click", function () {
     canvas.style.visibility = "visible";
     socket.emit("newPlayer",
         {
@@ -58,9 +57,9 @@ function openUI(info) {
 }
 
 function openShardNamerUI() {
-    var shardNamer = document.getElementById('shard_namer');
+    var shardNamer = document.getElementById('shard_namer_ui');
     var textInput = document.getElementById("textInput");
-    var nameShardButton = document.getElementById("nameShardButton");
+    var nameShardBtn = document.getElementById("nameShardBtn");
     var focusEvent = function (event) {
         event.preventDefault();
         if (event.keyCode === 13) {
@@ -80,71 +79,59 @@ function openShardNamerUI() {
 }
 
 function openHomeUI(home) {
-    var homeInfo = document.getElementById('home_info');
-    var homeLevel = document.getElementById('home_level');
-    var homeHealth = document.getElementById('home_health');
-    var homePower = document.getElementById('home_power');
-    var homeFaction = document.getElementById('home_faction_name');
-    var homeType = document.getElementById('home_type');
-    var buildBaseButton = document.getElementById('build_home_button');
-    var makeBotsButton = document.getElementById('make_bots_button');
-    var buildArmor = document.getElementById('build_armor');
-    var buildSpeed = document.getElementById('build_speed');
-    var buildDamage = document.getElementById('build_damage');
+    var homeInfo = document.getElementById('home_ui');
     var shardsList = document.getElementById('shards_list');
     var colorPicker = document.getElementById('color_picker');
-    var buildHome = function () {
-        console.log("BUILDING THE HOME");
-        socket.emit('buildHome', {
+
+    var bldArmorBtn= document.getElementById('bld_armor');
+    var bldSpeedBtn = document.getElementById('bld_speed');
+    var bldDmgBtn = document.getElementById('bld_damage');
+
+    var bldBaseHealthBtn = document.getElementById('bld_home_btn');
+    var makeBotsBtn = document.getElementById('make_bots_btn');
+
+    homeInfo.style.display = 'block';
+
+    document.getElementById('home_type').innerHTML = home.type + " Info";
+    document.getElementById('home_level').innerHTML = home.level;
+    document.getElementById('home_health').innerHTML = home.health;
+    document.getElementById('home_power').innerHTML = home.power;
+    document.getElementById('home_faction_name').innerHTML = home.faction;
+
+    var bldHome = function () {
+        socket.emit('bldHome', {
             home: home.id,
             shards: selectedShards
         })
     };
 
     var makeBots = function () {
-        console.log("MAKING BOTS");
         socket.emit('makeBots', {
             home: home.id,
             shards: selectedShards
         });
     };
 
-
-
     selectedShards = [];
 
-    homeLevel.innerHTML = "";
-    homeHealth.innerHTML = "";
-    homeFaction.innerHTML = "";
-    homePower.innerHTML = "";
-    homeType.innerHTML = "";
-
-    homeInfo.style.display = 'block';
-
-    homeLevel.innerHTML = home.level;
-    homeHealth.innerHTML = home.health;
-    homeFaction.innerHTML = home.id;
-    homePower.innerHTML = home.power;
-    homeType.innerHTML = home.type;
-
     if (home.shards.length !== 0) {
-        buildBaseButton = resetButton(buildBaseButton);
+        bldBaseHealthBtn = resetButton(bldBaseHealthBtn);
         if (home.type === "Barracks") {
-            makeBotsButton = resetButton(makeBotsButton);
-            buildArmor = resetButton(buildArmor);
-            buildSpeed = resetButton(buildSpeed);
-            buildDamage = resetButton(buildDamage);
+            makeBotsBtn = resetButton(makeBotsBtn);
+            bldArmorBtn= resetButton(bldArmor);
+            bldSpeedBtn = resetButton(bldSpeedBtn);
+            bldDmgBtn = resetButton(bldDmgBtn);
         }
 
-        buildBaseButton.addEventListener('click', buildHome);
-        makeBotsButton.addEventListener('click', makeBots);
-        buildArmor.addEventListener('click', buildBotArmor);
-        buildSpeed.addEventListener('click', buildBotSpeed);
-        buildDamage.addEventListener('click', buildBotDamage);
+        bldBaseHealthBtn.addEventListener('click', bldHome);
+        makeBotsBtn.addEventListener('click', makeBots);
+        //bldArmor.addEventListener('click', bldBotArmor);
+        //bldSpeedBtn.addEventListener('click', bldBotSpeed);
+        //bldDmgBtn.addEventListener('click', bldBotDmg);
     }
     else {
-        buildBaseButton.style.visibility = "hidden";
-        makeBotsButton.style.visibility = "hidden";
+        bldBaseBtn.style.display = "none";
+        makeBotsBtn.style.display = "none";
     }
 
     addShards(shardsList, home);
@@ -152,21 +139,20 @@ function openHomeUI(home) {
 
 }
 
-function resetButton(button) {
-    var buttonNew = button.cloneNode(true);
-    button.parentNode.replaceChild(buttonNew, button);
-    button = buttonNew;
-    button.style.visibility = "visible";
-    return button;
+function resetButton(btn) {
+    var btnNew = btn.cloneNode(true);
+    btn.parentNode.replaceChild(btnNew, btn);
+    btn = btnNew;
+    btn.style.display = "block";
+    return btn;
 }
 
 
 function closeUI(action) {
     var shardNamer = document.getElementById('shard_namer');
-    var homeInfo = document.getElementById('home_info');
+    var homeInfo = document.getElementById('home_ui');
 
     if (action === "name shard") {
-        console.log("CLOSING SHARD INFO");
         var textInput = document.getElementById("textInput");
         textInput.value = "";
         shardNamer.style.display = 'none';
@@ -211,13 +197,12 @@ function addShards(list, home) {
 function addColorPicker(colorPicker, home) {
     var colorCanvas = document.getElementById("color_canvas");
     var colorCtx = colorCanvas.getContext("2d");
-    var colorInput = document.getElementById("color_input");
-    var colorSubmitButton = document.getElementById("color_submit_button");
+
     if (!home.hasColor && home.level > 1) {
-        colorPicker.style.visibility = "visible";
+        colorPicker.style.display = "block";
     }
     else {
-        colorPicker.style.visibility = "hidden";
+        colorPicker.style.display = "none";
         return;
     }
 
@@ -243,17 +228,5 @@ function addColorPicker(colorPicker, home) {
                 b: img_data[2]
             }
         });
-    });
-
-
-    colorSubmitButton.addEventListener("click", function () {
-        socket.emit("newColor",
-            {
-                color: colorInput.value,
-                home: home.id
-            });
-        colorInput.value = "";
-
-        closeUI('home info');
     });
 }

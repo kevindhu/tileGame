@@ -7,14 +7,13 @@
 </head>
 
 <body>
-<ul id="player_namer" class='Namer'>
+<div id="player_namer" class='Namer'>
     <p> -- tileGame -- </p>
     <input type="text" name="name" id="playerNameInput" autofocus="autofocus" placeholder="choose your name">
     <input type="text" id="factionNameInput" list="factions" placeholder="choose your faction">
     <datalist id="factions"></datalist>
-
-    <button type="button" id="nameSubmit">Submit</button>
-</ul>
+    <input type="button" id="nameSubmit" value ="SUBMIT"/>
+</div>
 
 <canvas id="draftCanvas"></canvas>
 <canvas id="bigCanvas" width="1000" height="500"></canvas>
@@ -23,43 +22,50 @@
 
 
 
-<ul id="shard_namer_prompt" class='Info'>
+<div id="shard_namer_prompt" class='Info'>
 
-</ul>
+</div>
 
-<ul id="shard_namer" class='Info'>
+<div id="shard_namer_ui" class='Info'>
     <p>Shard Name: </p>
     <input type="text" id="textInput" size="30"/>
     <input type="button" value="Send" onclick="sendShardName();" id="nameShardButton"/>
-</ul>
+</div>
 
-<ul id="home_info" class='Namer'>
-    <li id="info_main">
-        <a>BUILDING INFO: </a> <br>
-        <a> ------------------</a> <br>
-        <a> TYPE : </a><a id="home_type"></a> <br>
-        <a> LEVEL : </a><a id="home_level"></a> <br>
-        <a> HEALTH : </a><a id="home_health"></a> <br>
-        <a> FACTION : </a><a id="home_faction_name"></a> <br>
-        <a> POWER : </a><a id="home_power"></a> <br>
-        <ol id="shards_list"></ol>
-        <input type="button" value="BUILD BASE" id="build_home_button"/>
-        <input type="button" value="MAKE BOTS" id="make_bots_button"/>
+<div id="home_ui" class='Namer'>
+    <ul>
+        <li id="info_main">
+            <div id="homeInfo">
+                <a id="home_type"></a> <br>
+                <a> ------------------</a> <br>
+                <a> LEVEL : </a><a id="home_level"></a> <br>
+                <a> HEALTH : </a><a id="home_health"></a> <br>
+                <a> FACTION : </a><a id="home_faction_name"></a> <br>
+                <a> POWER : </a><a id="home_power"></a> <br>
+            </div>
 
-        <input type="button" value="ARMOR" id="build_armor"/>
-        <input type="button" value="SPEED" id="build_speed"/>
-        <input type="button" value="DAMAGE" id="build_damage"/>
+            <ol id="shards_list"></ol>
 
-        <input type="button" value="Close" onclick="closeUI('home info');"/>
-    </li>
+            <div id ="buildBase">
+                <input type="button" value="BUILD BASE" id="build_home_button"/>
+                <input type="button" value="ARMOR" id="build_armor"/>
+                <input type="button" value="SPEED" id="build_speed"/>
+                <input type="button" value="DAMAGE" id="build_damage"/>
+            </div>
 
-    <li id="color_picker">
-        <canvas id="color_canvas"></canvas>
-        <a id="prompt">CHOOSE YOUR COLOR!!!</a>
-        <input type="text" id="color_input"/>
-        <input type="button" value="SUBMIT" id="color_submit_button"/>
-    </li>
-</ul>
+            <input type="button" value="MAKE BOTS" id="make_bots_button"/>
+
+            <input type="button" value="CLOSE" onclick="closeUI('home info');"/>
+        </li>
+    </ul>
+
+    <ul>
+        <li id="color_picker">
+            <a id="prompt">TILE COLOR</a>
+            <canvas id="color_canvas"></canvas>
+        </li>
+    </ul>
+</div>
 
 
 <script type="text/javascript" src="index.js"></script>

@@ -8,16 +8,16 @@ p {
     font-family: "Arial Narrow", Arial, sans-serif;
 }
 
-ul {
+div {
     list-style-type: none;
 }
 
+
+
+
 .Namer {
-    width: 400px;
-    height: 300px;
     background: rgba(255, 255, 255, 1);
 }
-
 .Namer p {
     font-size: 30pt;
 }
@@ -58,10 +58,6 @@ ul {
 
 
 
-
-
-
-
 #player_namer {
     width: 500px;
     height: 500px;
@@ -88,12 +84,7 @@ ul {
     margin-left: 10px;
 }
 
-.Namer {
-    width: 400px;
-    height: 500px;
-}
-
-#home_info {
+#home_ui {
     position: absolute;
     left: 30%;
     top: 50%;
@@ -103,40 +94,38 @@ ul {
     display: none;
 }
 
-#home_info a {
+#home_ui a {
     font-size: 15pt;
 }
 
-#home_info input {
-    height: 60px;
+#home_ui input {
+    margin: 3px;
+    height: 40px;
     width: 200px;
 }
 
-#home_info ol {
+#home_ui ol {
+    float:right;
     height: 100px;
     width: 100px;
     overflow: auto;
 }
 
-#color_picker button {
-    height: 100px;
-    width: 100px;
+#buildBase input{
+    height: 30px;
+    width: 80px;
 }
 
-#color_picker input {
-    font-size: 20pt;
-    height: 70px;
-    width: 400px;
-}
-
-#color_canvas {
-    border: 1px solid blue;
-    width: 100px;
-    height: 100px;
-}
 
 #bigCanvas {
     display: block;
     width: 100%;
     height: 100%;
+}
+
+
+#color_picker canvas{
+    border: 1px solid blue;
+    width: 100px;
+    height: 100px;
 }
