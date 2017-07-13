@@ -31,6 +31,10 @@ Player.prototype.removeView = function () {
 
 Player.prototype.onDelete = function () {
     this.dropAllShards();
+    var home = this.gameServer.HOME_LIST[this.viewing];
+    if (home) {
+        home.removeViewer(this);
+    }
     Player.super_.prototype.onDelete.apply(this);
 };
 

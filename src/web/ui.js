@@ -72,7 +72,7 @@ function openShardNamerUI() {
     textInput.addEventListener("keyup", function (event) {
         event.preventDefault();
         if (event.keyCode === 13) {
-            nameShardButton.click();
+            sendShardName();
         }
     });
 
@@ -149,7 +149,7 @@ function closeUI(action) {
 
 function sendShardName() {
     var text = document.getElementById("textInput").value;
-    if (text !== null) {
+    if (text !== null && text !== "") {
         socket.emit('textInput',
             {
                 id: selfId,

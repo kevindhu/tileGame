@@ -53,6 +53,7 @@ var Controller = function (controllerInfo) {
     this.x = controllerInfo.x;
     this.y = controllerInfo.y;
     this.health = controllerInfo.health;
+    this.maxHealth = controllerInfo.maxHealth;
     this.selected = controllerInfo.selected;
     this.owner = controllerInfo.owner;
     this.theta = controllerInfo.theta;
@@ -240,6 +241,7 @@ function updateEntities(packet) {
         controller.x = controllerInfo.x;
         controller.y = controllerInfo.y;
         controller.health = controllerInfo.health;
+        controller.maxHealth = controllerInfo.maxHealth;
         controller.selected = controllerInfo.selected;
         controller.theta = controllerInfo.theta;
     };
@@ -347,28 +349,33 @@ function drawScene(data) {
     }
 
     var inBounds = function (player, x, y) {
-        return x < (player.x + mainCanvas.width) && x > (player.x - 5 / 4 * mainCanvas.width)
-            && y < (player.y + mainCanvas.width) && y > (player.y - 5 / 4 * mainCanvas.width);
+        var range = mainCanvas.width / (1.5 * scaleFactor);
+        return x < (player.x + range) && x > (player.x - 5 / 4 * range)
+            && y < (player.y + range) && y > (player.y - 5 / 4 * range);
     };
 
     var drawControllers = function () {
         draftCtx.font = "20px Arial";
-        draftCtx.fillStyle = "#000000";
+
+        draftCtx.strokeStyle = "#FF0000";
         for (var id in CONTROLLER_LIST) {
             var controller = CONTROLLER_LIST[id], i;
+            draftCtx.fillStyle = "rgba(137,0,0," + controller.health / controller.maxHealth + ")";
+
             draftCtx.beginPath();
 
             //draw player object
             if (controller.type === "Player") {
                 var radius = 30;
                 draftCtx.moveTo(controller.x + radius, controller.y);
-                for (i = 0.3; i <= 2 * Math.PI - 0.4; i += 0.4) {
-                    theta = i + getRandom(0, 1) / 7;
+                for (i = Math.PI / 4; i <= 2 * Math.PI - Math.PI / 4; i += Math.PI / 4) {
+                    theta = i + getRandom(-(controller.maxHealth / controller.health) / 7, (controller.maxHealth / controller.health) / 7);
                     x = radius * Math.cos(theta);
                     y = radius * Math.sin(theta);
                     draftCtx.lineTo(controller.x + x, controller.y + y);
                 }
-                draftCtx.lineTo(controller.x + radius, controller.y);
+                draftCtx.lineTo(controller.x + radius, controller.y + 2);
+                draftCtx.stroke();
                 draftCtx.fill();
             } else { //bot
                 var x, y, theta, startX, startY;
@@ -378,9 +385,10 @@ function drawScene(data) {
                 theta = controller.theta;
                 startX = bigRadius * Math.cos(theta);
                 startY = bigRadius * Math.sin(theta);
-                draftCtx.lineTo(controller.x + startX, controller.y + startY);
+                draftCtx.moveTo(controller.x + startX, controller.y + startY);
                 for (i = 1; i <= 2; i++) {
-                    theta = 2 * Math.PI / 3 * i + controller.theta + getRandom(0, 1) / 8;
+                    theta = controller.theta + 2 * Math.PI / 3 * i +
+                        getRandom(-controller.maxHealth / controller.health / 7, controller.maxHealth / controller.health / 7);
                     x = smallRadius * Math.cos(theta);
                     y = smallRadius * Math.sin(theta);
                     draftCtx.lineTo(controller.x + x, controller.y + y);
@@ -390,9 +398,7 @@ function drawScene(data) {
                 draftCtx.fill();
             }
 
-            draftCtx.fillText(controller.name, controller.x, controller.y + 30);
-            draftCtx.fillRect(controller.x - controller.health * 10 / 2, controller.y + 10,
-                controller.health * 10, 10);
+            draftCtx.fillText(controller.name, controller.x, controller.y + 50);
             if (controller.selected && controller.owner === selfPlayer.id) {
                 draftCtx.lineWidth = 5;
                 draftCtx.strokeStyle = "#1d55af";
@@ -405,19 +411,18 @@ function drawScene(data) {
         for (var id in TILE_LIST) {
             var tile = TILE_LIST[id];
             if (inBounds(selfPlayer, tile.x, tile.y)) {
-                if (!tile.color) {
-                    tile.color = {
-                        r: Math.round(getRandom(210, 214)),
-                        g: Math.round(getRandom(210, 214)),
-                        b: Math.round(getRandom(200, 212))
-                    };
-                }
+                draftCtx.beginPath();
                 draftCtx.fillStyle = "rgb(" +
                     tile.color.r + "," +
                     tile.color.g + "," +
                     tile.color.b +
                     ")";
-                draftCtx.fillRect(tile.x, tile.y, tile.length, tile.length);
+
+                draftCtx.lineWidth = 5;
+                draftCtx.strokeStyle = "#FFFFF1";
+                draftCtx.rect(tile.x, tile.y, tile.length, tile.length);
+                draftCtx.stroke();
+                draftCtx.fill();
             }
         }
     };
@@ -629,7 +634,8 @@ function drawScene(data) {
                 imgData.data[i + 3] = 255;
                 i += 4;
             }
-            imgData = scaleImageData(imgData, 2, mainCtx);
+            console.log(400 / Object.size(TILE_LIST));
+            imgData = scaleImageData(imgData, Math.floor(400 / Object.size(TILE_LIST)), mainCtx);
 
             mMapCtx.putImageData(imgData, 0, 0);
 
@@ -647,7 +653,7 @@ function drawScene(data) {
             mapTimer -= 1;
         }
 
-        mainCtx.drawImage(serverMap, 100, 400);
+        mainCtx.drawImage(serverMap, 800, 400);
     };
 
 
@@ -677,7 +683,7 @@ function drawScene(data) {
 
     translateScene();
     mainCtx.drawImage(draftCanvas, 0, 0);
-    drawMiniMap();
+    //drawMiniMap();
     drawScoreBoard();
 }
 

@@ -170,6 +170,7 @@ PacketHandler.prototype.addControllerPackets = function (controller, ifInit) {
         x: controller.x,
         y: controller.y,
         health: controller.health,
+        maxHealth: controller.maxHealth,
         selected: controller.selected,
         theta: controller.theta
     };
@@ -218,6 +219,7 @@ PacketHandler.prototype.addShardPackets = function (shard, ifInit) {
 };
 
 PacketHandler.prototype.addTilePackets = function (tile, ifInit) {
+    console.log(tile.color);
     return {
         master: "add",
         class: "tileInfo",
@@ -313,6 +315,7 @@ PacketHandler.prototype.updateControllersPackets = function (controller) {
         x: controller.x,
         y: controller.y,
         health: controller.health,
+        maxHealth: controller.maxHealth,
         selected: controller.selected,
         theta: controller.theta
     });

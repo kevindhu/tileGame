@@ -1,4 +1,5 @@
 const entityConfig = require('../entityConfig');
+const Arithmetic = require('../../modules/Arithmetic');
 var EntityFunctions = require('../EntityFunctions');
 
 function Tile(x, y, gameServer) {
@@ -12,13 +13,13 @@ function Tile(x, y, gameServer) {
     this.home = null;
     this.faction = null;
 
-    this.color = null;
     this.length = (entityConfig.WIDTH - entityConfig.BORDER_WIDTH * 2) / Math.sqrt(entityConfig.TILES);
     this.alert = false; 
     this.init();
 }
 
 Tile.prototype.init = function () {
+    this.setRandomColor();
     this.addQuadItem();
     this.gameServer.tileTree.insert(this.quadItem);
     this.gameServer.TILE_LIST[this.id] = this;
@@ -70,13 +71,12 @@ Tile.prototype.addQuadItem = function () {
 };
 
 
-function getRandomColor() {
-    var letters = '0123456789ABCDEF';
-    var color = '#';
-    for (var i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
-}
+Tile.prototype.setRandomColor = function () {
+    this.color = {
+        r: Math.round(Arithmetic.getRandomInt(100, 255)),
+        g: Math.round(Arithmetic.getRandomInt(235, 250)),
+        b: Math.round(Arithmetic.getRandomInt(130, 212))
+    };
+};
 
 module.exports = Tile;

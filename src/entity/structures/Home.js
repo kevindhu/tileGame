@@ -58,9 +58,9 @@ Home.prototype.polluteNeighbors = function () {
             check = this.gameServer.getEntityTile(coords);
             if (check && !check.faction) {
                 check.setColor({
-                    r: Math.round(Arithmetic.getRandomInt(205, 220)),
-                    g: Math.round(Arithmetic.getRandomInt(205, 220)),
-                    b: Math.round(Arithmetic.getRandomInt(205, 220))
+                    r: Math.round(Arithmetic.getRandomInt(240, 255)),
+                    g: Math.round(Arithmetic.getRandomInt(240, 244)),
+                    b: Math.round(Arithmetic.getRandomInt(220, 230))
                 });
             }
 

@@ -15,6 +15,7 @@ function Controller(id, faction, gameServer) {
     this.stationary = true;
     this.x = faction.x;
     this.y = faction.y;
+    this.maxHealth = 5;
     this.health = 5;
     this.maxSpeed = 10;
     this.maxXSpeed = 10;
