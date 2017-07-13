@@ -9,7 +9,13 @@ $(document).keydown(function(event) {
 });
 
 $(window).bind('mousewheel DOMMouseScroll', function (event) {
-    if (event.ctrlKey == true) {
+    if (event.ctrlKey === true) {
         event.preventDefault();
+    }
+    if(event.originalEvent.wheelDelta /120 > 0 && mainScaleFactor < 2) {
+        mainScaleFactor += 0.2;
+    }
+    else if (mainScaleFactor > 0.7) {
+        mainScaleFactor -= 0.2;
     }
 });

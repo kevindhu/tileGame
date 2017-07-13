@@ -590,12 +590,8 @@ function drawScene(data) {
 
     var translateScene = function () {
         draftCtx.setTransform(1, 0, 0, 1, 0, 0);
-        if (keys[17] && keys[38] && scaleFactor < 2) {
-            scaleFactor += 0.2;
-        }
-        if (keys[17] && keys[40] && scaleFactor > 0.7) {
-            scaleFactor -= 0.2;
-        }
+        scaleFactor = lerp(scaleFactor, mainScaleFactor, 0.3);
+
         draftCtx.translate(mainCanvas.width / 2, mainCanvas.height / 2);
         draftCtx.scale(scaleFactor, scaleFactor);
         draftCtx.translate(-selfPlayer.x, -selfPlayer.y);
@@ -718,6 +714,7 @@ function lerp(a, b, ratio) {
 
 var keys = [];
 var scaleFactor = 1;
+var mainScaleFactor = 1;
 
 document.onkeydown = function (event) {
     keys[event.keyCode] = true;

@@ -17,7 +17,7 @@ function Home(faction, x, y, gameServer) {
 
     this.children = [];
     this.shards = [];
-    this.viewers = [];
+    this.viewers = {};
 
     this.power = 0;
     this.level = 0;
@@ -133,14 +133,13 @@ Home.prototype.getRandomShard = function () {
 
 
 Home.prototype.addViewer = function (player) {
-    this.viewers.push(player.id);
+    this.viewers[player.id] = player.id;
     player.addView(this);
     this.packetHandler.addUIPackets(player, this, "home info");
 };
 
 Home.prototype.removeViewer = function (player) {
-    var index = this.viewers.indexOf(player.id);
-    this.viewers.splice(index, 1);
+    delete this.viewers[player.id];
     player.removeView();
     this.packetHandler.deleteUIPackets(player, "home info");
 };
@@ -157,8 +156,8 @@ Home.prototype.removeShard = function (shard) {
 };
 
 Home.prototype.updateUIs = function () {
-    for (var i = 0; i < this.viewers.length; i++) {
-        var player = this.gameServer.CONTROLLER_LIST[this.viewers[i]];
+    for (var id in this.viewers) {
+        var player = this.gameServer.CONTROLLER_LIST[id];
         this.packetHandler.addUIPackets(player, this, "home info");
     }
 };
