@@ -95,7 +95,7 @@ function openHomeUI(home) {
 
     homeInfo.style.display = 'block';
 
-    document.getElementById('home_type').innerHTML = home.type + " INFO";
+    document.getElementById('home_type').innerHTML = home.type;
     document.getElementById('home_level').innerHTML = home.level;
     document.getElementById('home_health').innerHTML = home.health;
     document.getElementById('home_power').innerHTML = home.power;

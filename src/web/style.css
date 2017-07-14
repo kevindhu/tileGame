@@ -9,8 +9,8 @@
 }
 
 a {
-    margin-top:2px;
-    margin-bottom:2px;
+    margin-top: 2px;
+    margin-bottom: 2px;
     text-decoration: none;
     font-family: dist;
     letter-spacing: 1px;
@@ -21,15 +21,15 @@ b {
     text-decoration: none;
     font-family: openSansBold;
     font-weight: bold;
-    letter-spacing: 1px;
+    letter-spacing: 1.5px;
     color: #e0e2e5;
     font-size: 20pt;
     text-align: center;
 }
 
 li {
-    list-style:none;
-    padding-left:0;
+    list-style: none;
+    padding-left: 0;
     text-align: center;
 }
 
@@ -42,17 +42,13 @@ div {
     list-style-type: none;
 }
 
-
-
-
 .Namer {
     background: rgba(255, 255, 255, 1);
 }
+
 .Namer p {
     font-size: 30pt;
 }
-
-
 
 #shard_namer_prompt {
     position: absolute;
@@ -86,8 +82,6 @@ div {
     background: #e0e2e5;
 }
 
-
-
 #player_namer {
     width: 500px;
     height: 500px;
@@ -114,10 +108,6 @@ div {
     margin-left: 10px;
 }
 
-
-
-
-
 #home_ui {
     position: absolute;
     left: 30%;
@@ -130,15 +120,14 @@ div {
 
 #home_ui ol {
     padding-left: 0;
-    margin-top:0;
-    margin-right:0;
-    float:right;
+    margin-top: 0;
+    margin-right: 0;
+    float: right;
     width: 170px;
     height: 440px;
     overflow: auto;
     background: #131a26;
 }
-
 
 #home_ui a {
     text-align: center;
@@ -151,87 +140,92 @@ div {
     height: 40px;
     width: 100px;
 }
+
 #home_info {
-    width:60%;
+    width: 60%;
 }
 
+#home_info div {
+    border-radius: 5px;
+}
+
+#home_info a {
+
+    border-radius: 3px;
+}
 
 #home_ui header {
-    height:60px;
-    width:100%;
+    height: 60px;
+    width: 100%;
 }
 
 #home_ui #ribbon {
-    margin-left:2%;
-    margin-right:2%;
-    margin-top:2%;
-    width:96%;
-    height:60%;
+    vertical-align:middle;
+    margin-left: 2%;
+    margin-right: 2%;
+    margin-top: 2%;
+    width: 96%;
+    height: 60%;
     background: #22262d;
-    padding-bottom:10px;
-}
-#home_type {
-    padding-left:78px;
+    padding-bottom: 10px;
 }
 
+#home_type {
+    text-align: center;
+    width: 2000px;
+}
 
 #home_info #details {
-    background:#262b33;
-    margin-left:4%;
+    background: #262b33;
+    margin-left: 4%;
     padding: 4% 4% 4% 4%;
 }
 
-#home_info #details .left{
-    padding-left:1%;
+#home_info #details .left {
+    padding-left: 1%;
     text-align: left;
 }
 
-#home_info #details .right{
-    padding-right:1%;
+#home_info #details .right {
+    padding-right: 1%;
     text-align: right;
 }
 
 .left, .right {
-    border:1px solid white;
+    border: 1px solid #9398a0;
     display: inline-block;
     width: 48%;
-    background:#262b33;
+    background: #262b33;
 }
-
-
-
 
 #upgrade_wrapper {
-    margin-top:5px;
-    width:450px;
-    height:300px;
-    background:#3b4047;
+    margin-top: 5px;
+    width: 450px;
+    height: 300px;
+    background: #3b4047;
 }
-
 
 #upgrade_options {
-    width:300px;
-    height:90%;
-    background:#203456;
+    width: 300px;
+    height: 90%;
+    background: #203456;
 }
 
-#upgrade_options div{
-    margin:5px;
+#upgrade_options div {
+    margin: 5px;
     max-height: 50%;
-    border:3px solid black;
+    border: 3px solid black;
 }
 
 #upgrade_options a {
-    display:block;
+    display: block;
 }
 
-#upgrade_options input{
-    display:block;
+#upgrade_options input {
+    display: block;
     height: 30px;
     width: 80px;
 }
-
-
 
 #bigCanvas {
     display: block;
@@ -239,8 +233,7 @@ div {
     height: 100%;
 }
 
-
-#color_picker canvas{
+#color_picker canvas {
     border: 1px solid blue;
     width: 100px;
     height: 100px;

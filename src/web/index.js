@@ -357,7 +357,7 @@ function drawScene(data) {
 
 
     var inBoundsClose = function (player, x, y) {
-        var range = 70;
+        var range = 150;
         return x < (player.x + range) && x > (player.x - 5 / 4 * range)
             && y < (player.y + range) && y > (player.y - 5 / 4 * range);
     };
@@ -368,8 +368,8 @@ function drawScene(data) {
         draftCtx.strokeStyle = "#ff9d60";
         for (var id in CONTROLLER_LIST) {
             var controller = CONTROLLER_LIST[id], i;
-            draftCtx.fillStyle = "rgba(123,0,0," + controller.health / controller.maxHealth + ")";
-
+            draftCtx.fillStyle = "rgba(123,0,0," + controller.health / (4 *controller.maxHealth) + ")";
+            draftCtx.lineWidth = 10;
             draftCtx.beginPath();
 
             //draw player object
@@ -382,7 +382,7 @@ function drawScene(data) {
                     y = radius * Math.sin(theta);
                     draftCtx.lineTo(controller.x + x, controller.y + y);
                 }
-                draftCtx.lineTo(controller.x + radius, controller.y + 2);
+                draftCtx.lineTo(controller.x + radius, controller.y + 3);
                 draftCtx.stroke();
                 draftCtx.fill();
             } else { //bot
@@ -406,7 +406,8 @@ function drawScene(data) {
                 draftCtx.fill();
             }
 
-            draftCtx.fillText(controller.name, controller.x, controller.y + 50);
+            draftCtx.fillStyle = "#ff9d60";
+            draftCtx.fillText(controller.name, controller.x, controller.y + 70);
             if (controller.selected && controller.owner === selfPlayer.id) {
                 draftCtx.lineWidth = 5;
                 draftCtx.strokeStyle = "#1d55af";
@@ -441,6 +442,7 @@ function drawScene(data) {
     var drawShards = function () {
         for (var id in SHARD_LIST) {
             var shard = SHARD_LIST[id];
+            draftCtx.lineWidth = 2;
 
             if (inBounds(selfPlayer, shard.x, shard.y) && shard.visible) {
                 draftCtx.beginPath();
@@ -453,9 +455,25 @@ function drawScene(data) {
                 draftCtx.fill();
                 draftCtx.closePath();
 
+
+
                 draftCtx.beginPath();
                 draftCtx.fillStyle = "#dfff42";
-                draftCtx.arc(shard.x, shard.y, 5, 0, 2 * Math.PI, false);
+
+                var radius = 10, i;
+                var startTheta = getRandom(0,0.2);
+                var theta = 0;
+                var startX = radius * Math.cos(startTheta);
+                var startY = radius * Math.sin(startTheta);
+                draftCtx.moveTo(shard.x + startX, shard.y + startY);
+                for (i = Math.PI / 2; i <= 2 * Math.PI - Math.PI / 2; i += Math.PI / 2) {
+                    theta = startTheta + i + getRandom(-1 / 24, 1 / 24);
+                    var x = radius * Math.cos(theta);
+                    var y = radius * Math.sin(theta);
+                    draftCtx.lineTo(shard.x + x, shard.y + y);
+                }
+                draftCtx.lineTo(shard.x + startX, shard.y + startY);
+                draftCtx.stroke();
                 draftCtx.fill();
                 draftCtx.closePath();
             }
@@ -515,7 +533,8 @@ function drawScene(data) {
             draftCtx.fill();
 
             if (inBoundsClose(selfPlayer, home.x, home.y)) {
-                draftCtx.strokeStyle = "rgba(110, 222, 229, 0.8)";
+                if (home.faction )
+                draftCtx.strokeStyle = "rgba(12, 255, 218, 0.7)";
                 draftCtx.lineWidth = 10;
                 draftCtx.stroke();
             }
