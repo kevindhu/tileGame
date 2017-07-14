@@ -49,18 +49,30 @@
         <div id="upgrade_options">
             <div id="home_upgrades">
                 <a>Home Upgrades</a>
-                <input type="button" value="HEALTH" id="bld_home_btn"/>
+                <div class="skill">
+                    <input type="button" value="HEALTH" id="bld_home_btn"/>
+                    <canvas></canvas>
+                </div>
             </div>
-            <div>
+            <div id="unit_upgrades">
                 <a>Unit Upgrades</a>
-                <input type="button" value="ARMOR" id="bld_armor"/>
-                <input type="button" value="SPEED" id="bld_speed"/>
-                <input type="button" value="DAMAGE" id="bld_damage"/>
+                <div class="skill">
+                    <input type="button" value="ARMOR" id="bld_armor"/>
+                    <canvas></canvas>
+                </div>
+                <div class="skill">
+                    <input type="button" value="SPEED" id="bld_speed"/>
+                    <canvas></canvas>
+                </div>
+                <div class="skill">
+                    <input type="button" value="DAMAGE" id="bld_damage"/>
+                    <canvas></canvas>
+                </div>
             </div>
         </div>
     </div>
 
-    <input type="button" value="CLOSE" onclick="closeUI('home info');"/>
+    <input type="button" id="close_home_ui" value="CLOSE" onclick="closeUI('home info');"/>
 
     <div id="production">
         <input type="button" value="MAKE BOTS" id="make_bots_btn"/>

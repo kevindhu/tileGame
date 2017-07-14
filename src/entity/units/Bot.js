@@ -16,6 +16,9 @@ function Bot(name, player, home, faction, gameServer) {
     this.type = "Bot";
     this.x = home.x;
     this.y = home.y;
+    this.damage = home.unitDmg;
+    this.health = 5 + home.unitArmor;
+    this.maxSpeed = 10 + home.unitSpeed;
     this.timer = 0;
     this.theta = 0;
     this.laserTimer = 0;
@@ -90,7 +93,7 @@ Bot.prototype.updateControls = function () {
                 this.theta = 0;
                 break;
             case "enemy":
-                //this.theta = Math.random();
+            //this.theta = Math.random();
         }
         this.canShoot = true;
         return;
@@ -166,7 +169,7 @@ Bot.prototype.onDeath = function () {
 
 Bot.prototype.createCorpse = function () {
     var home = this.gameServer.HOME_LIST[this.home];
-    var corpse =  new Shard(this.x, this.y, this.gameServer);
+    var corpse = new Shard(this.x, this.y, this.gameServer);
     corpse.setName("deadBoi");
 };
 
@@ -255,8 +258,6 @@ function getName(name) {
     }
     return name;
 }
-
-
 
 
 module.exports = Bot;

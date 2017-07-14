@@ -465,11 +465,14 @@ GameServer.prototype.start = function () {
             this.findBots(boundary);
         }.bind(this));
 
+
+
+
         socket.on('makeBots', function (data) {
             var barracks = this.HOME_LIST[data.home];
             var shard;
-            for (var i = 0; i<data.shards.length; i++) {
-                shard = this.HOME_SHARD_LIST[data.shards[i]];
+            for (var id in data.shards) {
+                shard = this.HOME_SHARD_LIST[id];
                 if (shard) {
                     barracks.makeBot(player, shard);
                 }
@@ -479,13 +482,24 @@ GameServer.prototype.start = function () {
         socket.on('buildHome', function (data) {
             var home = this.HOME_LIST[data.home];
             var shard;
-            for (var i = 0; i<data.shards.length; i++) {
-                shard = this.HOME_SHARD_LIST[data.shards[i]];
+            for (var id in data.shards) {
+                shard = this.HOME_SHARD_LIST[id];
                 if (shard) {
                     home.buildBase(shard);
                 }
             }
         }.bind(this));
+
+        socket.on('upgradeUnit', function (data) {
+            var barracks = this.HOME_LIST[data.home];
+            barracks.upgradeUnit(data);
+        }.bind(this));
+
+
+
+
+
+
 
 
         socket.on('disconnect', function () {

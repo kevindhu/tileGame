@@ -12,6 +12,9 @@ function Barracks(faction, x, y, gameServer, home) {
     this.level = 0;
     this.radius = 10;
     this.health = 2;
+    this.unitArmor = 0;
+    this.unitSpeed = 10;
+    this.unitDmg = 1;
     this.mainInit();
 }
 
@@ -71,6 +74,31 @@ Barracks.prototype.makeBot = function (player, shard) {
         faction.addBot(this, player, shard);
     }
     this.packetHandler.updateHomePackets(this);
+};
+
+
+Barracks.prototype.upgradeUnit = function (data) {
+    var shard, id;
+    for (id in data.shards) {
+        shard = this.gameServer.HOME_SHARD_LIST[id];
+        if (shard) {
+            switch (data.type) {
+                case "dmg":
+                    this.unitDmg++;
+                    break;
+                case "armor":
+                    this.unitArmor++;
+                    break;
+                case "speed":
+                    this.unitSpeed++;
+                    break;
+            }
+            this.removeShard(shard);
+            shard.onDelete();
+        }
+    }
+    this.packetHandler.updateHomePackets(this);
+    this.updateUIs();
 };
 
 

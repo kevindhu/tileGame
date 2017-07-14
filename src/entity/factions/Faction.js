@@ -61,8 +61,8 @@ Faction.prototype.addPlayer = function (id, playerName) {
 };
 
 
-Faction.prototype.addBot = function (home, player, shard) {
-    var bot = new Bot(shard.name, player, home, this, this.gameServer);
+Faction.prototype.addBot = function (barracks, player, shard) {
+    var bot = new Bot(shard.name, player, barracks, this, this.gameServer);
     player.addBot(bot);
     this.controllers.push(bot.id);
     return bot;

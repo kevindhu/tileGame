@@ -91,7 +91,7 @@ Shard.prototype.removeHome = function () {
 
 Shard.prototype.removeFaction = function () {
     this.faction = null;
-}
+};
 
 Shard.prototype.becomeStatic = function () {
     this.limbo();
@@ -101,6 +101,7 @@ Shard.prototype.becomeStatic = function () {
 
     this.updateQuadItem();
     this.gameServer.shardTree.insert(this.quadItem);
+    this.gameServer.CHUNKS[this.chunk].STATIC_SHARD_LIST[this.id] = this;
     this.gameServer.STATIC_SHARD_LIST[this.id] = this;
 };
 
@@ -116,9 +117,9 @@ Shard.prototype.becomeShooting = function (xVel, yVel, temp) {
     this.addVelocity(xVel, yVel);
 
     this.gameServer.shootingShardTree.insert(this.quadItem);
+    this.gameServer.CHUNKS[this.chunk].SHOOTING_SHARD_LIST[this.id] = this;
     this.gameServer.SHOOTING_SHARD_LIST[this.id] = this;
 };
-
 
 Shard.prototype.becomePlayerShooting = function (player, xVel, yVel, temp) {
     this.becomeShooting(xVel, yVel, temp);
@@ -131,7 +132,6 @@ Shard.prototype.becomeHomeShooting = function (home, xVel, yVel, temp) {
     this.setFaction(faction);
 };
 
-
 Shard.prototype.becomePlayer = function (player) {
     this.limbo();
     this.type = "player";
@@ -142,6 +142,7 @@ Shard.prototype.becomePlayer = function (player) {
     this.updateQuadItem();
 
     this.gameServer.shardTree.insert(this.quadItem);
+    this.gameServer.CHUNKS[this.chunk].PLAYER_SHARD_LIST[this.id] = this;
     this.gameServer.PLAYER_SHARD_LIST[this.id] = this;
 };
 
@@ -151,8 +152,11 @@ Shard.prototype.becomeHome = function (home) {
     this.visible = false;
 
     this.setHome(home);
+    this.gameServer.CHUNKS[this.chunk].HOME_SHARD_LIST[this.id] = this;
     this.gameServer.HOME_SHARD_LIST[this.id] = this;
 };
+
+
 
 Shard.prototype.updatePosition = function () {
     if (this.timer > 0) {

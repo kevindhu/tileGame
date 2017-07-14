@@ -8,6 +8,8 @@
     src: url("OpenSans-Bold.ttf");
 }
 
+
+
 a {
     margin-top: 2px;
     margin-bottom: 2px;
@@ -119,11 +121,10 @@ div {
     display: none;
 }
 
-
 #home_ui li {
     height: 50px;
-    width:200px;
-    background: red;
+    width: 200px;
+    background: #542fce;
 }
 
 #home_ui ol {
@@ -146,11 +147,6 @@ div {
     color: #e0e2e5;
 }
 
-#home_ui input {
-    margin: 3px;
-    height: 40px;
-    width: 100px;
-}
 
 #home_info {
     width: 65%;
@@ -168,6 +164,14 @@ div {
 #home_ui header {
     height: 60px;
     width: 100%;
+}
+
+#close_home_ui {
+    background: #FFFFFF;
+    margin-left: 12%;
+    margin-right:12%;
+    height: 100px;
+    width: 500px;
 }
 
 #home_ui #ribbon {
@@ -233,15 +237,25 @@ div {
     display: block;
 }
 
+#upgrade_options .skill {
+    display: block;
+}
+
+#upgrade_options canvas {
+    width: 300px;
+    height: 100px;
+    margin: auto;
+    position:absolute;
+    background: #123123;
+}
+
 #upgrade_options input {
     margin: 20px;
-    display: block;
-    height: 70px;
+    height: 60px;
     width: 70px;
     border-radius: 5px;
     box-shadow: 0 8px #999;
 }
-
 
 #upgrade_options input:active {
     box-shadow: 0 6px #666;

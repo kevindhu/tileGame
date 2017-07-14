@@ -93,6 +93,9 @@ var Home = function (homeInfo) {
     this.hasColor = homeInfo.hasColor;
     this.health = homeInfo.health;
     this.neighbors = homeInfo.neighbors;
+    this.unitDmg =  homeInfo.unitDmg;
+    this.unitSpeed =  homeInfo.unitSpeed;
+    this.unitArmor =  homeInfo.unitArmor;
 };
 var Arrow = function (x, y) {
     this.preX = x;
@@ -222,6 +225,9 @@ function updateEntities(packet) {
         home.health = homeInfo.health;
         home.hasColor = homeInfo.hasColor;
         home.neighbors = homeInfo.neighbors;
+        home.unitDmg =  homeInfo.unitDmg;
+        home.unitSpeed =  homeInfo.unitSpeed;
+        home.unitArmor =  homeInfo.unitArmor;
     };
 
     var updateShards = function (shard, shardInfo) {

@@ -201,6 +201,9 @@ PacketHandler.prototype.addFactionPackets = function (faction, ifInit) {
 };
 
 PacketHandler.prototype.addShardPackets = function (shard, ifInit) {
+    if (shard.type === "home") {
+        console.log("HERE");
+    }
     var info = {
         master: "add",
         class: "shardInfo",
@@ -258,7 +261,10 @@ PacketHandler.prototype.addHomePackets = function (home, ifInit) {
         level: home.level,
         hasColor: home.hasColor,
         health: home.health,
-        neighbors: home.neighbors
+        neighbors: home.neighbors,
+        unitDmg: home.unitDmg,
+        unitSpeed: home.unitSpeed,
+        unitArmor: home.unitArmor
     };
     if (ifInit) {
         return info;
@@ -281,7 +287,10 @@ PacketHandler.prototype.updateHomePackets = function (home) {
             radius: home.radius,
             hasColor: home.hasColor,
             health: home.health,
-            neighbors: home.neighbors
+            neighbors: home.neighbors,
+            unitDmg: home.unitDmg,
+            unitSpeed: home.unitSpeed,
+            unitArmor: home.unitArmor
         }
     );
 };
