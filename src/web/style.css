@@ -12,7 +12,7 @@ a {
     margin-top: 2px;
     margin-bottom: 2px;
     text-decoration: none;
-    font-family: dist;
+    font-family: openSansBold;
     letter-spacing: 1px;
     font-weight: 800;
 }
@@ -110,8 +110,9 @@ div {
 
 #home_ui {
     position: absolute;
-    left: 30%;
+    left: 20%;
     top: 40%;
+    width: 700px;
     margin-left: -300px;
     margin-top: -300px;
     background: #131a26;
@@ -123,8 +124,8 @@ div {
     margin-top: 0;
     margin-right: 0;
     float: right;
-    width: 170px;
-    height: 440px;
+    width: 120px;
+    height: 600px;
     overflow: auto;
     background: #131a26;
 }
@@ -142,7 +143,7 @@ div {
 }
 
 #home_info {
-    width: 60%;
+    width: 65%;
 }
 
 #home_info div {
@@ -160,7 +161,7 @@ div {
 }
 
 #home_ui #ribbon {
-    vertical-align:middle;
+    vertical-align: middle;
     margin-left: 2%;
     margin-right: 2%;
     margin-top: 2%;
@@ -201,30 +202,45 @@ div {
 #upgrade_wrapper {
     margin-top: 5px;
     width: 450px;
-    height: 300px;
+    height: 500px;
     background: #3b4047;
 }
 
 #upgrade_options {
-    width: 300px;
-    height: 90%;
-    background: #203456;
+    width: 450px;
+    height: 100%;
+    background: #223451;
 }
 
 #upgrade_options div {
     margin: 5px;
-    max-height: 50%;
+    max-height: 500px;
     border: 3px solid black;
 }
 
 #upgrade_options a {
+    letter-spacing: 2.5px;
     display: block;
 }
 
 #upgrade_options input {
+    margin: 20px;
     display: block;
-    height: 30px;
-    width: 80px;
+    height: 70px;
+    width: 70px;
+    border-radius: 5px;
+    box-shadow: 0 8px #999;
+}
+
+
+#upgrade_options input:active {
+    box-shadow: 0 6px #666;
+    transform: translateY(10px);
+}
+
+#upgrade_options input:hover {
+    background: #CF4647;
+    border: 5px solid #CF4647;
 }
 
 #bigCanvas {
