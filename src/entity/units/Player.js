@@ -261,7 +261,7 @@ Player.prototype.dropRandomShard = function () {
 Player.prototype.dropShard = function (shard) {
     if (shard) {
         this.removeShard(shard);
-        shard.becomePlayerShooting(this, Arithmetic.getRandomInt(-30, 30),
+        shard.becomeControllerShooting(this, Arithmetic.getRandomInt(-30, 30),
             Arithmetic.getRandomInt(-30, 30))
     }
 };

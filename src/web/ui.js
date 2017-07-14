@@ -142,6 +142,11 @@ function openHomeUI(home) {
         }
     };
 
+    shardsList.addEventListener('scroll', function () {
+
+    });
+
+
     console.log("OPENING HOME INFO");
     openHomeInfo();
     openUpgradesUI();

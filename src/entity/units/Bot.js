@@ -18,7 +18,7 @@ function Bot(name, player, home, faction, gameServer) {
     this.y = home.y;
     this.damage = home.unitDmg;
     this.health = 5 + home.unitArmor;
-    this.maxSpeed = 10 + home.unitSpeed;
+    this.maxSpeed = 5 + home.unitSpeed;
     this.timer = 0;
     this.theta = 0;
     this.laserTimer = 0;
@@ -222,7 +222,7 @@ Bot.prototype.shootShard = function (player) {
 
     var shardClone = new Shard(this.x, this.y, this.gameServer);
     shardClone.setName("defaultBullet");
-    shardClone.becomeHomeShooting(this, (player.x - this.x) / 4,
+    shardClone.becomeControllerShooting(this, (player.x - this.x) / 4,
         (player.y - this.y) / 4, true);
 
     this.packetHandler.updateHomePackets(this);

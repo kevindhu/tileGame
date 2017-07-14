@@ -13,7 +13,7 @@ function Barracks(faction, x, y, gameServer, home) {
     this.radius = 10;
     this.health = 2;
     this.unitArmor = 0;
-    this.unitSpeed = 10;
+    this.unitSpeed = 4;
     this.unitDmg = 1;
     this.mainInit();
 }

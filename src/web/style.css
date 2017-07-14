@@ -8,6 +8,17 @@
     src: url("OpenSans-Bold.ttf");
 }
 
+::-webkit-scrollbar {
+    width: 15px;
+    height: 15px;
+}
+::-webkit-scrollbar-track-piece  {
+    background-color: #C2D2E4;
+}
+::-webkit-scrollbar-thumb:vertical {
+    height: 30px;
+    background-color: #314b75;
+}
 
 
 a {
@@ -113,7 +124,7 @@ div {
 #home_ui {
     position: absolute;
     left: 20%;
-    top: 40%;
+    top: 35%;
     width: 700px;
     margin-left: -300px;
     margin-top: -300px;
@@ -136,8 +147,10 @@ div {
     margin-right: 0;
     float: right;
     width: 200px;
-    height: 600px;
-    overflow: auto;
+    height: 300px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
     background: #131a26;
 }
 
@@ -167,11 +180,17 @@ div {
 }
 
 #close_home_ui {
-    background: #FFFFFF;
+    font-family:openSansBold;
+    font-size: 30px;
+    color: white;
+    background: #516689;
     margin-left: 12%;
     margin-right:12%;
     height: 100px;
     width: 500px;
+    border: 0;
+    border-radius: 5px;
+    box-shadow: 0 8px #69778e;
 }
 
 #home_ui #ribbon {

@@ -121,9 +121,10 @@ Shard.prototype.becomeShooting = function (xVel, yVel, temp) {
     this.gameServer.SHOOTING_SHARD_LIST[this.id] = this;
 };
 
-Shard.prototype.becomePlayerShooting = function (player, xVel, yVel, temp) {
+Shard.prototype.becomeControllerShooting = function (controller, xVel, yVel, temp) {
+    this.damage = controller.damage;
     this.becomeShooting(xVel, yVel, temp);
-    this.setOwner(player);
+    this.setOwner(controller);
 };
 
 Shard.prototype.becomeHomeShooting = function (home, xVel, yVel, temp) {
