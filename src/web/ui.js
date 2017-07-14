@@ -169,6 +169,7 @@ function addShards(list, home) {
 
         (function (_id) {
             entry.addEventListener("click", function () {
+                this.style.background = "#000000";
                 selectedShards.push(_id);
             });
         })(entry.id);
