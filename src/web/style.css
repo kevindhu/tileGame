@@ -1,6 +1,36 @@
+@font-face {
+    font-family: dist;
+    src: url("dist_pro_thin.otf");
+}
+
+@font-face {
+    font-family: openSansBold;
+    src: url("OpenSans-Bold.ttf");
+}
+
 a {
+    margin-top:2px;
+    margin-bottom:2px;
     text-decoration: none;
-    font-family: "Arial Narrow", Arial, sans-serif;
+    font-family: dist;
+    letter-spacing: 1px;
+    font-weight: 800;
+}
+
+b {
+    text-decoration: none;
+    font-family: openSansBold;
+    font-weight: bold;
+    letter-spacing: 1px;
+    color: #e0e2e5;
+    font-size: 20pt;
+    text-align: center;
+}
+
+li {
+    list-style:none;
+    padding-left:0;
+    text-align: center;
 }
 
 p {
@@ -53,7 +83,7 @@ div {
     font-size: 5vh;
     height: 10vh;
     width: 30vh;
-    background: #FFFFFF;
+    background: #e0e2e5;
 }
 
 
@@ -84,37 +114,123 @@ div {
     margin-left: 10px;
 }
 
+
+
+
+
 #home_ui {
     position: absolute;
     left: 30%;
-    top: 50%;
+    top: 40%;
     margin-left: -300px;
     margin-top: -300px;
-    background: gray;
+    background: #131a26;
     display: none;
 }
 
+#home_ui ol {
+    padding-left: 0;
+    margin-top:0;
+    margin-right:0;
+    float:right;
+    width: 170px;
+    height: 440px;
+    overflow: auto;
+    background: #131a26;
+}
+
+
 #home_ui a {
+    text-align: center;
     font-size: 15pt;
+    color: #e0e2e5;
 }
 
 #home_ui input {
     margin: 3px;
     height: 40px;
-    width: 200px;
-}
-
-#home_ui ol {
-    float:right;
-    height: 100px;
     width: 100px;
-    overflow: auto;
+}
+#home_info {
+    width:60%;
 }
 
-#buildBase input{
+
+#home_ui header {
+    height:60px;
+    width:100%;
+}
+
+#home_ui #ribbon {
+    margin-left:2%;
+    margin-right:2%;
+    margin-top:2%;
+    width:96%;
+    height:60%;
+    background: #22262d;
+    padding-bottom:10px;
+}
+#home_type {
+    padding-left:78px;
+}
+
+
+#home_info #details {
+    background:#262b33;
+    margin-left:4%;
+    padding: 4% 4% 4% 4%;
+}
+
+#home_info #details .left{
+    padding-left:1%;
+    text-align: left;
+}
+
+#home_info #details .right{
+    padding-right:1%;
+    text-align: right;
+}
+
+.left, .right {
+    border:1px solid white;
+    display: inline-block;
+    width: 48%;
+    background:#262b33;
+}
+
+
+
+
+#upgrade_wrapper {
+    margin-top:5px;
+    width:450px;
+    height:300px;
+    background:#3b4047;
+}
+
+
+#upgrade_options {
+    width:300px;
+    height:90%;
+    background:#203456;
+}
+
+#upgrade_options div{
+    margin:5px;
+    max-height: 50%;
+    border:3px solid black;
+}
+
+#upgrade_options a {
+    display:block;
+}
+
+#upgrade_options input{
+    display:block;
     height: 30px;
     width: 80px;
 }
+
 
 
 #bigCanvas {

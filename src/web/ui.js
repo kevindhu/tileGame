@@ -12,6 +12,7 @@ var playerNamer = document.getElementById("player_namer");
 var selectedShards = [];
 
 playerNamer.style.display = "block";
+playerNameInput.focus();
 
 var shardNamerPrompt = document.getElementById('shard_namer_prompt');
 shardNamerPrompt.addEventListener("click", function () {
@@ -83,6 +84,8 @@ function openHomeUI(home) {
     var shardsList = document.getElementById('shards_list');
     var colorPicker = document.getElementById('color_picker');
 
+    var upgradeOptions = document.getElementById('upgrade_options');
+
     var bldArmorBtn= document.getElementById('bld_armor');
     var bldSpeedBtn = document.getElementById('bld_speed');
     var bldDmgBtn = document.getElementById('bld_damage');
@@ -92,14 +95,15 @@ function openHomeUI(home) {
 
     homeInfo.style.display = 'block';
 
-    document.getElementById('home_type').innerHTML = home.type + " Info";
+    document.getElementById('home_type').innerHTML = home.type + " INFO";
     document.getElementById('home_level').innerHTML = home.level;
     document.getElementById('home_health').innerHTML = home.health;
     document.getElementById('home_power').innerHTML = home.power;
     document.getElementById('home_faction_name').innerHTML = home.faction;
 
     var bldHome = function () {
-        socket.emit('bldHome', {
+        console.log(selectedShards);
+        socket.emit('buildHome', {
             home: home.id,
             shards: selectedShards
         })
@@ -115,36 +119,17 @@ function openHomeUI(home) {
     selectedShards = [];
 
     if (home.shards.length !== 0) {
-        bldBaseHealthBtn = resetButton(bldBaseHealthBtn);
+        upgradeOptions.style.display = "block";
         if (home.type === "Barracks") {
-            makeBotsBtn = resetButton(makeBotsBtn);
-            bldArmorBtn= resetButton(bldArmor);
-            bldSpeedBtn = resetButton(bldSpeedBtn);
-            bldDmgBtn = resetButton(bldDmgBtn);
+            //add bot upgrades section
         }
-
-        bldBaseHealthBtn.addEventListener('click', bldHome);
-        makeBotsBtn.addEventListener('click', makeBots);
-        //bldArmor.addEventListener('click', bldBotArmor);
-        //bldSpeedBtn.addEventListener('click', bldBotSpeed);
-        //bldDmgBtn.addEventListener('click', bldBotDmg);
     }
     else {
-        bldBaseBtn.style.display = "none";
-        makeBotsBtn.style.display = "none";
+        upgradeOptions.style.display = "none";
     }
 
     addShards(shardsList, home);
     addColorPicker(colorPicker, home);
-
-}
-
-function resetButton(btn) {
-    var btnNew = btn.cloneNode(true);
-    btn.parentNode.replaceChild(btnNew, btn);
-    btn = btnNew;
-    btn.style.display = "block";
-    return btn;
 }
 
 

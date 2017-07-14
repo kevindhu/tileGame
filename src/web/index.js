@@ -66,6 +66,7 @@ var Tile = function (tileInfo) {
     this.length = tileInfo.length;
     this.color = tileInfo.color;
     this.alert = tileInfo.alert;
+    this.random = Math.floor(getRandom(0, 3));
 };
 var Shard = function (shardInfo) {
     this.id = shardInfo.id;
@@ -349,7 +350,14 @@ function drawScene(data) {
     }
 
     var inBounds = function (player, x, y) {
-        var range = mainCanvas.width / (1.5 * scaleFactor);
+        var range = mainCanvas.width / (1.2 * scaleFactor);
+        return x < (player.x + range) && x > (player.x - 5 / 4 * range)
+            && y < (player.y + range) && y > (player.y - 5 / 4 * range);
+    };
+
+
+    var inBoundsClose = function (player, x, y) {
+        var range = 70;
         return x < (player.x + range) && x > (player.x - 5 / 4 * range)
             && y < (player.y + range) && y > (player.y - 5 / 4 * range);
     };
@@ -357,10 +365,10 @@ function drawScene(data) {
     var drawControllers = function () {
         draftCtx.font = "20px Arial";
 
-        draftCtx.strokeStyle = "#FF0000";
+        draftCtx.strokeStyle = "#ff9d60";
         for (var id in CONTROLLER_LIST) {
             var controller = CONTROLLER_LIST[id], i;
-            draftCtx.fillStyle = "rgba(137,0,0," + controller.health / controller.maxHealth + ")";
+            draftCtx.fillStyle = "rgba(123,0,0," + controller.health / controller.maxHealth + ")";
 
             draftCtx.beginPath();
 
@@ -418,8 +426,10 @@ function drawScene(data) {
                     tile.color.b +
                     ")";
 
-                draftCtx.lineWidth = 5;
-                draftCtx.strokeStyle = "#FFFFF1";
+                draftCtx.lineWidth = 15;
+
+                draftCtx.strokeStyle = "#1e2a2b";
+
                 draftCtx.rect(tile.x, tile.y, tile.length, tile.length);
                 draftCtx.stroke();
                 draftCtx.fill();
@@ -434,11 +444,17 @@ function drawScene(data) {
 
             if (inBounds(selfPlayer, shard.x, shard.y) && shard.visible) {
                 draftCtx.beginPath();
-                draftCtx.fillStyle = "#008000";
                 if (shard.name !== null) {
                     draftCtx.font = "30px Arial";
                     draftCtx.fillText(shard.name, shard.x, shard.y);
                 }
+                draftCtx.fillStyle = "rgba(100, 255, 227, 0.1)";
+                draftCtx.arc(shard.x, shard.y, 20, 0, 2 * Math.PI, false);
+                draftCtx.fill();
+                draftCtx.closePath();
+
+                draftCtx.beginPath();
+                draftCtx.fillStyle = "#dfff42";
                 draftCtx.arc(shard.x, shard.y, 5, 0, 2 * Math.PI, false);
                 draftCtx.fill();
                 draftCtx.closePath();
@@ -471,7 +487,11 @@ function drawScene(data) {
                 for (var i = 0; i < home.neighbors.length; i++) {
                     var neighbor = HOME_LIST[home.neighbors[i]];
                     draftCtx.moveTo(home.x, home.y);
-                    draftCtx.strokeStyle = "#912381";
+                    if (inBoundsClose(selfPlayer, home.x, home.y)) {
+                        draftCtx.strokeStyle = "#f442b0";
+                    } else {
+                        draftCtx.strokeStyle = "#912381";
+                    }
                     draftCtx.lineWidth = 10;
                     draftCtx.lineTo(neighbor.x, neighbor.y);
                     draftCtx.stroke();
@@ -488,14 +508,17 @@ function drawScene(data) {
             if (home.neighbors.length >= 4) {
                 draftCtx.fillStyle = "#4169e1";
             } else {
-                draftCtx.fillStyle = "#003290";
+                draftCtx.fillStyle = "#396a6d";
             }
-            draftCtx.strokeStyle = "rgba(255,30, 1, 0.1)";
-            draftCtx.lineWidth = 20;
 
             draftCtx.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
             draftCtx.fill();
-            draftCtx.stroke();
+
+            if (inBoundsClose(selfPlayer, home.x, home.y)) {
+                draftCtx.strokeStyle = "rgba(110, 222, 229, 0.8)";
+                draftCtx.lineWidth = 10;
+                draftCtx.stroke();
+            }
 
             if (home.owner !== null) {
                 draftCtx.fillText(home.shards.length, home.x, home.y + 40);
@@ -575,7 +598,7 @@ function drawScene(data) {
                 draftCtx.translate(animation.x, animation.y);
                 draftCtx.rotate(-Math.PI / 50 * animation.theta);
                 draftCtx.textAlign = "center";
-                draftCtx.fillStyle = "rgba(0, 0, 0, " + animation.timer * 10 / 100 + ")";
+                draftCtx.fillStyle = "rgba(255, 168, 86, " + animation.timer * 10 / 100 + ")";
                 draftCtx.fillText(animation.name, 0, 15);
                 draftCtx.restore();
 

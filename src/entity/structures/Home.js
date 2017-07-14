@@ -57,16 +57,61 @@ Home.prototype.polluteNeighbors = function () {
             coords['y'] = tile.y + tile.length / 2 + tile.length * j;
             check = this.gameServer.getEntityTile(coords);
             if (check && !check.faction) {
-                check.setColor({
-                    r: Math.round(Arithmetic.getRandomInt(240, 255)),
-                    g: Math.round(Arithmetic.getRandomInt(240, 244)),
-                    b: Math.round(Arithmetic.getRandomInt(220, 230))
-                });
+                var int = Arithmetic.getRandomInt(0, 6);
+                //check.setColor(getColor(int));
+                check.setRandomColor();
             }
 
         }
     }
 };
+
+function getColor(int) {
+    switch (int) {
+        case 0:
+            return { //green
+                r: 0,
+                g: 198,
+                b: 0
+            };
+        case 1:
+            return { //blue
+                r: 0,
+                g: 0,
+                b: 234
+            };
+        case 2:
+            return { //cyan
+                r: 8,
+                g: 208,
+                b: 218
+            };
+        case 3:
+            return { //pink
+                r: 201,
+                g: 111,
+                b: 232
+            };
+        case 4:
+            return { //light grey
+                r: 200,
+                g: 200,
+                b: 200
+            };
+        case 5:
+            return { //red
+                r: 231,
+                g: 0,
+                b: 0
+            };
+        case 6: //orange
+            return {
+                r: 222,
+                g: 146,
+                b: 0
+            }
+    }
+}
 
 Home.prototype.removeAllNeighbors = function () {
     var neighbor;
@@ -216,7 +261,7 @@ Home.prototype.addShard = function (shard) {
 };
 
 Home.prototype.buildBase = function (shard) {
-    this.power ++;
+    this.power++;
     this.updateLevel();
     this.removeShard(shard);
     shard.onDelete();

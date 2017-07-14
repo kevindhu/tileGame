@@ -73,9 +73,9 @@ Tile.prototype.addQuadItem = function () {
 
 Tile.prototype.setRandomColor = function () {
     this.color = {
-        r: Math.round(Arithmetic.getRandomInt(100, 255)),
-        g: Math.round(Arithmetic.getRandomInt(235, 250)),
-        b: Math.round(Arithmetic.getRandomInt(130, 212))
+        r: Math.round(Arithmetic.getRandomInt(20, 40)),
+        g: Math.round(Arithmetic.getRandomInt(23, 40)),
+        b: Math.round(Arithmetic.getRandomInt(10, 40))
     };
 };
 
