@@ -10,6 +10,7 @@ var playerNameInput = document.getElementById("playerNameInput");
 var factionNameInput = document.getElementById("factionNameInput");
 var playerNamer = document.getElementById("player_namer");
 var selectedShards = {};
+var shardListScroll = false;
 var HOME;
 
 playerNamer.style.display = "block";
@@ -81,7 +82,6 @@ function openShardNamerUI() {
 }
 
 function openHomeUI(home) {
-    HOME = home;
     var homeInfo = document.getElementById('home_ui');
     var shardsList = document.getElementById('shards_list');
     var colorPicker = document.getElementById('color_picker');
@@ -142,18 +142,16 @@ function openHomeUI(home) {
         }
     };
 
-    shardsList.addEventListener('scroll', function () {
-
+    shardsList.addEventListener('scroll', function (event) {
+        shardListScroll = true;
     });
 
-
-    console.log("OPENING HOME INFO");
+    HOME = home;
     openHomeInfo();
     openUpgradesUI();
     addShards(shardsList, home);
     addColorPicker(colorPicker, home);
 }
-
 
 var bldHome = function () {
     socket.emit('buildHome', {
@@ -190,7 +188,7 @@ function findChildCanvas(skillDiv) {
 function setSkillMeter(button) {
     var canvas = findChildCanvas(button.parentNode);
     var ctx = canvas.getContext("2d");
-    ctx.clearRect(0,0,1000,200);
+    ctx.clearRect(0, 0, 1000, 200);
     var magnitude = 0;
     ctx.fillStyle = "#FFFFFF";
     switch (button.upgType) {
@@ -223,6 +221,7 @@ function closeUI(action) {
         shardNamer.style.display = 'none';
     }
     if (action === "home info") {
+        shardListScroll = false;
         homeInfo.style.display = 'none';
     }
 }
@@ -241,6 +240,7 @@ function sendShardName() {
 }
 
 function addShards(list, home) {
+    checkSelection();
     list.innerHTML = "";
     for (var i = 0; i < home.shards.length; i++) {
         var entry = document.createElement('li');
@@ -253,11 +253,13 @@ function addShards(list, home) {
                     this.clicked = true;
                     this.style.background = "#fffb22";
                     selectedShards[_id] = _id;
+                    checkSelection();
                 }
                 else {
                     this.clicked = false;
                     this.style.background = "#542fce";
                     delete selectedShards[_id];
+                    checkSelection();
                 }
             });
         })(entry.id);
@@ -304,6 +306,29 @@ function addColorPicker(colorPicker, home) {
         });
     });
 }
+
+function checkSelection() {
+    var bldBaseHealthBtn = document.getElementById('bld_home_btn');
+    var makeBotsBtn = document.getElementById('make_bots_btn');
+    var bldArmorBtn = document.getElementById('bld_armor');
+    var bldSpeedBtn = document.getElementById('bld_speed');
+    var bldDmgBtn = document.getElementById('bld_damage');
+
+    if (Object.size(selectedShards) > 0) {
+        bldBaseHealthBtn.disabled = false;
+        bldArmorBtn.disabled = false;
+        bldSpeedBtn.disabled = false;
+        bldDmgBtn.disabled = false;
+        makeBotsBtn.disabled = false;
+    } else {
+        bldBaseHealthBtn.disabled = "disabled";
+        bldArmorBtn.disabled = "disabled";
+        bldSpeedBtn.disabled = "disabled";
+        bldDmgBtn.disabled = "disabled";
+        makeBotsBtn.disabled = "disabled";
+    }
+}
+
 
 function resetButton(button, callback) {
     button.removeEventListener('click', callback);

@@ -229,7 +229,7 @@ GameServer.prototype.checkControllerCollision = function (controller) {
 
         //player + home collision
         this.homeTree.find(controllerBound, function (home) {
-            if (controller.faction === home.faction) {
+            if (controller.type === "Player" && controller.faction === home.faction) {
                 for (var i = controller.shards.length - 1; i >= 0; i--) {
                     var shard = this.PLAYER_SHARD_LIST[controller.shards[i]];
                     controller.removeShard(shard);
@@ -244,6 +244,9 @@ GameServer.prototype.checkControllerCollision = function (controller) {
                         controller.timer = 15;
                     }
                     home.addViewer(controller);
+                }
+                else {
+                    this.packetHandler.addUIPackets(controller, null, "press space");
                 }
             }
         }.bind(this));

@@ -565,6 +565,8 @@ function drawScene(data) {
         if (BRACKET) {
             draftCtx.fillStyle = "rgba(100,211,211,0.6)";
             draftCtx.fillRect(BRACKET.x, BRACKET.y, BRACKET.length, BRACKET.length);
+            draftCtx.font = "20px Arial";
+            draftCtx.fillText("Press Z to Place Sentinel", selfPlayer.x, selfPlayer.y + 100);
         }
     };
 
@@ -723,7 +725,7 @@ function drawScene(data) {
     drawLasers();
     drawConnectors();
     drawHomes();
-    drawFactions();
+    //drawFactions();
     drawAnimations();
 
     drawBracket();

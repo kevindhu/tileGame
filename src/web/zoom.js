@@ -12,6 +12,9 @@ $(window).bind('mousewheel DOMMouseScroll', function (event) {
     if (event.ctrlKey === true) {
         event.preventDefault();
     }
+    if (shardListScroll) {
+        return;
+    }
     if(event.originalEvent.wheelDelta /120 > 0 && mainScaleFactor < 2) {
         mainScaleFactor += 0.2;
     }
