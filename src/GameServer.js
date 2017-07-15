@@ -479,7 +479,7 @@ GameServer.prototype.start = function () {
             for (var id in data.shards) {
                 shard = this.HOME_SHARD_LIST[id];
                 if (shard) {
-                    barracks.makeBot(player, shard);
+                    barracks.startBot(player, shard);
                 }
             }
         }.bind(this));

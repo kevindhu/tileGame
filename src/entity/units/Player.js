@@ -67,14 +67,12 @@ Player.prototype.isTarget = function (x, y) {
     };
     this.gameServer.controllerTree.find(bound, function (controller) {
         if (controller.faction !== this.faction) {
-            console.log("DETECTED CONTROLLER ENEMY");
             target = controller;
         }
     }.bind(this));
     if (!target) {
         this.gameServer.homeTree.find(bound, function (home) {
             if (home.faction !== this.faction) {
-                console.log("DETECTED HOME ENEMY");
                 target = home;
             }
         }.bind(this));
@@ -296,7 +294,6 @@ Player.prototype.reset = function () {
     this.health = 5;
     this.stationary = false;
     this.updateQuadItem();
-    console.log("UPDATED QUAD ITEM");
 };
 
 

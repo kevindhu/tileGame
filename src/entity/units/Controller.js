@@ -82,7 +82,6 @@ Controller.prototype.update = function () {
 Controller.prototype.updateChunk = function () {
     var newChunk = EntityFunctions.findChunk(this.gameServer, this);
     if (newChunk !== this.chunk) {
-        console.log("NEW CHUNK!");
         delete this.gameServer.CHUNKS[this.chunk].CONTROLLER_LIST[this.id];
         this.chunk = newChunk;
         this.gameServer.CHUNKS[this.chunk].CONTROLLER_LIST[this.id] = this;

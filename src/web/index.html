@@ -45,6 +45,11 @@
         </div>
     </div>
 
+    <div id="production">
+        <input type="button" value="MAKE BOTS" id="make_bots_btn"/>
+        <ol id="build_queue"></ol>
+    </div>
+
     <div id="upgrade_wrapper">
         <div id="upgrade_options">
             <div id="home_upgrades">
@@ -54,6 +59,8 @@
                     <canvas></canvas>
                 </div>
             </div>
+
+
             <div id="unit_upgrades">
                 <a>Unit Upgrades</a>
                 <div class="skill">
@@ -75,11 +82,6 @@
     <br>
 
     <input type="button" id="close_home_ui" value="CLOSE" onclick="closeUI('home info');"/>
-
-    <div id="production">
-        <input type="button" value="MAKE BOTS" id="make_bots_btn"/>
-    </div>
-
 
     <div id="color_picker">
         <canvas id="color_canvas"></canvas>

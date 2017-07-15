@@ -96,6 +96,7 @@ var Home = function (homeInfo) {
     this.unitDmg =  homeInfo.unitDmg;
     this.unitSpeed =  homeInfo.unitSpeed;
     this.unitArmor =  homeInfo.unitArmor;
+    this.queue = homeInfo.queue;
 };
 var Arrow = function (x, y) {
     this.preX = x;
@@ -228,6 +229,8 @@ function updateEntities(packet) {
         home.unitDmg =  homeInfo.unitDmg;
         home.unitSpeed =  homeInfo.unitSpeed;
         home.unitArmor =  homeInfo.unitArmor;
+        console.log(homeInfo.queue);
+        home.queue = homeInfo.queue;
     };
 
     var updateShards = function (shard, shardInfo) {
@@ -278,7 +281,7 @@ function deleteEntities(packet) {
             return;
         }
         if (array) {
-            var index = findWithAttr(array, "id", info.id);
+            var index = findWithAttr(array, "id", packet.id);
             array.splice(index, 1);
         }
         delete list[packet.id];

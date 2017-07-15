@@ -142,6 +142,10 @@ Home.prototype.removeNeighbor = function (home) {
 
 Home.prototype.decreaseHealth = function (amount) {
     var faction = this.gameServer.FACTION_LIST[this.faction];
+    if (!faction) {
+        console.log("WTF?");
+        return;
+    }
     var hq = this.gameServer.HOME_LIST[faction.headquarter];
 
     if (this.neighbors.length === 4) {

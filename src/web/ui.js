@@ -83,6 +83,7 @@ function openShardNamerUI() {
 
 function openHomeUI(home) {
     var homeInfo = document.getElementById('home_ui');
+    var buildQueue = document.getElementById('build_queue');
     var shardsList = document.getElementById('shards_list');
     var colorPicker = document.getElementById('color_picker');
 
@@ -149,6 +150,7 @@ function openHomeUI(home) {
     HOME = home;
     openHomeInfo();
     openUpgradesUI();
+    addQueueInfo(buildQueue, home);
     addShards(shardsList, home);
     addColorPicker(colorPicker, home);
 }
@@ -237,6 +239,35 @@ function sendShardName() {
         )
     }
     closeUI("name shard");
+}
+
+function addQueueInfo(list, home) {
+    list.innerHTML = "";
+    if (!home.queue) {
+        return;
+    }
+    for (var i = 0; i < home.queue.length; i++) {
+        var buildInfo = home.queue[i];
+        var entry = document.createElement('li');
+        entry.id = Math.random();
+
+        (function (_id) {
+            entry.addEventListener("click", function () {
+                if (!this.clicked) {
+                    this.clicked = true;
+                    this.style.background = "#fffb22";
+                }
+                else {
+                    this.clicked = false;
+                    this.style.background = "#542fce";
+                }
+            });
+        })(entry.id);
+
+        entry.appendChild(document.createTextNode("DONE BUILDING: " +
+            buildInfo.shard + "IN " + buildInfo.timer));
+        list.appendChild(entry);
+    }
 }
 
 function addShards(list, home) {

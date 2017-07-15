@@ -126,8 +126,9 @@ div {
     left: 20%;
     top: 35%;
     width: 700px;
-    margin-left: -300px;
-    margin-top: -300px;
+    height:1000px;
+    margin-left: -350px;
+    margin-top: -360px;
     background: #131a26;
     display: none;
 }
@@ -186,8 +187,8 @@ div {
     background: #516689;
     margin-left: 12%;
     margin-right:12%;
-    height: 100px;
-    width: 500px;
+    height: 90px;
+    width: 400px;
     border: 0;
     border-radius: 5px;
     box-shadow: 0 8px #69778e;
@@ -235,7 +236,7 @@ div {
 #upgrade_wrapper {
     margin-top: 5px;
     width: 450px;
-    height: 500px;
+    height: 600px;
     background: #3b4047;
 }
 
@@ -284,6 +285,21 @@ div {
 #upgrade_options input:hover {
     background: #CF4647;
     border: 5px solid #CF4647;
+}
+
+
+#production {
+    position: absolute;
+    margin-top:299px;
+    margin-left:480px;
+    float:right;
+}
+
+#production input {
+    margin-left: 0px;
+    width:200px;
+    height:100px;
+    float:right;
 }
 
 #bigCanvas {
