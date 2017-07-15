@@ -37,6 +37,7 @@ function GameServer() {
 
     this.tileLength = (entityConfig.WIDTH - 2 * entityConfig.BORDER_WIDTH) /
         Math.sqrt(entityConfig.TILES);
+    this.startTime = Date.now();
 }
 
 /** SERVER INIT METHODS **/
@@ -331,6 +332,7 @@ GameServer.prototype.updateLasers = function () {
 };
 
 GameServer.prototype.update = function () {
+    this.timeStamp = Date.now();
     this.initNewClients();
     this.updateControllers();
     this.updateProjectiles();

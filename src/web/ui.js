@@ -273,7 +273,8 @@ function addQueueInfo(list, home) {
         })(entry.id);
 
         entry.appendChild(document.createTextNode(
-            buildInfo.shardName + ": " + buildInfo.timer));
+            buildInfo.shardName + " -- " + Math.floor(buildInfo.timer/1000) +
+            ":" + Math.floor(buildInfo.timer%1000)));
         list.appendChild(entry);
     }
 }

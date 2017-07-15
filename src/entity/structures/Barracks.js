@@ -75,7 +75,9 @@ Barracks.prototype.startBot = function (player, shard) {
         var botBuilder = {
             shardName: shard.name,
             player:  player.id,
-            timer: 100
+            startTime: this.gameServer.timeStamp,
+            endTime: this.gameServer.timeStamp + 10000,
+            timer: 10000
         };
         this.addToBuildQueue(botBuilder);
     }
@@ -95,7 +97,7 @@ Barracks.prototype.updateQueue = function () {
     }
     for (var i =0; i<this.queue.length; i++) {
         var botBuilder = this.queue[i];
-        botBuilder.timer -= 1;
+        botBuilder.timer = botBuilder.endTime - this.gameServer.timeStamp;
         if (botBuilder.timer <= 0) {
             this.createBot(botBuilder);
             this.removeQueueItem(botBuilder);
