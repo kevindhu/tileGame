@@ -17,6 +17,7 @@ function GameServer() {
     this.CONTROLLER_LIST = {};
     this.HOME_LIST = {};
     this.LASER_LIST = {};
+    this.QUEUE_LIST = {};
 
     this.STATIC_SHARD_LIST = {};
     this.SHOOTING_SHARD_LIST = {};
@@ -292,6 +293,14 @@ GameServer.prototype.updateProjectiles = function () {
     this.updateLasers();
 };
 
+GameServer.prototype.updateQueues = function () {
+    for (var id in this.QUEUE_LIST) {
+        var home = this.QUEUE_LIST[id];
+        home.updateQueue();
+    }
+};
+
+
 GameServer.prototype.updateShards = function () {
     var id, shard;
     this.spawnShards();
@@ -325,6 +334,7 @@ GameServer.prototype.update = function () {
     this.initNewClients();
     this.updateControllers();
     this.updateProjectiles();
+    this.updateQueues();
     this.packetHandler.sendPackets();
 };
 
@@ -451,6 +461,15 @@ GameServer.prototype.start = function () {
         socket.on('textInput', function (data) {
             if (player) {
                 player.addShardNamer(data.word);
+            }
+        }.bind(this));
+
+        socket.on('removeViewer', function (data) {
+            if (player && player.viewing) {
+                var home = this.HOME_LIST[player.viewing];
+                if (home) {
+                    home.removeViewer(player);
+                }
             }
         }.bind(this));
 

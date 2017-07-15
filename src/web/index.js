@@ -229,7 +229,6 @@ function updateEntities(packet) {
         home.unitDmg =  homeInfo.unitDmg;
         home.unitSpeed =  homeInfo.unitSpeed;
         home.unitArmor =  homeInfo.unitArmor;
-        console.log(homeInfo.queue);
         home.queue = homeInfo.queue;
     };
 

@@ -70,39 +70,59 @@ Barracks.prototype.startBot = function (player, shard) {
         if (shard.supply === 0) {
             this.removeShard(shard);
             shard.onDelete();
+            this.updateUIs();
         }
         var botBuilder = {
-            shard: shard.id,
+            shardName: shard.name,
             player:  player.id,
             timer: 100
         };
         this.addToBuildQueue(botBuilder);
     }
     this.packetHandler.updateHomePackets(this);
-    this.updateUIs();
+    this.updateQueueUI();
 };
 
 Barracks.prototype.addToBuildQueue = function (botBuilder) {
     this.queue.push(botBuilder);
+    this.gameServer.QUEUE_LIST[this.id] = this;
 };
 
 
 Barracks.prototype.updateQueue = function () {
+    if (this.queue.length <= 0) {
+        delete this.gameServer.QUEUE_LIST[this.id];
+    }
     for (var i =0; i<this.queue.length; i++) {
         var botBuilder = this.queue[i];
         botBuilder.timer -= 1;
         if (botBuilder.timer <= 0) {
             this.createBot(botBuilder);
+            this.removeQueueItem(botBuilder);
         }
     }
     this.packetHandler.updateHomePackets(this);
+    this.updateQueueUI();
+};
+
+Barracks.prototype.updateQueueUI = function () {
+    for (var id in this.viewers) {
+        var player = this.gameServer.CONTROLLER_LIST[id];
+        this.packetHandler.addUIPackets(player, this, "update queue");
+    }
+};
+
+
+Barracks.prototype.removeQueueItem = function (botBuilder) {
+    var index = this.queue.indexOf(botBuilder);
+    this.queue.splice(index, 1);
 };
 
 Barracks.prototype.createBot = function (botBuilder) {
     var player = this.gameServer.CONTROLLER_LIST[botBuilder.player];
-    var shard = this.gameServer.CONTROLLER_LIST[botBuilder.shard];
+    var shardName = botBuilder.shardName;
     var faction = this.gameServer.FACTION_LIST[this.faction];
-    faction.addBot(this, player, shard);
+    faction.addBot(this, player, shardName);
 };
 
 

@@ -72,7 +72,7 @@ div {
     background: rgba(255, 25, 255, 0.5);
 }
 
-#shard_namer {
+#shard_namer_ui {
     display: none;
     position: absolute;
     height: 50vh;
@@ -82,11 +82,11 @@ div {
     background: rgba(255, 255, 255, 0.5);
 }
 
-#shard_namer p {
+#shard_namer_ui p {
     font-size: 5vh;
 }
 
-#shard_namer input {
+#shard_namer_ui input {
     margin-top: 1vh;
     margin-left: 1.2vh;
     font-size: 5vh;

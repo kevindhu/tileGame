@@ -57,6 +57,11 @@ function openUI(info) {
         var home = HOME_LIST[info.homeId];
         openHomeUI(home);
     }
+    if (action === "update queue") {
+        var buildQueue = document.getElementById('build_queue');
+        var home = HOME_LIST[info.homeId];
+        addQueueInfo(buildQueue, home);
+    }
 }
 
 function openShardNamerUI() {
@@ -70,6 +75,9 @@ function openShardNamerUI() {
             document.removeEventListener("keyup", focusEvent);
         }
     };
+
+    shardNamer.style.display = 'block';
+
     document.addEventListener("keyup", focusEvent);
     textInput.addEventListener("keyup", function (event) {
         event.preventDefault();
@@ -77,9 +85,9 @@ function openShardNamerUI() {
             sendShardName();
         }
     });
-
-    shardNamer.style.display = 'block';
 }
+
+
 
 function openHomeUI(home) {
     var homeInfo = document.getElementById('home_ui');
@@ -97,6 +105,7 @@ function openHomeUI(home) {
         document.getElementById('home_faction_name').innerHTML = home.faction;
     };
     var openUpgradesUI = function () {
+        console.log("OPENING UPGRADES UI");
         var upgradeOptions = document.getElementById('upgrade_options');
         var unitUpgrades = document.getElementById("unit_upgrades");
 
@@ -163,7 +172,6 @@ var bldHome = function () {
 };
 
 var makeBots = function () {
-    console.log("MAKING BOTS");
     socket.emit('makeBots', {
         home: HOME.id,
         shards: selectedShards
@@ -195,7 +203,6 @@ function setSkillMeter(button) {
     ctx.fillStyle = "#FFFFFF";
     switch (button.upgType) {
         case "homeHealth":
-            console.log(HOME.power + " is the power of the home!")
             magnitude = HOME.power;
             break;
         case "dmg":
@@ -214,7 +221,7 @@ function setSkillMeter(button) {
 
 
 function closeUI(action) {
-    var shardNamer = document.getElementById('shard_namer');
+    var shardNamer = document.getElementById('shard_namer_ui');
     var homeInfo = document.getElementById('home_ui');
 
     if (action === "name shard") {
@@ -225,6 +232,7 @@ function closeUI(action) {
     if (action === "home info") {
         shardListScroll = false;
         homeInfo.style.display = 'none';
+        socket.emit("removeViewer", {});
     }
 }
 
@@ -264,8 +272,8 @@ function addQueueInfo(list, home) {
             });
         })(entry.id);
 
-        entry.appendChild(document.createTextNode("DONE BUILDING: " +
-            buildInfo.shard + "IN " + buildInfo.timer));
+        entry.appendChild(document.createTextNode(
+            buildInfo.shardName + ": " + buildInfo.timer));
         list.appendChild(entry);
     }
 }
