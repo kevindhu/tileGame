@@ -16,6 +16,7 @@ function Barracks(faction, x, y, gameServer, home) {
     this.unitSpeed = 4;
     this.unitDmg = 1;
     this.queue = [];
+    this.bots = [];
     this.mainInit();
 }
 
@@ -76,8 +77,8 @@ Barracks.prototype.startBot = function (player, shard) {
             shardName: shard.name,
             player:  player.id,
             startTime: this.gameServer.timeStamp,
-            endTime: this.gameServer.timeStamp + 10000,
-            timer: 10000
+            endTime: this.gameServer.timeStamp + 1000,
+            timer: 1000
         };
         this.addToBuildQueue(botBuilder);
     }
@@ -129,12 +130,9 @@ Barracks.prototype.createBot = function (botBuilder) {
 
 
 Barracks.prototype.storeBot = function (bot) {
-    var player = this.gameServer.CONTROLLER_LIST[this.owner];
-    if (player) {
-        player.removeBot(bot);
-    }
-
-    this.updateHomePackets(this);
+    bot.becomeHome();
+    this.bots.push(bot.id);
+    this.packetHandler.updateHomePackets(this);
 };
 
 Barracks.prototype.upgradeUnit = function (data) {

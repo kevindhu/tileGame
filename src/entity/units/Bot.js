@@ -12,7 +12,6 @@ function Bot(name, player, home, faction, gameServer) {
     this.name = getName(name);
     this.owner = player.id;
     this.radius = 40;
-    this.emptyShard = null;
     this.type = "Bot";
     this.x = home.x;
     this.y = home.y;
@@ -25,6 +24,7 @@ function Bot(name, player, home, faction, gameServer) {
     this.manual = false;
     this.manualCoord = null;
     this.enemy = null;
+    this.setOwnerTarget();
     this.init();
 }
 
@@ -35,24 +35,40 @@ Bot.prototype.update = function () {
 };
 
 Bot.prototype.setManual = function (x, y) {
-    this.manual = true;
-    this.manualCoord = {
+    this.target.object = {
         x: x,
         y: y
-    }
+    };
+    this.target.type = "manual";
+};
+
+Bot.prototype.setFriendly = function (target) {
+    this.removeManual();
+    this.target.object = target;
+    this.target.type = "friend";
 };
 
 Bot.prototype.setEnemy = function (target) {
     this.removeManual();
-    this.enemy = target.id;
+    this.target.object = target;
+    this.target.type = "enemy";
 };
 
 Bot.prototype.regroup = function () {
     this.removeManual();
     this.removeSelect();
     this.removeEnemy();
+
+    this.setOwnerTarget();
 };
 
+
+Bot.prototype.setOwnerTarget = function () {
+    this.target = {
+        object: this.gameServer.CONTROLLER_LIST[this.owner],
+        type: "owner"
+    }
+};
 
 Bot.prototype.becomeSelected = function () {
     this.selected = true;
@@ -73,7 +89,9 @@ Bot.prototype.removeEnemy = function () {
 };
 
 Bot.prototype.updateControls = function () {
-    var target;
+    if (!this.target) {
+        return;
+    }
 
     this.canShoot = false;
     this.pressingUp = false;
@@ -81,37 +99,36 @@ Bot.prototype.updateControls = function () {
     this.pressingLeft = false;
     this.pressingRight = false;
 
-    target = this.getTarget();
-    if (!target) {
-        return;
-    }
-
-    if (this.inRange(target)) {
-        switch (target.type) {
+    if (this.inRange(this.target)) {
+        switch (this.target.type) {
             case "owner":
             case "manual":
                 this.theta = 0;
                 break;
             case "enemy":
             //this.theta = Math.random();
-            case "home":
-                target.object.storeBot(this);
+            case "friend":
+                this.target.object.storeBot(this);
 
         }
         this.canShoot = true;
         return;
     }
 
-    this.getTheta(target.object);
+    this.getTheta(this.target.object);
 
     this.maxXSpeed = Math.abs(this.maxSpeed * Math.cos(this.theta));
     this.maxYSpeed = Math.abs(this.maxSpeed * Math.sin(this.theta));
 
-    (target.object.x < this.x) ? this.pressingLeft = true : this.pressingRight = true;
-    (target.object.y < this.y) ? this.pressingUp = true : this.pressingDown = true;
+    (this.target.object.x < this.x) ? this.pressingLeft = true : this.pressingRight = true;
+    (this.target.object.y < this.y) ? this.pressingUp = true : this.pressingDown = true;
 };
 
 Bot.prototype.limbo = function () {
+    var player = this.gameServer.CONTROLLER_LIST[this.owner];
+    if (player) {
+        player.removeBot(this);
+    }
     this.removeSelect();
     this.removeManual();
     this.removeEnemy();
@@ -126,47 +143,6 @@ Bot.prototype.getTheta = function (target) {
     if (this.y - target.y > 0 && this.x - target.x > 0 || this.y - target.y < 0 && this.x - target.x > 0) {
         this.theta += Math.PI;
     }
-};
-
-Bot.prototype.getTarget = function () {
-    var target = {};
-    var player = this.gameServer.CONTROLLER_LIST[this.owner];
-
-    if (!player) {
-        return;
-    }
-    if (this.outofRange() && (this.enemy || this.manual)) {
-        this.regroup();
-        return null;
-    }
-
-    if (!this.manual) {
-        if (this.enemy) {
-            var enemy;
-            var controller = this.gameServer.CONTROLLER_LIST[this.enemy];
-            var home = this.gameServer.HOME_LIST[this.enemy];
-            if (controller) {
-                enemy = controller;
-            }
-            else if (home) {
-                enemy = home;
-            }
-            else {
-                this.regroup();
-                return;
-            }
-            target.object = enemy;
-            target.type = "enemy";
-        } else {
-            target.object = player;
-            target.type = "owner";
-        }
-    }
-    else if (this.manualCoord) {
-        target.object = this.manualCoord;
-        target.type = "manual";
-    }
-    return target;
 };
 
 Bot.prototype.updatePosition = function () {
@@ -196,10 +172,7 @@ Bot.prototype.shootLaser = function (player) {
 };
 
 Bot.prototype.onDelete = function () {
-    var player = this.gameServer.CONTROLLER_LIST[this.owner];
-    if (player) {
-        player.removeBot(this);
-    }
+    this.limbo();
     Bot.super_.prototype.onDelete.apply(this);
 };
 
@@ -208,17 +181,12 @@ Bot.prototype.getRandomShard = function () {
     return this.shards[randomIndex];
 };
 
-
-Bot.prototype.addShard = function (shard) {
-    this.increaseHealth(1);
-    if (shard.name === null) {
-        this.emptyShard = shard.id;
-    }
-    this.shards.push(shard.id);
-    shard.becomeBot(this);
-    this.gameServer.PLAYER_SHARD_LIST[shard.id] = shard;
+Bot.prototype.becomeHome = function () {
+    this.limbo();
+    this.x = -20;
+    this.y = -20;
+    this.packetHandler.updateControllersPackets(this);
 };
-
 
 Bot.prototype.shootShard = function (player) {
     if (!this.canShoot) {
@@ -237,7 +205,7 @@ Bot.prototype.shootShard = function (player) {
     shardClone.becomeControllerShooting(this, (player.x - this.x) / 4,
         (player.y - this.y) / 4, true);
 
-    this.packetHandler.updateHomePackets(this);
+    this.packetHandler.updateControllersPackets(this);
 };
 
 

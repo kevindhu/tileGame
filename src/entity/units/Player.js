@@ -96,7 +96,10 @@ Player.prototype.moveBots = function (x, y) {
             return;
         }
         if (bot.selected) {
-            if (target) {
+            if (target && target.faction) {
+                if (target.faction === this.faction && target.type === "Barracks") {
+                    bot.setFriendly(target);
+                }
                 bot.setEnemy(target);
             } else {
                 rIndex = index % row;
