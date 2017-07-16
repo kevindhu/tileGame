@@ -1,14 +1,17 @@
-var mainCanvas = document.getElementById("bigCanvas");
-var draftCanvas = document.getElementById("draftCanvas");
-var mMap = document.getElementById("mMap");
-var mMapRot = document.getElementById("mMapRot");
+var mainCanvas = document.getElementById("main_canvas");
+var draftCanvas = document.createElement("canvas");
+var mMap = document.createElement("canvas");
+var mMapRot = document.createElement("canvas");
 
+mainCanvas.style.visibility = "hidden";
 draftCanvas.style.display = "none";
 mMap.style.display = "none";
 mMapRot.style.display = "none";
 
 draftCanvas.width = mainCanvas.width;
 draftCanvas.height = mainCanvas.height;
+mMap.width = 500; mMapRot.width = 500;
+mMap.height = 500; mMapRot.height = 500;
 
 var mainCtx = mainCanvas.getContext("2d");
 var draftCtx = draftCanvas.getContext("2d");

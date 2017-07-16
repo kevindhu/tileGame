@@ -1,26 +1,19 @@
-$(document).ready(function () {
-    document.documentElement.style.overflow = 'hidden';  // firefox, chrome
-    document.body.scroll = "no";
-});
+document.documentElement.style.overflow = 'hidden';  // firefox, chrome
+document.body.scroll = "no";
 
-var canvas = document.getElementById("bigCanvas");
-canvas.style.visibility = "hidden";
 var nameBtn = document.getElementById("nameSubmit");
 var playerNameInput = document.getElementById("playerNameInput");
 var factionNameInput = document.getElementById("factionNameInput");
 var playerNamer = document.getElementById("player_namer");
+var shardNamerPrompt = document.getElementById('shard_namer_prompt');
+
 var selectedShards = {};
 var shardListScroll = false;
 var HOME;
 
-playerNamer.style.display = "block";
-playerNameInput.focus();
-
-var shardNamerPrompt = document.getElementById('shard_namer_prompt');
 shardNamerPrompt.addEventListener("click", function () {
     openShardNamerUI();
 });
-
 
 playerNameInput.addEventListener("keyup", function (event) {
     event.preventDefault();
@@ -37,7 +30,7 @@ factionNameInput.addEventListener("keyup", function (event) {
 });
 
 nameBtn.addEventListener("click", function () {
-    canvas.style.visibility = "visible";
+    mainCanvas.style.visibility = "visible";
     socket.emit("newPlayer",
         {
             name: playerNameInput.value,
@@ -46,6 +39,8 @@ nameBtn.addEventListener("click", function () {
     playerNamer.style.display = 'none';
 });
 
+playerNamer.style.display = "block";
+playerNameInput.focus();
 
 function openUI(info) {
     var action = info.action;
@@ -86,8 +81,6 @@ function openShardNamerUI() {
         }
     });
 }
-
-
 
 function openHomeUI(home) {
     var homeInfo = document.getElementById('home_ui');
@@ -136,23 +129,14 @@ function openHomeUI(home) {
             makeBotsBtn.style.display = "none";
         }
 
-        if (home.shards.length !== 0) {
-            bldBaseHealthBtn.style.visibility = "visible";
-            bldArmorBtn.style.visibility = "visible";
-            bldSpeedBtn.style.visibility = "visible";
-            bldDmgBtn.style.visibility = "visible";
 
-            upgradeOptions.style.display = "block";
-        }
-        else {
-            bldBaseHealthBtn.style.visibility = "hidden";
-            bldArmorBtn.style.visibility = "hidden";
-            bldSpeedBtn.style.visibility = "hidden";
-            bldDmgBtn.style.visibility = "hidden";
-        }
     };
 
     shardsList.addEventListener('scroll', function (event) {
+        shardListScroll = true;
+    });
+
+    buildQueue.addEventListener('scroll', function (event) {
         shardListScroll = true;
     });
 
@@ -218,7 +202,6 @@ function setSkillMeter(button) {
     }
     ctx.fillRect(0, 0, magnitude * 10, 200);
 }
-
 
 function closeUI(action) {
     var shardNamer = document.getElementById('shard_namer_ui');
@@ -368,7 +351,6 @@ function checkSelection() {
         makeBotsBtn.disabled = "disabled";
     }
 }
-
 
 function resetButton(button, callback) {
     button.removeEventListener('click', callback);

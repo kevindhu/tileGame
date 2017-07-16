@@ -7,7 +7,9 @@
 </head>
 
 <body>
-<div id="player_namer" class='Namer'>
+<canvas id="main_canvas" width="1000" height="500"></canvas>
+
+<div id="player_namer">
     <p> -- tileGame -- </p>
     <input type="text" name="name" id="playerNameInput" placeholder="choose your name">
     <input type="text" id="factionNameInput" list="factions" placeholder="choose your faction">
@@ -15,42 +17,34 @@
     <input type="button" id="nameSubmit" value="SUBMIT"/>
 </div>
 
-<canvas id="draftCanvas"></canvas>
-<canvas id="bigCanvas" width="1000" height="500"></canvas>
-<canvas id="mMap" width="500" height="500"></canvas>
-<canvas id="mMapRot" width="500" height="500"></canvas>
-
-
-<div id="shard_namer_prompt" class='Info'>
-</div>
-
-<div id="shard_namer_ui" class='Info'>
+<div id="shard_namer_ui">
     <p>Shard Name: </p>
     <input type="text" id="textInput" size="30"/>
     <input type="button" value="Send" onclick="sendShardName();" id="nameShardButton"/>
 </div>
 
 <div id="home_ui" class='Namer'>
-    <header>
+
+    <div class="top">
         <div id="ribbon"><b id="home_type"></b></div>
-    </header>
-    <ol id="shards_list"></ol>
-    <div id="home_info">
-        <div id="details">
+    </div>
+
+    <div class="info">
+        <div id="info_list">
             <a class="left">LEVEL </a><a class="right" id="home_level"></a> <br>
             <a class="left">HEALTH </a><a class="right" id="home_health"></a>
             <a class="left">FACTION </a><a class="right" id="home_faction_name"></a>
             <a class="left">POWER </a><a class="right" id="home_power"></a>
         </div>
     </div>
-
-    <div id="production">
-        <input type="button" value="MAKE BOTS" id="make_bots_btn"/>
-        <ol id="build_queue"></ol>
+    <div class="shards">
+        <div id="shards_container" class = "container">
+            <a>SHARD LIST</a>
+            <ol id="shards_list"></ol>
+        </div>
     </div>
-
-    <div id="upgrade_wrapper">
-        <div id="upgrade_options">
+    <div class="upgrades">
+        <div id="upgrades_container">
             <div id="home_upgrades">
                 <a>Home Upgrades</a>
                 <div class="skill">
@@ -58,8 +52,6 @@
                     <canvas></canvas>
                 </div>
             </div>
-
-
             <div id="unit_upgrades">
                 <a>Unit Upgrades</a>
                 <div class="skill">
@@ -77,16 +69,29 @@
             </div>
         </div>
     </div>
+    <div class="queue">
+        <div id="queue_container">
+            <input type="button" value="MAKE BOTS" id="make_bots_btn"/>
+            <a>BUILD QUEUE</a>
+            <ol id="build_queue"></ol>
+        </div>
+    </div>
 
-    <br>
-
-    <input type="button" id="close_home_ui" value="CLOSE" onclick="closeUI('home info');"/>
+    <div class="bottom">
+        <input type="button" id="close_home_ui" value="CLOSE" onclick="closeUI('home info');"/>
+    </div>
 
     <div id="color_picker">
         <canvas id="color_canvas"></canvas>
     </div>
 
 </div>
+
+
+<div id="game_ui">
+    <div id="shard_namer_prompt" class='Info'></div>
+</div>
+
 
 
 <script type="text/javascript" src="index.js"></script>

@@ -1,3 +1,8 @@
+* { margin: 0; padding: 0;}
+
+body, html { height:100%; }
+
+
 @font-face {
     font-family: dist;
     src: url("dist_pro_thin.otf");
@@ -12,18 +17,17 @@
     width: 15px;
     height: 15px;
 }
-::-webkit-scrollbar-track-piece  {
+
+::-webkit-scrollbar-track-piece {
     background-color: #C2D2E4;
 }
+
 ::-webkit-scrollbar-thumb:vertical {
     height: 30px;
     background-color: #314b75;
 }
 
-
 a {
-    margin-top: 2px;
-    margin-bottom: 2px;
     text-decoration: none;
     font-family: openSansBold;
     letter-spacing: 1px;
@@ -36,8 +40,7 @@ b {
     font-weight: bold;
     letter-spacing: 1.5px;
     color: #e0e2e5;
-    font-size: 20pt;
-    text-align: center;
+    font-size: 30pt;
 }
 
 li {
@@ -51,16 +54,40 @@ p {
     font-family: "Arial Narrow", Arial, sans-serif;
 }
 
-div {
-    list-style-type: none;
+.top {
+    width: 100%;
+    height: 10%;
+    background-color: red;
 }
 
-.Namer {
-    background: rgba(255, 255, 255, 1);
+.info {
+    float: left;
+    width: 70%;
+    height: 20%;
+    background-color: green;
 }
 
-.Namer p {
-    font-size: 30pt;
+.shards {
+    float: right;
+    width: 30%;
+    height: 40%;
+    background-color: blue;
+}
+
+.queue {
+    float: right;
+    width: 30%;
+    height: 50%;
+    background-color: yellow;
+}
+
+.upgrades {
+    display: flex;
+    align-items: center;
+    float: left;
+    width: 70%;
+    height: 70%;
+    background-color: #DDDDDD;
 }
 
 #shard_namer_prompt {
@@ -126,7 +153,7 @@ div {
     left: 20%;
     top: 35%;
     width: 700px;
-    height:1000px;
+    height: 1000px;
     margin-left: -350px;
     margin-top: -360px;
     background: #131a26;
@@ -134,59 +161,36 @@ div {
 }
 
 #home_ui li {
-    height: 80px;
-    width: 200px;
+    height: 60px;
+    width: 100%;
     background: #542fce;
 }
 
+#home_ui a {
+    font-size: 15pt;
+    color: #e0e2e5;
+}
+
 #home_ui ol {
+    padding-left: 0;
+    padding-right: 0;
+    width: 100%;
     font-family: openSansBold;
     font-size: 30px;
     color: white;
-    padding-left: 0;
-    margin-top: 0;
-    margin-right: 20px;
-    float: right;
-    width: 200px;
     height: 300px;
-
     overflow-y: auto;
     overflow-x: hidden;
     background: #131a26;
 }
 
-#home_ui a {
-    text-align: center;
-    font-size: 15pt;
-    color: #e0e2e5;
-}
-
-
-#home_info {
-    width: 65%;
-}
-
-#home_info div {
-    border-radius: 5px;
-}
-
-#home_info a {
-
-    border-radius: 3px;
-}
-
-#home_ui header {
-    height: 60px;
-    width: 100%;
-}
-
 #close_home_ui {
-    font-family:openSansBold;
+    font-family: openSansBold;
     font-size: 30px;
     color: white;
     background: #516689;
-    margin-left: 4%;
-    margin-right:12%;
+    margin-left: 4.5%;
+    margin-right: 12%;
     height: 90px;
     width: 400px;
     border: 0;
@@ -194,82 +198,69 @@ div {
     box-shadow: 0 8px #69778e;
 }
 
-#home_ui #ribbon {
+.top #ribbon {
     vertical-align: middle;
-    margin-left: 2%;
-    margin-right: 2%;
-    margin-top: 2%;
-    width: 96%;
-    height: 60%;
+    margin: 0 auto;
+    width: 95%;
+    height: 90%;
     background: #22262d;
-    padding-bottom: 10px;
-}
-
-#home_type {
     text-align: center;
-    width: 2000px;
 }
 
-#home_info #details {
-    background: #262b33;
-    margin-left: 4%;
-    padding: 4% 4% 4% 4%;
-}
-
-#home_info #details .left {
-    padding-left: 1%;
+#info_list .left {
+    float: left;
     text-align: left;
 }
 
-#home_info #details .right {
-    padding-right: 1%;
+#info_list .right {
+    float: right;
     text-align: right;
 }
 
-.left, .right {
+#info_list .left, .right {
     border: 1px solid #9398a0;
     display: inline-block;
-    width: 48%;
+    height: 25%;
+    width: 49%;
     background: #262b33;
 }
 
-#upgrade_wrapper {
-    margin-top: 5px;
-    width: 450px;
-    height: 600px;
-    background: #3b4047;
-}
-
-#upgrade_options {
-    width: 450px;
-    height: 100%;
+#upgrades_container {
+    margin: 0 auto;
+    width: 90%;
+    height: 90%;
     background: #223451;
+    border-radius: 5px;
 }
 
-#upgrade_options div {
-    margin: 5px;
-    max-height: 500px;
-    border: 3px solid black;
+#upgrades_container div {
+    max-height: 50%;
 }
 
-#upgrade_options a {
-    letter-spacing: 2.5px;
+#upgrades_container a {
+    font-size: 20pt;
+    letter-spacing: 2px;
     display: block;
 }
 
-#upgrade_options .skill {
+#upgrades_container .skill {
     display: block;
+    margin-top: 5px;
 }
 
-#upgrade_options canvas {
-    width: 300px;
+#upgrades_container canvas {
+    width: 280px;
     height: 100px;
     margin: auto;
-    position:absolute;
+    position: absolute;
+    -webkit-border-radius: 7px;
+    -moz-border-radius: 7px;
+    border-radius: 7px;
+    border: 2px solid #62c164;
     background: #123123;
 }
 
-#upgrade_options input {
+#upgrades_container input {
     margin: 20px;
     height: 60px;
     width: 70px;
@@ -277,33 +268,19 @@ div {
     box-shadow: 0 8px #999;
 }
 
-#upgrade_options input:active {
+#upgrades_container input:active {
     box-shadow: 0 6px #666;
     transform: translateY(10px);
 }
 
-#upgrade_options input:hover {
+#upgrades_container input:hover {
     background: #CF4647;
     border: 5px solid #CF4647;
 }
 
 
-#production {
+#main_canvas {
     position: absolute;
-    margin-top:299px;
-    margin-left:480px;
-    float:right;
-}
-
-#production input {
-    margin-left: 0px;
-    width:200px;
-    height:100px;
-    float:right;
-}
-
-#bigCanvas {
-    display: block;
     width: 100%;
     height: 100%;
 }
