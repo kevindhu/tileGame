@@ -30,7 +30,6 @@ function Bot(name, player, home, faction, gameServer) {
 
 EntityFunctions.inherits(Bot, Controller);
 
-
 Bot.prototype.update = function () {
     Bot.super_.prototype.update.apply(this);
 };
@@ -43,11 +42,17 @@ Bot.prototype.setManual = function (x, y) {
     }
 };
 
+Bot.prototype.setEnemy = function (target) {
+    this.removeManual();
+    this.enemy = target.id;
+};
+
 Bot.prototype.regroup = function () {
     this.removeManual();
     this.removeSelect();
     this.removeEnemy();
 };
+
 
 Bot.prototype.becomeSelected = function () {
     this.selected = true;
@@ -61,11 +66,6 @@ Bot.prototype.removeSelect = function () {
 
 Bot.prototype.removeManual = function () {
     this.manual = false;
-};
-
-Bot.prototype.setEnemy = function (target) {
-    this.removeManual();
-    this.enemy = target.id;
 };
 
 Bot.prototype.removeEnemy = function () {
@@ -94,6 +94,9 @@ Bot.prototype.updateControls = function () {
                 break;
             case "enemy":
             //this.theta = Math.random();
+            case "home":
+                target.object.storeBot(this);
+
         }
         this.canShoot = true;
         return;
@@ -106,6 +109,15 @@ Bot.prototype.updateControls = function () {
 
     (target.object.x < this.x) ? this.pressingLeft = true : this.pressingRight = true;
     (target.object.y < this.y) ? this.pressingUp = true : this.pressingDown = true;
+};
+
+Bot.prototype.limbo = function () {
+    this.removeSelect();
+    this.removeManual();
+    this.removeEnemy();
+
+    this.gameServer.controllerTree.remove(this.quadItem);
+    delete this.gameServer.CONTROLLER_LIST[this.id];
 };
 
 

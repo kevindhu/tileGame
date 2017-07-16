@@ -1,7 +1,17 @@
-* { margin: 0; padding: 0;}
+* {
+    margin: 0;
+    padding: 0;
 
-body, html { height:100%; }
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 
+body, html {
+    height: 100%;
+}
 
 @font-face {
     font-family: dist;
@@ -14,8 +24,8 @@ body, html { height:100%; }
 }
 
 ::-webkit-scrollbar {
-    width: 15px;
-    height: 15px;
+    width: 1vh;
+    height: 1vh;
 }
 
 ::-webkit-scrollbar-track-piece {
@@ -23,24 +33,26 @@ body, html { height:100%; }
 }
 
 ::-webkit-scrollbar-thumb:vertical {
-    height: 30px;
+    height: 2vh;
     background-color: #314b75;
 }
 
 a {
     text-decoration: none;
     font-family: openSansBold;
-    letter-spacing: 1px;
+    letter-spacing: 0.1vh;
     font-weight: 800;
+    text-shadow: 0.3vh 0.3vh #2e3238;
 }
 
 b {
     text-decoration: none;
     font-family: openSansBold;
     font-weight: bold;
-    letter-spacing: 1.5px;
-    color: #e0e2e5;
-    font-size: 30pt;
+    letter-spacing: 0.1vh;
+    color: #a6edf4;
+    font-size: 4vh;
+    text-shadow: 0.3vh 0.3vh #0c0d0f;
 }
 
 li {
@@ -49,36 +61,92 @@ li {
     text-align: center;
 }
 
+input {
+    border: 0.3vh solid #5a80af;
+}
+
 p {
     text-decoration: none;
     font-family: "Arial Narrow", Arial, sans-serif;
 }
 
+.item_list {
+    text-align: center;
+    margin: 0 auto;
+    width: 100%;
+    height:100%;
+    box-shadow: 0.5vh 0.5vh 0.5vh #1f2630;
+}
+
+.item_list a {
+    font-size: 3.2vh !important;
+}
+
+.list_header {
+    width: 100%;
+    background: #375482;
+}
+
 .top {
     width: 100%;
     height: 10%;
-    background-color: red;
+    background-color: rgba(39, 75, 132,0.7);
+}
+
+.bottom {
+    float: left;
+    height:15%;
+    width: 70%;
+    margin: 0 auto;
+    background-color: rgba(39, 75, 132,0.4) !important;
 }
 
 .info {
+    display: flex;
+    align-items: center;
     float: left;
     width: 70%;
-    height: 20%;
-    background-color: green;
+    height: 15%;
+    background-color: rgba(61, 71, 89, 1);
 }
 
 .shards {
     float: right;
     width: 30%;
-    height: 40%;
-    background-color: blue;
+    height: 30%;
+    background-color: rgba(39, 75, 132,0.4);
+}
+
+.create_bot {
+    float:right;
+    width: 30%;
+    height: 20%;
+}
+
+#create_bot_container {
+    width:100%;
+    height:100%;
+    display: flex;
+    align-items: center;
 }
 
 .queue {
     float: right;
     width: 30%;
-    height: 50%;
-    background-color: yellow;
+    height: 30%;
+    background-color: rgba(39, 75, 132,0.4);
+}
+
+#make_bots_btn {
+    display:block;
+    font-family: openSansBold;
+    font-size: 2.5vh;
+    color: white;
+    background: #516689;
+    width: 16vh;
+    height: 8vh;
+    margin: 0 auto;
+    margin-bottom:3.5vh;
 }
 
 .upgrades {
@@ -86,17 +154,27 @@ p {
     align-items: center;
     float: left;
     width: 70%;
-    height: 70%;
-    background-color: #DDDDDD;
+    height: 60%;
+    background-color: rgba(61, 71, 89, 0.4);
 }
 
 #shard_namer_prompt {
     position: absolute;
     height: 12vh;
     width: 5vh;
-    margin-left: 10vh;
-    margin-top: -30vh;
+    margin-left: 100vh;
+    margin-top: 80vh;
     background: rgba(255, 25, 255, 0.5);
+}
+
+#leaderboard_container {
+    position: absolute;
+    height: 70vh;
+    width: 30vh;
+    margin-left: 170vh;
+    margin-top: 5vh;
+    background: rgba(250, 250, 255, 0.5);
+    text-align: center;
 }
 
 #shard_namer_ui {
@@ -104,8 +182,8 @@ p {
     position: absolute;
     height: 50vh;
     width: 40vh;
-    margin-left: 15vh;
-    margin-top: -90vh;
+    margin-left: 80vh;
+    margin-top: 20vh;
     background: rgba(255, 255, 255, 0.5);
 }
 
@@ -122,53 +200,72 @@ p {
     background: #e0e2e5;
 }
 
+#game_title {
+    font-size: 10vh;
+    color: #82b1ff;
+}
+
 #player_namer {
-    width: 500px;
-    height: 500px;
     position: absolute;
-    left: 50%;
-    margin-left: -300px;
-    top: 50%;
-    margin-top: -300px;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#player_namer_wrapper {
+    width: 75vh;
+    height: 70vh;
+    margin: 0 auto;
+    text-align: center;
+}
+
+#factionNameInput {
+
 }
 
 #player_namer input {
-    font-size: 30pt;
-    height: 80px;
-    width: 400px;
+    text-align: center;
+    font-size: 5vh;
+    height: 12vh;
+    width: 60vh;
     background: #FFFFFF;
-    margin: 10px;
+    margin: 1vh;
 }
 
 #player_namer button {
-    border: 2px;
-    border-radius: 4px;
-    height: 80px;
-    width: 400px;
-    margin-left: 10px;
+    border: 0.5vh;
+    border-radius: 1vh;
+    height: 10vh;
+    width: 40vh;
+    margin-left: 1vh;
 }
 
 #home_ui {
     position: absolute;
-    left: 20%;
-    top: 35%;
-    width: 700px;
-    height: 1000px;
-    margin-left: -350px;
-    margin-top: -360px;
-    background: #131a26;
+    width: 70vh;
+    height: 97vh;
+    margin-left: 5vh;
+    margin-top: 1vh;
+    background: rgba(35, 41, 51, 0.3);
     display: none;
 }
 
 #home_ui li {
-    height: 60px;
-    width: 100%;
+    margin: 0 auto;
+    height: 5vh;
+    width: 95%;
     background: #542fce;
+    border: solid 1px #84c62d;
+    -webkit-border-radius: 2vh;
+    -moz-border-radius: 2vh;
+    border-radius: 2vh;
 }
 
 #home_ui a {
-    font-size: 15pt;
-    color: #e0e2e5;
+    font-size: 2.3vh;
+    color: #d1fbff;
 }
 
 #home_ui ol {
@@ -176,9 +273,9 @@ p {
     padding-right: 0;
     width: 100%;
     font-family: openSansBold;
-    font-size: 30px;
+    font-size: 2vh;
     color: white;
-    height: 300px;
+    height: 30vh;
     overflow-y: auto;
     overflow-x: hidden;
     background: #131a26;
@@ -186,20 +283,17 @@ p {
 
 #close_home_ui {
     font-family: openSansBold;
-    font-size: 30px;
+    font-size: 5vh;
     color: white;
     background: #516689;
-    margin-left: 4.5%;
-    margin-right: 12%;
-    height: 90px;
-    width: 400px;
-    border: 0;
-    border-radius: 5px;
-    box-shadow: 0 8px #69778e;
+    height: 10vh;
+    width: 40vh;
+    border-radius: 0.4vh;
+    margin-top: 2vh;
+    margin-left: 6.3%;
 }
 
 .top #ribbon {
-    vertical-align: middle;
     margin: 0 auto;
     width: 95%;
     height: 90%;
@@ -207,77 +301,96 @@ p {
     text-align: center;
 }
 
-#info_list .left {
+#info_container {
+    margin: 0 auto;
+    margin-bottom: 1vh;
+    width: 95%;
+    height: 80%;
+}
+
+#info_container .left {
     float: left;
     text-align: left;
 }
 
-#info_list .right {
+#info_container .right {
     float: right;
     text-align: right;
 }
 
-#info_list .left, .right {
-    border: 1px solid #9398a0;
+#info_container .left, .right {
+    margin: 0.1vh;
+    border: 0.1vh solid #384559;
     display: inline-block;
     height: 25%;
-    width: 49%;
+    width: 47%;
     background: #262b33;
 }
 
 #upgrades_container {
     margin: 0 auto;
-    width: 90%;
-    height: 90%;
-    background: #223451;
-    border-radius: 5px;
+    width: 95%;
+    height: 95%;
+    background: #143e82;
+    border-radius: 1vh;
+    box-shadow: 0.5vh 0.5vh 0.5vh #1f2630;
 }
 
 #upgrades_container div {
     max-height: 50%;
+    text-align: center;
+}
+
+#upgrades_header {
+    height: 5vh;
+    vertical-align: middle;
+    background: #375482;
+    text-align: center;
 }
 
 #upgrades_container a {
-    font-size: 20pt;
-    letter-spacing: 2px;
+    padding-top: 0.3vh;
+    font-size: 3vh;
+    letter-spacing: 0.1vh;
     display: block;
 }
 
 #upgrades_container .skill {
     display: block;
-    margin-top: 5px;
+    margin-top: 1vh;
 }
 
 #upgrades_container canvas {
-    width: 280px;
-    height: 100px;
-    margin: auto;
-    position: absolute;
-    -webkit-border-radius: 7px;
-    -moz-border-radius: 7px;
-    border-radius: 7px;
-    border: 2px solid #62c164;
+    width: 70%;
+    height: 30%;
+    -webkit-border-radius: 0.7vh;
+    -moz-border-radius: 0.7vh;
+    border-radius: 0.7vh;
+    border: 0.4vh solid #236368;
     background: #123123;
+    float: right;
+    margin-top: 1vh;
+    margin-right: 0.5vh;
 }
 
 #upgrades_container input {
-    margin: 20px;
-    height: 60px;
-    width: 70px;
-    border-radius: 5px;
-    box-shadow: 0 8px #999;
+    font-size: 1.5vh;
+    margin: 1vh;
+    height: 8vh;
+    width: 8.5vh;
+    border-radius: 0.5vh;
+    box-shadow: 0 1vh #61c254;
 }
 
 #upgrades_container input:active {
-    box-shadow: 0 6px #666;
-    transform: translateY(10px);
+    box-shadow: 0 1vh #666;
+    transform: translateY(1vh);
 }
 
 #upgrades_container input:hover {
     background: #CF4647;
-    border: 5px solid #CF4647;
+    border: 0.4vh solid #CF4647;
 }
-
 
 #main_canvas {
     position: absolute;
@@ -286,7 +399,7 @@ p {
 }
 
 #color_picker canvas {
-    border: 1px solid blue;
-    width: 100px;
-    height: 100px;
+    border: 0.3vh solid blue;
+    width: 4vh;
+    height: 4vh;
 }

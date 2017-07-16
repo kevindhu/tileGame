@@ -72,9 +72,7 @@ Player.prototype.isTarget = function (x, y) {
     }.bind(this));
     if (!target) {
         this.gameServer.homeTree.find(bound, function (home) {
-            if (home.faction !== this.faction) {
-                target = home;
-            }
+            target = home;
         }.bind(this));
     }
     return target;

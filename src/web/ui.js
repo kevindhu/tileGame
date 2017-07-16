@@ -6,12 +6,14 @@ var playerNameInput = document.getElementById("playerNameInput");
 var factionNameInput = document.getElementById("factionNameInput");
 var playerNamer = document.getElementById("player_namer");
 var shardNamerPrompt = document.getElementById('shard_namer_prompt');
+var leaderboard = document.getElementById("leaderboard_container");
 
 var selectedShards = {};
 var shardListScroll = false;
 var HOME;
 
 shardNamerPrompt.addEventListener("click", function () {
+    console.log("OPENING");
     openShardNamerUI();
 });
 
@@ -20,6 +22,7 @@ playerNameInput.addEventListener("keyup", function (event) {
     if (event.keyCode === 13) {
         factionNameInput.focus();
     }
+    drawLeaderBoard();
 });
 
 factionNameInput.addEventListener("keyup", function (event) {
@@ -31,6 +34,7 @@ factionNameInput.addEventListener("keyup", function (event) {
 
 nameBtn.addEventListener("click", function () {
     mainCanvas.style.visibility = "visible";
+    leaderboard.style.visibility = "visible";
     socket.emit("newPlayer",
         {
             name: playerNameInput.value,
@@ -39,8 +43,10 @@ nameBtn.addEventListener("click", function () {
     playerNamer.style.display = 'none';
 });
 
-playerNamer.style.display = "block";
+playerNamer.style.visibility = "visible";
 playerNameInput.focus();
+leaderboard.style.visibility = "hidden";
+
 
 function openUI(info) {
     var action = info.action;
@@ -101,9 +107,10 @@ function openHomeUI(home) {
         console.log("OPENING UPGRADES UI");
         var upgradeOptions = document.getElementById('upgrade_options');
         var unitUpgrades = document.getElementById("unit_upgrades");
+        var createBot = document.getElementById("create_bot_container");
 
-        var bldBaseHealthBtn = document.getElementById('bld_home_btn');
         var makeBotsBtn = document.getElementById('make_bots_btn');
+        var bldBaseHealthBtn = document.getElementById('bld_home_btn');
         var bldArmorBtn = document.getElementById('bld_armor');
         var bldSpeedBtn = document.getElementById('bld_speed');
         var bldDmgBtn = document.getElementById('bld_damage');
@@ -117,16 +124,17 @@ function openHomeUI(home) {
         resetButton(bldBaseHealthBtn, bldHome);
         if (home.type === "Barracks") {
             unitUpgrades.style.display = "block";
-            makeBotsBtn.style.display = "block";
             resetButton(bldArmorBtn, upgUnit);
             resetButton(bldSpeedBtn, upgUnit);
             resetButton(bldDmgBtn, upgUnit);
-
             resetButton(makeBotsBtn, makeBots);
+
+            createBot.style.display = "flex";
+            console.log(" block ")
         }
         else {
+            createBot.style.display = "none";
             unitUpgrades.style.display = "none";
-            makeBotsBtn.style.display = "none";
         }
 
 
@@ -181,6 +189,8 @@ function findChildCanvas(skillDiv) {
 
 function setSkillMeter(button) {
     var canvas = findChildCanvas(button.parentNode);
+    canvas.width = 260;
+    canvas.height = 100;
     var ctx = canvas.getContext("2d");
     ctx.clearRect(0, 0, 1000, 200);
     var magnitude = 0;
@@ -296,6 +306,9 @@ function addShards(list, home) {
 function addColorPicker(colorPicker, home) {
     var colorCanvas = document.getElementById("color_canvas");
     var colorCtx = colorCanvas.getContext("2d");
+
+    colorCanvas.width = 100;
+    colorCanvas.height = 100;
 
     if (!home.hasColor && home.level > 1) {
         colorPicker.style.display = "block";

@@ -128,6 +128,15 @@ Barracks.prototype.createBot = function (botBuilder) {
 };
 
 
+Barracks.prototype.storeBot = function (bot) {
+    var player = this.gameServer.CONTROLLER_LIST[this.owner];
+    if (player) {
+        player.removeBot(bot);
+    }
+
+    this.updateHomePackets(this);
+};
+
 Barracks.prototype.upgradeUnit = function (data) {
     var shard, id;
     for (id in data.shards) {

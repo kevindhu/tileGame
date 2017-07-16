@@ -10,11 +10,13 @@
 <canvas id="main_canvas" width="1000" height="500"></canvas>
 
 <div id="player_namer">
-    <p> -- tileGame -- </p>
-    <input type="text" name="name" id="playerNameInput" placeholder="choose your name">
-    <input type="text" id="factionNameInput" list="factions" placeholder="choose your faction">
-    <datalist id="factions"></datalist>
-    <input type="button" id="nameSubmit" value="SUBMIT"/>
+    <div id="player_namer_wrapper">
+        <p id="game_title"> -- tileGame -- </p>
+        <input type="text" name="name" id="playerNameInput" placeholder="choose your name">
+        <input type="text" id="factionNameInput" list="factions" placeholder="choose your faction">
+        <datalist id="factions"></datalist>
+        <input type="button" id="nameSubmit" value="SUBMIT"/>
+    </div>
 </div>
 
 <div id="shard_namer_ui">
@@ -28,27 +30,30 @@
     <div class="top">
         <div id="ribbon"><b id="home_type"></b></div>
     </div>
-
     <div class="info">
-        <div id="info_list">
-            <a class="left">LEVEL </a><a class="right" id="home_level"></a> <br>
+        <div id="info_container">
+            <a class="left">LEVEL </a><a class="right" id="home_level"></a>
             <a class="left">HEALTH </a><a class="right" id="home_health"></a>
             <a class="left">FACTION </a><a class="right" id="home_faction_name"></a>
             <a class="left">POWER </a><a class="right" id="home_power"></a>
         </div>
     </div>
     <div class="shards">
-        <div id="shards_container" class = "container">
-            <a>SHARD LIST</a>
+        <div id="shards_container" class = "item_list">
+            <div class="list_header">
+                <a>SHARDS</a>
+            </div>
             <ol id="shards_list"></ol>
         </div>
     </div>
     <div class="upgrades">
         <div id="upgrades_container">
             <div id="home_upgrades">
-                <a>Home Upgrades</a>
+                <div id="upgrades_header">
+                    <a>UPGRADES</a>
+                </div>
                 <div class="skill">
-                    <input type="button" value="HEALTH" id="bld_home_btn"/>
+                    <input value="HEALTH" id="bld_home_btn"/>
                     <canvas></canvas>
                 </div>
             </div>
@@ -69,27 +74,33 @@
             </div>
         </div>
     </div>
-    <div class="queue">
-        <div id="queue_container">
+    <div class="create_bot">
+        <div id="create_bot_container">
             <input type="button" value="MAKE BOTS" id="make_bots_btn"/>
-            <a>BUILD QUEUE</a>
+        </div>
+    </div>
+    <div class="queue">
+        <div id="queue_container" class="item_list">
+            <div class="list_header">
+                <a>QUEUE</a>
+            </div>
             <ol id="build_queue"></ol>
         </div>
     </div>
-
     <div class="bottom">
         <input type="button" id="close_home_ui" value="CLOSE" onclick="closeUI('home info');"/>
     </div>
-
     <div id="color_picker">
         <canvas id="color_canvas"></canvas>
     </div>
-
 </div>
 
-
 <div id="game_ui">
-    <div id="shard_namer_prompt" class='Info'></div>
+    <div id="shard_namer_prompt"></div>
+    <div id="leaderboard_container">
+        <p>LEADERBOARD:</p>
+        <ol id="leaderboard"></ol>
+    </div>
 </div>
 
 

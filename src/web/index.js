@@ -181,6 +181,7 @@ function addEntities(packet) {
             break;
         case "factionInfo":
             addEntity(packet, FACTION_LIST, Faction, FACTION_ARRAY);
+            drawLeaderBoard();
             break;
         case "animationInfo":
             addEntity(packet, ANIMATION_LIST, Animation);
@@ -219,6 +220,7 @@ function updateEntities(packet) {
         faction.y = factionInfo.y;
         faction.size = factionInfo.size;
         FACTION_ARRAY.sort(factionSort);
+        drawLeaderBoard();
     };
 
     var updateHomes = function (home, homeInfo) {
@@ -306,6 +308,7 @@ function deleteEntities(packet) {
             deleteEntity(packet, TILE_LIST);
         case "factionInfo":
             deleteEntity(packet, FACTION_LIST, FACTION_ARRAY);
+            drawLeaderBoard();
             break;
         case "animationInfo":
             deleteEntity(packet, ANIMATION_LIST);
@@ -711,16 +714,6 @@ function drawScene(data) {
         mainCtx.drawImage(serverMap, 800, 400);
     };
 
-
-    var drawScoreBoard = function () {
-        mainCtx.fillText("LEADERBOARD:", mainCanvas.width * 3 / 4, 40);
-        for (var i = FACTION_ARRAY.length - 1; i >= 0; i--) {
-            var faction = FACTION_ARRAY[i];
-            mainCtx.font = "30px Arial";
-            mainCtx.fillText(faction.name, mainCanvas.width * 3 / 4, 40 + (FACTION_ARRAY.length - i) * 30);
-        }
-    };
-
     mainCtx.clearRect(0, 0, 11000, 11000);
     draftCtx.clearRect(0, 0, 11000, 11000);
     mMapCtx.clearRect(0, 0, 500, 500);
@@ -730,7 +723,7 @@ function drawScene(data) {
     drawLasers();
     drawConnectors();
     drawHomes();
-    //drawFactions();
+    drawFactions();
     drawAnimations();
 
     drawBracket();
@@ -739,7 +732,6 @@ function drawScene(data) {
     translateScene();
     mainCtx.drawImage(draftCanvas, 0, 0);
     //drawMiniMap();
-    drawScoreBoard();
 }
 
 
@@ -747,6 +739,17 @@ function factionSort(a, b) {
     return a.size - b.size;
 }
 
+function drawLeaderBoard() {
+    var leaderboard = document.getElementById("leaderboard");
+    leaderboard.innerHTML = "";
+    for (var i = FACTION_ARRAY.length - 1; i >= 0; i--) {
+        var faction = FACTION_ARRAY[i];
+
+        var entry = document.createElement('li');
+        entry.appendChild(document.createTextNode(faction.name));
+        leaderboard.appendChild(entry);
+    }
+}
 
 function scaleImageData(imageData, scale, mainCtx) {
     var scaled = mainCtx.createImageData(imageData.width * scale, imageData.height * scale);

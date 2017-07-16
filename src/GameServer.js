@@ -190,8 +190,6 @@ GameServer.prototype.checkShardCollision = function (shard) {
 
     //shard + home collision
     this.homeTree.find(shardBound, function (home) {
-        console.log(home);
-
         if (home.faction === shard.faction) {
             if (shard.owner) { //is shot by player
                 home.addShard(shard);
