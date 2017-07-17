@@ -135,6 +135,11 @@ Barracks.prototype.storeBot = function (bot) {
     this.packetHandler.updateHomePackets(this);
 };
 
+Barracks.prototype.removeBot = function (bot) {
+    var index = this.bots.indexOf(bot);
+    this.bots.splice(index, 1);
+};
+
 Barracks.prototype.upgradeUnit = function (data) {
     var shard, id;
     for (id in data.shards) {

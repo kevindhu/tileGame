@@ -89,23 +89,52 @@ function openShardNamerUI() {
 }
 
 function openHomeUI(home) {
-    var homeInfo = document.getElementById('home_ui');
-    var buildQueue = document.getElementById('build_queue');
-    var shardsList = document.getElementById('shards_list');
+    var homeUI = document.getElementById('home_ui');
+    var shardsLists = document.getElementsByClassName('shards_list');
     var colorPicker = document.getElementById('color_picker');
 
-    var openHomeInfo = function () {
-        homeInfo.style.display = 'block';
+    homeUI.style.display = 'block';
 
+    var openHomeInfo = function () {
         document.getElementById('home_type').innerHTML = home.type;
         document.getElementById('home_level').innerHTML = home.level;
         document.getElementById('home_health').innerHTML = home.health;
         document.getElementById('home_power').innerHTML = home.power;
         document.getElementById('home_faction_name').innerHTML = home.faction;
     };
-    var openUpgradesUI = function () {
-        console.log("OPENING UPGRADES UI");
-        var upgradeOptions = document.getElementById('upgrade_options');
+    var addTabListeners = function () {
+        var upgradesPage = document.getElementById("upgrades_page");
+        var createPage = document.getElementById("create_page");
+        var botsPage = document.getElementById("bots_page");
+
+        var upgradesTab = document.getElementById('upgrades_tab');
+        var createTab = document.getElementById('create_tab');
+        var botsTab = document.getElementById('bots_tab');
+
+        upgradesTab.addEventListener('click', function (evt) {
+            upgradesPage.style.display = "block";
+            createPage.style.display = "none";
+            botsPage.style.display = "none";
+            openUpgradesPage();
+        });
+
+        createTab.addEventListener('click', function (evt) {
+            upgradesPage.style.display = "none";
+            createPage.style.display = "block";
+            botsPage.style.display = "none";
+            openCreatePage();
+        });
+
+        botsTab.addEventListener('click', function (evt) {
+            upgradesPage.style.display = "none";
+            createPage.style.display = "none";
+            botsPage.style.display = "block";
+            openBotsPage();
+        });
+
+    };
+
+    var openUpgradesPage = function () {
         var unitUpgrades = document.getElementById("unit_upgrades");
         var createBot = document.getElementById("create_bot_container");
 
@@ -139,21 +168,34 @@ function openHomeUI(home) {
 
 
     };
+    var openCreatePage = function () {
+        var buildQueue = document.getElementById('build_queue');
+        buildQueue.addEventListener('scroll', function (event) {
+            shardListScroll = true;
+        });
+        addQueueInfo(buildQueue, home);
+    };
+    var openBotsPage = function () {
+        var botsList = document.getElementById('bots_list');
+        if (home.type === "Barracks") {
+            console.log(home.type);
+            addBots(botsList, home);
+        }
+    };
 
-    shardsList.addEventListener('scroll', function (event) {
-        shardListScroll = true;
-    });
-
-    buildQueue.addEventListener('scroll', function (event) {
-        shardListScroll = true;
-    });
+    for (var i = 0; i < shardsLists.length; i++) {
+        shardsLists[i].addEventListener('scroll', function (event) {
+            shardListScroll = true;
+        });
+    }
 
     HOME = home;
+    addTabListeners();
     openHomeInfo();
-    openUpgradesUI();
-    addQueueInfo(buildQueue, home);
-    addShards(shardsList, home);
-    addColorPicker(colorPicker, home);
+    openUpgradesPage();
+    openColorPicker(colorPicker, home);
+
+    addShards(shardsLists, home);
 }
 
 var bldHome = function () {
@@ -266,44 +308,60 @@ function addQueueInfo(list, home) {
         })(entry.id);
 
         entry.appendChild(document.createTextNode(
-            buildInfo.shardName + " -- " + Math.floor(buildInfo.timer/1000) +
-            ":" + Math.floor(buildInfo.timer%1000)));
+            buildInfo.shardName + " -- " + Math.floor(buildInfo.timer / 1000) +
+            ":" + Math.floor(buildInfo.timer % 1000)));
         list.appendChild(entry);
     }
 }
 
-function addShards(list, home) {
+function addShards(lists, home) {
+    for (var i = 0; i < lists.length; i++) {
+        var list = lists[i];
+        checkSelection();
+        list.innerHTML = "";
+        for (var j = 0; j < home.shards.length; j++) {
+            var entry = document.createElement('li');
+            var shard = SHARD_LIST[home.shards[j]];
+            entry.id = shard.id;
+
+            (function (_id) {
+                entry.addEventListener("click", function () {
+                    if (!this.clicked) {
+                        this.clicked = true;
+                        this.style.background = "#fffb22";
+                        selectedShards[_id] = _id;
+                        checkSelection();
+                    }
+                    else {
+                        this.clicked = false;
+                        this.style.background = "#542fce";
+                        delete selectedShards[_id];
+                        checkSelection();
+                    }
+                });
+            })(entry.id);
+
+
+            entry.appendChild(document.createTextNode(shard.name));
+            list.appendChild(entry);
+        }
+    }
+}
+
+function addBots(list, home) {
     checkSelection();
     list.innerHTML = "";
-    for (var i = 0; i < home.shards.length; i++) {
+    for (var i = 0; i < home.bots.length; i++) {
         var entry = document.createElement('li');
-        var shard = SHARD_LIST[home.shards[i]];
-        entry.id = shard.id;
+        var bot = CONTROLLER_LIST[home.bots[i]];
+        entry.id = bot.id;
 
-        (function (_id) {
-            entry.addEventListener("click", function () {
-                if (!this.clicked) {
-                    this.clicked = true;
-                    this.style.background = "#fffb22";
-                    selectedShards[_id] = _id;
-                    checkSelection();
-                }
-                else {
-                    this.clicked = false;
-                    this.style.background = "#542fce";
-                    delete selectedShards[_id];
-                    checkSelection();
-                }
-            });
-        })(entry.id);
-
-
-        entry.appendChild(document.createTextNode(shard.name));
+        entry.appendChild(document.createTextNode(bot.name));
         list.appendChild(entry);
     }
 }
 
-function addColorPicker(colorPicker, home) {
+function openColorPicker(colorPicker, home) {
     var colorCanvas = document.getElementById("color_canvas");
     var colorCtx = colorCanvas.getContext("2d");
 

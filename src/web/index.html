@@ -26,7 +26,6 @@
 </div>
 
 <div id="home_ui" class='Namer'>
-
     <div class="top">
         <div id="ribbon"><b id="home_type"></b></div>
     </div>
@@ -38,15 +37,29 @@
             <a class="left">POWER </a><a class="right" id="home_power"></a>
         </div>
     </div>
-    <div class="shards">
-        <div id="shards_container" class = "item_list">
-            <div class="list_header">
-                <a>SHARDS</a>
+    <div class="tabs">
+        <div id="tabs_container">
+            <div id="upgrades_tab" class="tab">
+                <a>UPGRADES</a>
             </div>
-            <ol id="shards_list"></ol>
+            <div id="create_tab" class="tab">
+                <a>CREATE</a>
+            </div>
+            <div id="bots_tab" class="tab">
+                <a>BOTS</a>
+            </div>
         </div>
     </div>
-    <div class="upgrades">
+
+    <div id="upgrades_page" class="page">
+        <div class="shards">
+            <div id="shards_container" class="item_list">
+                <div class="list_header">
+                    <a>SHARDS</a>
+                </div>
+                <ol class="shards_list"></ol>
+            </div>
+        </div>
         <div id="upgrades_container">
             <div id="home_upgrades">
                 <div id="upgrades_header">
@@ -74,22 +87,50 @@
             </div>
         </div>
     </div>
-    <div class="create_bot">
-        <div id="create_bot_container">
-            <input type="button" value="MAKE BOTS" id="make_bots_btn"/>
-        </div>
-    </div>
-    <div class="queue">
-        <div id="queue_container" class="item_list">
-            <div class="list_header">
-                <a>QUEUE</a>
+    <div id="create_page" class="page">
+        <div id="queue">
+            <div id="queue_container" class="item_list">
+                <div class="list_header">
+                    <a>QUEUE</a>
+                </div>
+                <ol id="build_queue"></ol>
             </div>
-            <ol id="build_queue"></ol>
+        </div>
+        <div class="shards">
+            <div class="item_list">
+                <div class="list_header">
+                    <a>SHARDS</a>
+                </div>
+                <ol class="shards_list"></ol>
+            </div>
+        </div>
+        <div class="bot_info">
+        </div>
+        <div class="create_bot">
+            <div id="create_bot_container">
+                <input type="button" value="MAKE BOTS" id="make_bots_btn"/>
+            </div>
         </div>
     </div>
+    <div id="bots_page" class="page">
+        <div id="bots">
+            <div id="bots_container" class="item_list">
+                <div class="list_header">
+                    <a>BOTS</a>
+                </div>
+                <ol id="bots_list"></ol>
+            </div>
+        </div>
+        <div class="bot_info"></div>
+    </div>
+
     <div class="bottom">
         <input type="button" id="close_home_ui" value="CLOSE" onclick="closeUI('home info');"/>
     </div>
+
+
+
+
     <div id="color_picker">
         <canvas id="color_canvas"></canvas>
     </div>
@@ -102,8 +143,6 @@
         <ol id="leaderboard"></ol>
     </div>
 </div>
-
-
 
 <script type="text/javascript" src="index.js"></script>
 <script type="text/javascript" src="ui.js"></script>

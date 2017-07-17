@@ -261,7 +261,8 @@ PacketHandler.prototype.addHomePackets = function (home, ifInit) {
         unitDmg: home.unitDmg,
         unitSpeed: home.unitSpeed,
         unitArmor: home.unitArmor,
-        queue: home.queue
+        queue: home.queue,
+        bots: home.bots
     };
     if (ifInit) {
         return info;
@@ -288,7 +289,8 @@ PacketHandler.prototype.updateHomePackets = function (home) {
             unitDmg: home.unitDmg,
             unitSpeed: home.unitSpeed,
             unitArmor: home.unitArmor,
-            queue: home.queue
+            queue: home.queue,
+            bots: home.bots
         }
     );
 };

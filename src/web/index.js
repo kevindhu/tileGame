@@ -100,6 +100,7 @@ var Home = function (homeInfo) {
     this.unitSpeed =  homeInfo.unitSpeed;
     this.unitArmor =  homeInfo.unitArmor;
     this.queue = homeInfo.queue;
+    this.bots = homeInfo.bots;
 };
 var Arrow = function (x, y) {
     this.preX = x;
@@ -235,6 +236,7 @@ function updateEntities(packet) {
         home.unitSpeed =  homeInfo.unitSpeed;
         home.unitArmor =  homeInfo.unitArmor;
         home.queue = homeInfo.queue;
+        home.bots = homeInfo.bots;
     };
 
     var updateShards = function (shard, shardInfo) {

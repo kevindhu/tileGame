@@ -134,7 +134,6 @@ Bot.prototype.limbo = function () {
     this.removeEnemy();
 
     this.gameServer.controllerTree.remove(this.quadItem);
-    delete this.gameServer.CONTROLLER_LIST[this.id];
 };
 
 
