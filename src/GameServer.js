@@ -47,7 +47,6 @@ GameServer.prototype.initChunks = function () {
     }
 };
 
-
 GameServer.prototype.initTiles = function () {
     this.tileTree = new QuadNode({
         minx: this.minx,
@@ -298,7 +297,6 @@ GameServer.prototype.updateQueues = function () {
         home.updateQueue();
     }
 };
-
 
 GameServer.prototype.updateShards = function () {
     var id, shard;

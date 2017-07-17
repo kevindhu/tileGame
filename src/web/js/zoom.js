@@ -13,7 +13,7 @@ $(window).bind('mousewheel DOMMouseScroll', function (event) {
     if (event.ctrlKey === true) {
         event.preventDefault();
     }
-    if (shardListScroll) {
+    if (LIST_SCROLL) {
         return;
     }
     if(event.originalEvent.wheelDelta /120 > 0 && mainScaleFactor < 2) {

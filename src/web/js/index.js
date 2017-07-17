@@ -278,6 +278,11 @@ function updateEntities(packet) {
         case "factionInfo":
             updateEntity(packet, FACTION_LIST, updateFactions);
             break;
+        case "UIInfo":
+            if (selfId === packet.playerId) {
+                updateUI(packet);
+            }
+            break;
     }
 }
 

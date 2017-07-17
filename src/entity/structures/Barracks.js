@@ -111,7 +111,7 @@ Barracks.prototype.updateQueue = function () {
 Barracks.prototype.updateQueueUI = function () {
     for (var id in this.viewers) {
         var player = this.gameServer.CONTROLLER_LIST[id];
-        this.packetHandler.addUIPackets(player, this, "update queue");
+        this.packetHandler.updateUIPackets(player, this, "update queue");
     }
 };
 

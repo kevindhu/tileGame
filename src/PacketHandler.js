@@ -90,7 +90,6 @@ PacketHandler.prototype.deleteChunkPacket = function (chunk) {
 };
 
 
-
 PacketHandler.prototype.addShardAnimationPackets = function (shard) {
     this.CHUNK_PACKETS[shard.chunk].push(
         {
@@ -295,6 +294,25 @@ PacketHandler.prototype.updateHomePackets = function (home) {
     );
 };
 
+PacketHandler.prototype.updateUIPackets = function (player, home, action) {
+    var homeId;
+    if (home === null) {
+        homeId = null;
+    }
+    else {
+        homeId = home.id;
+    }
+
+    this.CHUNK_PACKETS[player.chunk].push(
+        {
+            master: "update",
+            class: "UIInfo",
+            playerId: player.id,
+            homeId: homeId,
+            action: action
+        });
+};
+
 PacketHandler.prototype.updateFactionPackets = function (faction) {
     this.CHUNK_PACKETS[faction.chunk].push({
         master: "update",
@@ -361,8 +379,6 @@ PacketHandler.prototype.deleteBracketPackets = function (player) {
         id: player.id
     });
 };
-
-
 
 
 PacketHandler.prototype.deleteControllerPackets = function (controller, chunk) {
@@ -441,11 +457,6 @@ PacketHandler.prototype.deleteShardPackets = function (shard, chunk) {
 };
 
 
-
-
-
-
-
 PacketHandler.prototype.sendPackets = function () {
     var id;
     for (var index in this.gameServer.SOCKET_LIST) {
@@ -455,7 +466,7 @@ PacketHandler.prototype.sendPackets = function () {
 
             if (player.chunkAdd) {
                 for (id in player.chunkAdd) {
-                    socket.emit('updateEntities',this.createChunkPacket(id));
+                    socket.emit('updateEntities', this.createChunkPacket(id));
                 }
             }
             if (player.chunkDelete) {

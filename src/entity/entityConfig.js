@@ -5,7 +5,6 @@ var SHARDS = 0;
 var BORDER_WIDTH = 0;
 
 
-
 var small = function () {
     CHUNKS = 1;
     WIDTH = 2000;
@@ -24,7 +23,7 @@ var medium = function () {
 };
 
 
-var large  = function () {
+var large = function () {
     CHUNKS = 9;
     WIDTH = 10000;
     TILES_INPUT = 2000;
@@ -33,13 +32,14 @@ var large  = function () {
 };
 
 
-var superLarge  = function () {
+var superLarge = function () {
     CHUNKS = 2500;
     WIDTH = 400000;
     TILES_INPUT = 1000000;
     SHARDS = 100000;
     BORDER_WIDTH = 50000;
 };
+
 
 small();
 
@@ -54,5 +54,5 @@ module.exports = {
     TILES: TILES,
     SHARDS: SHARDS,
     SHARD_WIDTH: SHARD_WIDTH,
-    BORDER_WIDTH: BORDER_WIDTH,
+    BORDER_WIDTH: BORDER_WIDTH
 };
