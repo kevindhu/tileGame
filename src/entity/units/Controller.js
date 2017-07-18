@@ -24,6 +24,7 @@ function Controller(id, faction, gameServer) {
     this.xSpeed = 0;
     this.ySpeed = 0;
     this.theta = 0;
+    this.stasis = false;
 
     this.selected = false;
     this.pressingRight = false;

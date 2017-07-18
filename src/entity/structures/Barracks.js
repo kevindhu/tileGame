@@ -130,8 +130,8 @@ Barracks.prototype.createBot = function (botBuilder) {
 
 
 Barracks.prototype.storeBot = function (bot) {
-    bot.becomeHome();
     this.bots.push(bot.id);
+    bot.onDelete();
     this.packetHandler.updateHomePackets(this);
 };
 

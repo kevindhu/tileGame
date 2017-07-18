@@ -199,6 +199,7 @@ function openHomeUI(home) {
         var makeBotsBtn = document.getElementById('make_bots_btn');
 
         var makeBots = function () {
+            console.log(SELECTED_SHARDS);
             socket.emit('makeBots', {
                 home: HOME.id,
                 shards: SELECTED_SHARDS
@@ -210,6 +211,7 @@ function openHomeUI(home) {
         });
 
         if (home.type === "Barracks") {
+            console.log("RESETTING MAKE_BOTS");
             resetButton(makeBotsBtn, makeBots);
             createBot.style.display = "flex";
         } else {
@@ -286,7 +288,6 @@ function openHomeUI(home) {
                 makeBotsBtn.disabled = "disabled";
             }
         };
-
         for (var i = 0; i < lists.length; i++) {
             var list = lists[i];
             checkSelection();
@@ -323,14 +324,10 @@ function openHomeUI(home) {
         }
     }
     function addBots(list, home) {
-        checkSelection();
         list.innerHTML = "";
         for (var i = 0; i < home.bots.length; i++) {
             var entry = document.createElement('li');
-            var bot = CONTROLLER_LIST[home.bots[i]];
-            entry.id = bot.id;
-
-            entry.appendChild(document.createTextNode(bot.name));
+            entry.appendChild(document.createTextNode(home.bots[i]));
             list.appendChild(entry);
         }
     }
@@ -369,8 +366,9 @@ function openHomeUI(home) {
             }
             ctx.fillRect(0, 0, magnitude * 10, 200);
         };
-
-        button.removeEventListener('click', callback);
+        var newButton = button.cloneNode(true);
+        button.parentNode.replaceChild(newButton, button);
+        button = newButton;
         button.addEventListener('click', callback);
         if (button.upgType) {
             setSkillMeter(button);

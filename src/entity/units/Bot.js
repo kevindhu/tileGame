@@ -108,8 +108,9 @@ Bot.prototype.updateControls = function () {
             case "enemy":
             //this.theta = Math.random();
             case "friend":
-                this.target.object.storeBot(this);
-
+                if (this.target.object.storeBot) {
+                    this.target.object.storeBot(this);
+                }
         }
         this.canShoot = true;
         return;

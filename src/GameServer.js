@@ -487,9 +487,6 @@ GameServer.prototype.start = function () {
             this.findBots(boundary);
         }.bind(this));
 
-
-
-
         socket.on('makeBots', function (data) {
             var barracks = this.HOME_LIST[data.home];
             var shard;
