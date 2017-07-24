@@ -1,159 +1,3 @@
-var mainCanvas = document.getElementById("main_canvas");
-var draftCanvas = document.createElement("canvas");
-var mMap = document.createElement("canvas");
-var mMapRot = document.createElement("canvas");
-
-mainCanvas.style.visibility = "hidden";
-draftCanvas.style.display = "none";
-mMap.style.display = "none";
-mMapRot.style.display = "none";
-
-draftCanvas.width = mainCanvas.width;
-draftCanvas.height = mainCanvas.height;
-mMap.width = 500; mMapRot.width = 500;
-mMap.height = 500; mMapRot.height = 500;
-
-var mainCtx = mainCanvas.getContext("2d");
-var draftCtx = draftCanvas.getContext("2d");
-var mMapCtx = mMap.getContext("2d");
-var mMapCtxRot = mMapRot.getContext("2d");
-
-var socket = io();
-socket.verified = false;
-
-socket.on('addFactionsUI', addFactionstoUI);
-socket.on('updateEntities', packetHandler);
-socket.on('drawScene', drawScene);
-
-var selfId = null;
-
-var FACTION_LIST = {};
-var FACTION_ARRAY = [];
-
-var CONTROLLER_LIST = {};
-var TILE_LIST = {};
-var SHARD_LIST = {};
-var LASER_LIST = {};
-var HOME_LIST = {};
-var ANIMATION_LIST = {};
-
-var rightClick = false;
-var ARROW = null;
-var BRACKET = null;
-var serverMap = null;
-var mapTimer = 0;
-
-var Faction = function (factionInfo) {
-    this.id = factionInfo.id;
-    this.name = factionInfo.name;
-    this.x = factionInfo.x;
-    this.y = factionInfo.y;
-    this.size = factionInfo.size;
-};
-var Controller = function (controllerInfo) {
-    this.id = controllerInfo.id;
-    this.name = controllerInfo.name;
-    this.x = controllerInfo.x;
-    this.y = controllerInfo.y;
-    this.health = controllerInfo.health;
-    this.maxHealth = controllerInfo.maxHealth;
-    this.selected = controllerInfo.selected;
-    this.owner = controllerInfo.owner;
-    this.theta = controllerInfo.theta;
-    this.type = controllerInfo.type;
-};
-var Tile = function (tileInfo) {
-    this.id = tileInfo.id;
-    this.x = tileInfo.x;
-    this.y = tileInfo.y;
-    this.length = tileInfo.length;
-    this.color = tileInfo.color;
-    this.alert = tileInfo.alert;
-    this.random = Math.floor(getRandom(0, 3));
-};
-var Shard = function (shardInfo) {
-    this.id = shardInfo.id;
-    this.x = shardInfo.x;
-    this.y = shardInfo.y;
-    this.name = shardInfo.name;
-    this.visible = shardInfo.visible;
-};
-var Laser = function (laserInfo) {
-    this.id = laserInfo.id;
-    this.owner = laserInfo.owner;
-    this.target = laserInfo.target;
-};
-var Home = function (homeInfo) {
-    this.id = homeInfo.id;
-    this.x = homeInfo.x;
-    this.y = homeInfo.y;
-    this.name = homeInfo.owner;
-    this.type = homeInfo.type;
-    this.radius = homeInfo.radius;
-    this.shards = homeInfo.shards;
-    this.power = homeInfo.power;
-    this.level = homeInfo.level;
-    this.hasColor = homeInfo.hasColor;
-    this.health = homeInfo.health;
-    this.neighbors = homeInfo.neighbors;
-    this.unitDmg =  homeInfo.unitDmg;
-    this.unitSpeed =  homeInfo.unitSpeed;
-    this.unitArmor =  homeInfo.unitArmor;
-    this.queue = homeInfo.queue;
-    this.bots = homeInfo.bots;
-};
-var Arrow = function (x, y) {
-    this.preX = x;
-    this.preY = y;
-    this.postX = x;
-    this.postY = y;
-    this.deltaX = function () {
-        return this.postX - mainCanvas.width / 2;
-    };
-    this.deltaY = function () {
-        return this.postY - mainCanvas.height / 2;
-    }
-};
-var Bracket = function (bracketInfo) {
-    var tile = TILE_LIST[bracketInfo.tileId];
-    this.x = tile.x;
-    this.y = tile.y;
-    this.length = tile.length;
-};
-var Animation = function (animationInfo) {
-    this.type = animationInfo.type;
-    this.id = animationInfo.id;
-    this.name = animationInfo.name;
-    this.x = animationInfo.x;
-    this.y = animationInfo.y;
-    this.theta = 15;
-    this.timer = getRandom(10, 14);
-
-    if (this.x) {
-        this.endX = this.x + getRandom(-100, 100);
-        this.endY = this.y + getRandom(-100, 100);
-    }
-};
-
-
-function packetHandler(data) {
-    var packet, i;
-    for (i = 0; i < data.length; i++) {
-        packet = data[i];
-        switch (packet.master) {
-            case "add":
-                addEntities(packet);
-                break;
-            case "delete":
-                deleteEntities(packet);
-                break;
-            case "update":
-                updateEntities(packet);
-                break;
-        }
-    }
-}
-
 function addEntities(packet) {
     var addEntity = function (packet, list, Entity, array) {
         if (!packet) {
@@ -260,6 +104,7 @@ function updateEntities(packet) {
         controller.maxHealth = controllerInfo.maxHealth;
         controller.selected = controllerInfo.selected;
         controller.theta = controllerInfo.theta;
+        controller.level = controllerInfo.level;
     };
 
     switch (packet.class) {
@@ -311,8 +156,6 @@ function deleteEntities(packet) {
         case "homeInfo":
             deleteEntity(packet, HOME_LIST);
             break;
-        case "tileInfo":
-            deleteEntity(packet, TILE_LIST);
         case "factionInfo":
             deleteEntity(packet, FACTION_LIST, FACTION_ARRAY);
             drawLeaderBoard();
@@ -334,7 +177,6 @@ function deleteEntities(packet) {
             }
             break;
     }
-
 }
 
 function addFactionstoUI(data) {

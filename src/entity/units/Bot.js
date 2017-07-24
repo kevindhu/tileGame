@@ -24,6 +24,7 @@ function Bot(name, player, home, faction, gameServer) {
     this.manual = false;
     this.manualCoord = null;
     this.enemy = null;
+    this.level = 0;
     this.setOwnerTarget();
     this.init();
 }

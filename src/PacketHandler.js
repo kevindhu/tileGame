@@ -171,7 +171,8 @@ PacketHandler.prototype.addControllerPackets = function (controller, ifInit) {
         health: controller.health,
         maxHealth: controller.maxHealth,
         selected: controller.selected,
-        theta: controller.theta
+        theta: controller.theta,
+        level: controller.level
     };
     if (ifInit) {
         return info;
@@ -343,10 +344,12 @@ PacketHandler.prototype.updateControllersPackets = function (controller) {
         y: controller.y,
         health: controller.health,
         maxHealth: controller.maxHealth,
-        selected: controller.selected,
-        theta: controller.theta
+        theta: controller.theta,
+        level: controller.level,
+        selected: controller.selected
     });
 };
+
 
 PacketHandler.prototype.updateShardsPackets = function (shard) {
     this.CHUNK_PACKETS[shard.chunk].push({

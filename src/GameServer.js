@@ -116,7 +116,7 @@ GameServer.prototype.initNewClients = function () {
             delete this.INIT_SOCKET_LIST[id];
         }
 
-        if (!socket.verified) {
+        if (!socket.verified) { //verify new client socket
             socket.life -= 1;
             if (socket.life === 0) {
                 console.log("DETECTED ROGUE CLIENT!");
@@ -344,9 +344,9 @@ GameServer.prototype.start = function () {
 
     /** INIT PORT CONNECTION **/
     app.get('/', function (req, res) {
-        res.sendFile(__dirname + '/web/index.html');
+        res.sendFile(__dirname + '/client/index.html');
     });
-    app.use('/', express.static(__dirname + '/web'));
+    app.use('/', express.static(__dirname + '/client'));
 
     server.listen(PORT);
     console.log('Started Server!');
@@ -364,7 +364,6 @@ GameServer.prototype.start = function () {
 
     io.sockets.on('connection', function (socket) {
         var player;
-
         socket.id = Math.random();
         socket.timer = 0;
         socket.life = 10;
@@ -404,7 +403,7 @@ GameServer.prototype.start = function () {
             }
         }.bind(this));
 
-        socket.on('keyEvent', function x(data) {
+        socket.on('keyEvent', function (data) {
             if (!player) {
                 return;
             }
@@ -514,13 +513,6 @@ GameServer.prototype.start = function () {
             barracks.upgradeUnit(data);
         }.bind(this));
 
-
-
-
-
-
-
-
         socket.on('disconnect', function () {
             console.log("Client #" + socket.id + " has left the server");
             if (player) {
@@ -562,7 +554,6 @@ GameServer.prototype.createEmptyShard = function () {
 
 /** MISC METHODS **/
 GameServer.prototype.findBots = function (boundary) {
-
     this.controllerTree.find(boundary, function (controller) {
         if (controller.type === "Bot" && controller.owner === boundary.player) {
             var player = this.CONTROLLER_LIST[boundary.player];
@@ -570,7 +561,6 @@ GameServer.prototype.findBots = function (boundary) {
         }
     }.bind(this));
 };
-
 
 Object.size = function (obj) {
     var size = 0, key;
