@@ -1,7 +1,9 @@
-var ui = require('./ui');
+var ui = require('./ShardNamerUI');
 
-function ShardNamerUI(socket) {
+function ShardNamerUI(client, socket) {
+    this.client = client;
     this.socket = socket;
+
     this.shardNamer = document.getElementById('shard_namer_ui');
     this.textInput = document.getElementById("textInput");
     this.nameShardBtn = document.getElementById("nameShardBtn");
@@ -45,3 +47,5 @@ ShardNamerUI.prototype.close = function () {
     this.textInput.value = "";
     this.template.style.display = 'none';
 };
+
+module.exports = ShardNamerUI;

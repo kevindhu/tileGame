@@ -3,8 +3,6 @@ function HomeUI(client,socket) {
     this.socket = socket;
     this.template = document.getElementById('home_ui');
     this.home = null;
-
-
 }
 
 HomeUI.prototype.open = function (home) {
@@ -288,4 +286,4 @@ HomeUI.prototype.resetButton = function (button, callback) {
     }
 };
 
-module.exports = openHomeUI;
+module.exports = HomeUI;

@@ -12,3 +12,5 @@ function Animation(animationInfo) {
         this.endY = this.y + getRandom(-100, 100);
     }
 }
+
+module.exports = Animation;

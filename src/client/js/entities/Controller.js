@@ -1,4 +1,4 @@
-function Controller (controllerInfo) {
+function Controller(controllerInfo) {
     this.id = controllerInfo.id;
     this.name = controllerInfo.name;
     this.x = controllerInfo.x;
@@ -11,6 +11,16 @@ function Controller (controllerInfo) {
     this.type = controllerInfo.type;
     this.level = controllerInfo.level;
 }
+
+Controller.prototype.update = function (controller, controllerInfo) {
+    this.x = controllerInfo.x;
+    this.y = controllerInfo.y;
+    this.health = controllerInfo.health;
+    this.maxHealth = controllerInfo.maxHealth;
+    this.selected = controllerInfo.selected;
+    this.theta = controllerInfo.theta;
+    this.level = controllerInfo.level;
+};
 
 Controller.prototype.show = function () {
 

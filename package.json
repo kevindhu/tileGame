@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node app.js",
     "deploy": "gcloud app deploy",
-    "watch": "watchify ./src/client/js/index.js -o ./src/client/js/bundle.js"
+    "watch": "watchify ./src/client/js/index.js -o ./src/client/js/bundle.js --debug"
   },
   "engines": {
     "node": "4.1.x"

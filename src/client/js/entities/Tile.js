@@ -8,6 +8,11 @@ function Tile(tileInfo) {
     this.random = Math.floor(getRandom(0, 3));
 }
 
+Tile.prototype.update = function (tileInfo) {
+    this.color = tileInfo.color;
+    this.alert = tileInfo.alert;
+};
+
 Tile.prototype.show = function () {
 
 };
