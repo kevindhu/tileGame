@@ -1,3 +1,5 @@
+var ListUI = require('./ListUI');
+
 function UpgradesPage(homeUI) {
     this.template = document.getElementById("upgrades_page");
     this.unitUpgrades = document.getElementById("unit_upgrades");
@@ -6,7 +8,12 @@ function UpgradesPage(homeUI) {
     this.bldSpeedBtn = document.getElementById('bld_speed');
     this.bldDmgBtn = document.getElementById('bld_damage');
 
+    this.SELECTED_SHARDS = {};
+
+    this.shardsUI = new ListUI(document.getElementById("upgrades_shards_list"),homeUI, this);
     this.homeUI = homeUI;
+
+    this.shardsUI.addShards();
 }
 
 UpgradesPage.prototype.open = function () {
@@ -19,7 +26,7 @@ UpgradesPage.prototype.open = function () {
     var bldHome = function () {
         this.socket.emit('buildHome', {
             home: this.homeUI.home.id,
-            shards: SELECTED_SHARDS
+            shards: this.SELECTED_SHARDS
         })
     }.bind(this);
     var upgUnit = function () {
@@ -46,7 +53,6 @@ UpgradesPage.prototype.open = function () {
 
 
 UpgradesPage.prototype.close = function () {
-    console.log("CLOSING UPGRADES PAGE");
     this.template.style.display = "none";
 };
 

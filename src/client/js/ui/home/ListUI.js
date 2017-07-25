@@ -1,10 +1,11 @@
-function ListUI(list, homeUI) {
+function ListUI(list, homeUI, parent) {
     this.list = list;
     this.homeUI = homeUI;
     this.client = homeUI.client;
+    this.parent = parent;
 
     this.list.addEventListener('scroll', function (event) {
-        this.client.LIST_SCROLL = true;
+        this.homeUI.LIST_SCROLL = true;
     }.bind(this));
 }
 
@@ -78,7 +79,7 @@ ListUI.prototype.addShards = function () {
         var bldSpeedBtn = document.getElementById('bld_speed');
         var bldDmgBtn = document.getElementById('bld_damage');
 
-        if (Object.size(this.homeUI.SELECTED_SHARDS) > 0) {
+        if (Object.size(this.parent.SELECTED_SHARDS) > 0) {
             bldBaseHealthBtn.disabled = false;
             bldArmorBtn.disabled = false;
             bldSpeedBtn.disabled = false;
@@ -100,23 +101,23 @@ ListUI.prototype.addShards = function () {
         entry.id = shard.id;
 
         entry.addEventListener("click", function () {
-            if (!this.clicked) {
-                this.clicked = true;
-                this.style.background = "#fffb22";
-                this.homeUI.SELECTED_SHARDS[_id] = _id;
+            if (!entry.clicked) {
+                entry.clicked = true;
+                entry.style.background = "#fffb22";
+                this.parent.SELECTED_SHARDS[entry.id] = entry.id;
                 checkSelection();
             }
             else {
-                this.clicked = false;
-                this.style.background = "#542fce";
-                delete this.homeUI.SELECTED_SHARDS[_id];
+                entry.clicked = false;
+                entry.style.background = "#542fce";
+                delete this.parent.SELECTED_SHARDS[entry.id];
                 checkSelection();
             }
         }.bind(this));
 
 
         entry.appendChild(document.createTextNode(shard.name));
-        list.appendChild(entry);
+        this.list.appendChild(entry);
     }
 };
 

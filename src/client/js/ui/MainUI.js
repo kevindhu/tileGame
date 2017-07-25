@@ -8,8 +8,6 @@ var HomeUI = require("./home/HomeUI");
 function MainUI(client, socket) {
     this.client = client;
     this.socket = socket;
-    this.SELECTED_SHARDS = {};
-    this.LIST_SCROLL = false;
 
     this.playerNamerUI = new PlayerNamerUI(this.client, this.socket);
     this.gameUI = new GameUI(this.client, this.socket);

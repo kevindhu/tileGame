@@ -6,22 +6,25 @@ function BuildPage(homeUI) {
     this.createBot = document.getElementById("create_bot_container");
     this.makeBotsBtn = document.getElementById('make_bots_btn');
 
+    this.SELECTED_SHARDS = {};
+
     this.buildQueueUI = new ListUI(document.getElementById('build_queue'), homeUI);
-    this.shardsUI = new ListUI(document.getElementById('build_shards_list'), homeUI);
+    this.shardsUI = new ListUI(document.getElementById('build_shards_list'), homeUI, this);
     this.homeUI = homeUI;
 }
 
 
 BuildPage.prototype.open = function () {
-    console.log("OPENING BUILDS PAGE");
     this.template.style.display = "block";
+
+    this.SELECTED_SHARDS = {};
+
     var makeBots = function () {
-        console.log(SELECTED_SHARDS);
-        socket.emit('makeBots', {
+        this.socket.emit('makeBots', {
             home: this.home.id,
-            shards: SELECTED_SHARDS
+            shards: this.SELECTED_SHARDS
         });
-    };
+    }.bind(this);
 
     if (this.homeUI.home.type === "Barracks") {
         this.homeUI.resetButton(makeBotsBtn, makeBots);

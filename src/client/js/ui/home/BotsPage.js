@@ -4,7 +4,6 @@ function BotsPage(homeUI) {
     this.template = document.getElementById("bots_page");
     this.botsListUI = new ListUI(document.getElementById('bots_list'), homeUI);
     this.homeUI = homeUI;
-
 }
 
 BotsPage.prototype.open = function () {

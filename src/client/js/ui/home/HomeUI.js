@@ -8,14 +8,21 @@ function HomeUI(client, socket) {
     this.template = document.getElementById('home_ui');
     this.home = null;
 
-    this.upgradesPage = new UpgradesPage(this);
-    this.botsPage = new BotsPage(this);
-    this.buildPage = new BuildPage(this);
+    this.upgradesPage = null;
+    this.botsPage = null;
+    this.buildPage = null;
 }
 
 HomeUI.prototype.open = function (home) {
     this.template.style.display = 'block';
     this.home = home;
+
+    if (this.upgradesPage === null) {
+        this.upgradesPage = new UpgradesPage(this);
+        this.botsPage = new BotsPage(this);
+        this.buildPage = new BuildPage(this);
+    }
+
 
     this.addTabListeners();
     this.openHomeInfo();
