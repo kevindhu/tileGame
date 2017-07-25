@@ -139,7 +139,7 @@ GameServer.prototype.initNewClients = function () {
 
             while (!(chunk % rowLength + xIndex).between(0, rowLength - 1) ||
             !(Math.floor(chunk / rowLength) + yIndex).between(0, rowLength - 1)) {
-                socket.stage ++;
+                socket.stage++;
                 if (socket.stage > 8) {
                     return;
                 }
@@ -211,7 +211,7 @@ GameServer.prototype.checkControllerCollision = function (controller) {
 
     if (controller.type === "Player") {
         //player + static/player shard collision
-            this.shardTree.find(controllerBound, function (shard) {
+        this.shardTree.find(controllerBound, function (shard) {
             if (controller.faction !== shard.faction && shard.timer <= 0) {
                 //if shard already owned
                 if (shard.owner !== null) {
@@ -243,9 +243,6 @@ GameServer.prototype.checkControllerCollision = function (controller) {
                         controller.timer = 15;
                     }
                     home.addViewer(controller);
-                }
-                else {
-                    this.packetHandler.addUIPackets(controller, null, "press space");
                 }
             }
         }.bind(this));

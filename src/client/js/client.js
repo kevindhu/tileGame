@@ -1,11 +1,10 @@
-var Entity = require('./entities');
+var Entity = require('./entity');
+var MainUI = require('./ui/MainUI');
 
 function Client() {
     this.SELFID = null;
     this.ARROW = null;
     this.BRACKET = null;
-    this.serverMap = null;
-    this.mapTimer = 0;
     this.rightClick = false;
     this.init();
 }
@@ -14,7 +13,7 @@ Client.prototype.init = function () {
     this.initSocket();
     this.initCanvases();
     this.initLists();
-    this.initViewer();
+    this.initViewers();
 };
 
 
@@ -112,10 +111,11 @@ Client.prototype.initSocket = function () {
     this.socket.on('drawScene', this.drawScene.bind(this));
 };
 
-Client.prototype.initViewer = function () {
+Client.prototype.initViewers = function () {
     this.keys = [];
     this.scaleFactor = 1;
     this.mainScaleFactor = 1;
+    this.mainUI = new MainUI(this, this.socket);
 };
 
 
@@ -137,7 +137,6 @@ Client.prototype.addFactionstoUI = function (data) {
 };
 
 Client.prototype.handlePacket = function (data) {
-    console.log("HANDLING PACKET");
     var packet, i;
     for (i = 0; i < data.length; i++) {
         packet = data[i];
@@ -218,7 +217,7 @@ Client.prototype.deleteEntities = function (packet) {
             break;
         case "factionInfo":
             deleteEntity(packet, this.FACTION_LIST, this.FACTION_ARRAY);
-            drawLeaderBoard();
+            //this.drawLeaderBoard();
             break;
         case "animationInfo":
             deleteEntity(packet, this.ANIMATION_LIST);
@@ -228,12 +227,12 @@ Client.prototype.deleteEntities = function (packet) {
             break;
         case "bracketInfo":
             if (this.SELFID === packet.id) {
-                BRACKET = null;
+                this.BRACKET = null;
             }
             break;
         case "UIInfo":
             if (this.SELFID === packet.id) {
-                closeUI(packet.action);
+                this.mainUI.close(packet.action);
             }
             break;
     }
@@ -241,17 +240,15 @@ Client.prototype.deleteEntities = function (packet) {
 
 Client.prototype.addEntities = function (packet) {
     var addEntity = function (packet, list, entity, array) {
-
-        console.log(entity);
-
         if (!packet) {
             return;
         }
-        list[packet.id] = new entity(packet);
+        list[packet.id] = new entity(packet, this);
         if (array && findWithAttr(array, "id", packet.id) === -1) {
             array.push(list[packet.id]);
         }
-    };
+    }.bind(this);
+
     switch (packet.class) {
         case "tileInfo":
             addEntity(packet, this.TILE_LIST, Entity.Tile);
@@ -270,23 +267,24 @@ Client.prototype.addEntities = function (packet) {
             break;
         case "factionInfo":
             addEntity(packet, this.FACTION_LIST, Entity.Faction, this.FACTION_ARRAY);
-            drawLeaderBoard();
+            //this.drawLeaderBoard();
             break;
         case "animationInfo":
+            console.log(packet.type);
             addEntity(packet, this.ANIMATION_LIST, Entity.Animation);
             break;
         case "bracketInfo":
-            if (SELFID === packet.playerId) {
-                this.BRACKET = new Entity.Bracket(packet);
+            if (this.SELFID === packet.playerId) {
+                this.BRACKET = new Entity.Bracket(packet, this);
             }
             break;
         case "UIInfo":
             if (this.SELFID === packet.playerId) {
-                openUI(packet);
+                this.mainUI.open(packet);
             }
             break;
-        case "this.SELFID":
-            this.SELFID = packet.this.SELFID;
+        case "selfId":
+            this.SELFID = packet.selfId;
             break;
     }
 };
@@ -299,158 +297,40 @@ Client.prototype.updateFactionsList = function () {
 };
 
 Client.prototype.drawScene = function (data) {
+    var id;
     var selfPlayer = this.CONTROLLER_LIST[this.SELFID];
     if (!selfPlayer) {
         return;
     }
 
+    this.mainCtx.clearRect(0, 0, 11000, 11000);
+    this.draftCtx.clearRect(0, 0, 11000, 11000);
+    this.mMapCtx.clearRect(0, 0, 500, 500);
+
+    var entityList = [this.TILE_LIST, this.CONTROLLER_LIST,
+        this.SHARD_LIST, this.LASER_LIST, this.HOME_LIST,
+        this.FACTION_LIST, this.ANIMATION_LIST];
+
     var inBounds = function (player, x, y) {
-        var range = mainCanvas.width / (1.2 * this.scaleFactor);
+        var range = this.mainCanvas.width / (1.2 * this.scaleFactor);
         return x < (player.x + range) && x > (player.x - 5 / 4 * range)
             && y < (player.y + range) && y > (player.y - 5 / 4 * range);
-    };
+    }.bind(this);
 
-
-    var inBoundsClose = function (player, x, y) {
-        var range = 150;
-        return x < (player.x + range) && x > (player.x - 5 / 4 * range)
-            && y < (player.y + range) && y > (player.y - 5 / 4 * range);
-    };
-
-    var drawControllers = function () {
-        draftCtx.font = "20px Arial";
-
-        draftCtx.strokeStyle = "#ff9d60";
-        for (var id in this.CONTROLLER_LIST) {
-            var controller = this.CONTROLLER_LIST[id], i;
-            draftCtx.fillStyle = "rgba(123,0,0," + controller.health / (4 * controller.maxHealth) + ")";
-            draftCtx.lineWidth = 10;
-            draftCtx.beginPath();
-
-            //draw player object
-            if (controller.type === "Player") {
-                var radius = 30;
-                draftCtx.moveTo(controller.x + radius, controller.y);
-                for (i = Math.PI / 4; i <= 2 * Math.PI - Math.PI / 4; i += Math.PI / 4) {
-                    theta = i + getRandom(-(controller.maxHealth / controller.health) / 7, (controller.maxHealth / controller.health) / 7);
-                    x = radius * Math.cos(theta);
-                    y = radius * Math.sin(theta);
-                    draftCtx.lineTo(controller.x + x, controller.y + y);
-                }
-                draftCtx.lineTo(controller.x + radius, controller.y + 3);
-                draftCtx.stroke();
-                draftCtx.fill();
-            } else { //bot
-                var x, y, theta, startX, startY;
-                var smallRadius = 12;
-                var bigRadius = 20;
-
-                theta = controller.theta;
-                startX = bigRadius * Math.cos(theta);
-                startY = bigRadius * Math.sin(theta);
-                draftCtx.moveTo(controller.x + startX, controller.y + startY);
-                for (i = 1; i <= 2; i++) {
-                    theta = controller.theta + 2 * Math.PI / 3 * i +
-                        getRandom(-controller.maxHealth / controller.health / 7, controller.maxHealth / controller.health / 7);
-                    x = smallRadius * Math.cos(theta);
-                    y = smallRadius * Math.sin(theta);
-                    draftCtx.lineTo(controller.x + x, controller.y + y);
-                }
-                theta = controller.theta;
-                draftCtx.lineTo(controller.x + startX, controller.y + startY);
-                draftCtx.fill();
-            }
-
-            draftCtx.fillStyle = "#ff9d60";
-            draftCtx.fillText(controller.name, controller.x, controller.y + 70);
-            if (controller.selected && controller.owner === selfPlayer.id) {
-                draftCtx.lineWidth = 5;
-                draftCtx.strokeStyle = "#1d55af";
-                draftCtx.stroke();
+    for (var i = 0; i < entityList.length; i++) {
+        var list = entityList[i];
+        for (id in list) {
+            var entity = list[id];
+            if (inBounds(selfPlayer, entity.x, entity.y)) {
+                entity.show();
             }
         }
-    };
-
-    var drawTiles = function () {
-        for (var id in this.TILE_LIST) {
-            var tile = this.TILE_LIST[id];
-            if (inBounds(selfPlayer, tile.x, tile.y)) {
-                draftCtx.beginPath();
-                draftCtx.fillStyle = "rgb(" +
-                    tile.color.r + "," +
-                    tile.color.g + "," +
-                    tile.color.b +
-                    ")";
-
-                draftCtx.lineWidth = 15;
-
-                draftCtx.strokeStyle = "#1e2a2b";
-
-                draftCtx.rect(tile.x, tile.y, tile.length, tile.length);
-                draftCtx.stroke();
-                draftCtx.fill();
-            }
-        }
-    };
+    }
 
 
-    var drawShards = function () {
-        for (var id in this.SHARD_LIST) {
-            var shard = this.SHARD_LIST[id];
-            draftCtx.lineWidth = 2;
-
-            if (inBounds(selfPlayer, shard.x, shard.y) && shard.visible) {
-                draftCtx.beginPath();
-                if (shard.name !== null) {
-                    draftCtx.font = "30px Arial";
-                    draftCtx.fillText(shard.name, shard.x, shard.y);
-                }
-                draftCtx.fillStyle = "rgba(100, 255, 227, 0.1)";
-                draftCtx.arc(shard.x, shard.y, 20, 0, 2 * Math.PI, false);
-                draftCtx.fill();
-                draftCtx.closePath();
-
-
-                draftCtx.beginPath();
-                draftCtx.fillStyle = "#dfff42";
-
-                var radius = 10, i;
-                var startTheta = getRandom(0, 0.2);
-                var theta = 0;
-                var startX = radius * Math.cos(startTheta);
-                var startY = radius * Math.sin(startTheta);
-                draftCtx.moveTo(shard.x + startX, shard.y + startY);
-                for (i = Math.PI / 2; i <= 2 * Math.PI - Math.PI / 2; i += Math.PI / 2) {
-                    theta = startTheta + i + getRandom(-1 / 24, 1 / 24);
-                    var x = radius * Math.cos(theta);
-                    var y = radius * Math.sin(theta);
-                    draftCtx.lineTo(shard.x + x, shard.y + y);
-                }
-                draftCtx.lineTo(shard.x + startX, shard.y + startY);
-                draftCtx.stroke();
-                draftCtx.fill();
-                draftCtx.closePath();
-            }
-        }
-    };
-
-    var drawLasers = function () {
-        var id, laser, target, owner;
-        for (id in this.LASER_LIST) {
-            laser = this.LASER_LIST[id];
-            target = this.CONTROLLER_LIST[laser.target];
-            owner = this.CONTROLLER_LIST[laser.owner];
-            if (target && owner && inBounds(selfPlayer, owner.x, owner.y)) {
-                draftCtx.beginPath();
-                draftCtx.moveTo(owner.x, owner.y);
-                draftCtx.strokeStyle = "#912222";
-                draftCtx.lineWidth = 10;
-                draftCtx.lineTo(target.x, target.y);
-                draftCtx.stroke();
-            }
-        }
-    };
-
+    if (this.BRACKET) {
+        this.BRACKET.show();
+    }
 
     var drawConnectors = function () {
         for (var id in this.HOME_LIST) {
@@ -458,170 +338,31 @@ Client.prototype.drawScene = function (data) {
             if (home.neighbors) {
                 for (var i = 0; i < home.neighbors.length; i++) {
                     var neighbor = this.HOME_LIST[home.neighbors[i]];
-                    draftCtx.moveTo(home.x, home.y);
-                    if (inBoundsClose(selfPlayer, home.x, home.y)) {
-                        draftCtx.strokeStyle = "#f442b0";
-                    } else {
-                        draftCtx.strokeStyle = "#912381";
-                    }
-                    draftCtx.lineWidth = 10;
-                    draftCtx.lineTo(neighbor.x, neighbor.y);
-                    draftCtx.stroke();
+                    this.draftCtx.moveTo(home.x, home.y);
+                    this.draftCtx.strokeStyle = "#912381";
+
+                    this.draftCtx.lineWidth = 10;
+                    this.draftCtx.lineTo(neighbor.x, neighbor.y);
+                    this.draftCtx.stroke();
                 }
             }
         }
-    };
-
-    var drawHomes = function () {
-        for (var id in this.HOME_LIST) {
-            var home = this.HOME_LIST[id];
-
-            draftCtx.beginPath();
-            if (home.neighbors.length >= 4) {
-                draftCtx.fillStyle = "#4169e1";
-            } else {
-                draftCtx.fillStyle = "#396a6d";
-            }
-
-            draftCtx.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
-            draftCtx.fill();
-
-            if (inBoundsClose(selfPlayer, home.x, home.y)) {
-                if (home.faction)
-                    draftCtx.strokeStyle = "rgba(12, 255, 218, 0.7)";
-                draftCtx.lineWidth = 10;
-                draftCtx.stroke();
-            }
-
-            if (home.owner !== null) {
-                draftCtx.fillText(home.shards.length, home.x, home.y + 40);
-            }
-            draftCtx.closePath();
-        }
-    };
-
-    var drawFactions = function () {
-        for (var id in this.FACTION_LIST) {
-            var faction = this.FACTION_LIST[id];
-            draftCtx.font = faction.size * 30 + "px Arial";
-            draftCtx.textAlign = "center";
-            draftCtx.fillText(faction.name, faction.x, faction.y);
-        }
-    };
-
-    var drawBracket = function () {
-        if (BRACKET) {
-            draftCtx.fillStyle = "rgba(100,211,211,0.6)";
-            draftCtx.fillRect(BRACKET.x, BRACKET.y, BRACKET.length, BRACKET.length);
-            draftCtx.font = "20px Arial";
-            draftCtx.fillText("Press Z to Place Sentinel", selfPlayer.x, selfPlayer.y + 100);
-        }
-    };
-
-    var drawArrow = function () {
-        if (this.ARROW && this.ARROW.postX) {
-            draftCtx.beginPath();
-            draftCtx.strokeStyle = "#521522";
-
-            var preX = selfPlayer.x + (this.ARROW.preX - draftCanvas.width / 2) / this.scaleFactor;
-            var preY = selfPlayer.y + (this.ARROW.preY - draftCanvas.height / 2) / this.scaleFactor;
-
-            var postX = selfPlayer.x + (this.ARROW.postX - draftCanvas.width / 2) / this.scaleFactor;
-            var postY = selfPlayer.y + (this.ARROW.postY - draftCanvas.height / 2) / this.scaleFactor;
-
-            draftCtx.fillRect(preX, preY, postX - preX, postY - preY);
-
-            draftCtx.arc(postX, postY, 3, 0, 2 * Math.PI, true);
-            draftCtx.stroke();
-        }
-    };
-
-    var drawAnimations = function () {
-        for (var id in this.ANIMATION_LIST) {
-            var home;
-            var animation = this.ANIMATION_LIST[id];
-            if (animation.type === "addShard") {
-                home = this.HOME_LIST[animation.id];
-                if (!home) {
-                    return;
-                }
-                draftCtx.beginPath();
-                draftCtx.lineWidth = 3 * animation.timer;
-                draftCtx.strokeStyle = "#012CCC";
-                draftCtx.arc(home.x, home.y, home.radius, 0, animation.timer / 1.2, true);
-                draftCtx.stroke();
-                draftCtx.closePath();
-            }
-
-            if (animation.type === "removeShard") {
-                home = this.HOME_LIST[animation.id];
-                if (!home) {
-                    delete this.ANIMATION_LIST[id];
-                    return;
-                }
-                draftCtx.beginPath();
-                draftCtx.lineWidth = 15 - animation.timer;
-                draftCtx.strokeStyle = "rgba(255, 0, 0, " + animation.timer * 10 / 100 + ")";
-                draftCtx.arc(home.x, home.y, home.radius, 0, 2 * Math.PI, false);
-                draftCtx.stroke();
-                draftCtx.closePath();
-            }
-
-            if (animation.type === "shardDeath") {
-                draftCtx.font = 60 - animation.timer + "px Arial";
-                draftCtx.save();
-                draftCtx.translate(animation.x, animation.y);
-                draftCtx.rotate(-Math.PI / 50 * animation.theta);
-                draftCtx.textAlign = "center";
-                draftCtx.fillStyle = "rgba(255, 168, 86, " + animation.timer * 10 / 100 + ")";
-                draftCtx.fillText(animation.name, 0, 15);
-                draftCtx.restore();
-
-                draftCtx.fillStyle = "#000000";
-                animation.theta = lerp(animation.theta, 0, 0.08);
-                animation.x = lerp(animation.x, animation.endX, 0.1);
-                animation.y = lerp(animation.y, animation.endY, 0.1);
-            }
-
-            animation.timer--;
-            if (animation.timer <= 0) {
-                delete this.ANIMATION_LIST[id];
-            }
-        }
-    };
+    }.bind(this);
 
 
     var translateScene = function () {
-        draftCtx.setTransform(1, 0, 0, 1, 0, 0);
+        this.draftCtx.setTransform(1, 0, 0, 1, 0, 0);
         this.scaleFactor = lerp(this.scaleFactor, this.mainScaleFactor, 0.3);
 
-        draftCtx.translate(mainCanvas.width / 2, mainCanvas.height / 2);
-        draftCtx.scale(this.scaleFactor, this.scaleFactor);
-        draftCtx.translate(-selfPlayer.x, -selfPlayer.y);
-    };
+        this.draftCtx.translate(this.mainCanvas.width / 2, this.mainCanvas.height / 2);
+        this.draftCtx.scale(this.scaleFactor, this.scaleFactor);
+        this.draftCtx.translate(-selfPlayer.x, -selfPlayer.y);
+    }.bind(this);
 
-    mainCtx.clearRect(0, 0, 11000, 11000);
-    draftCtx.clearRect(0, 0, 11000, 11000);
-    mMapCtx.clearRect(0, 0, 500, 500);
-    drawTiles();
-    drawControllers();
-    drawShards();
-    drawLasers();
     drawConnectors();
-    drawHomes();
-    drawFactions();
-    drawAnimations();
-
-    drawBracket();
-    drawArrow();
-
     translateScene();
-    mainCtx.drawImage(draftCanvas, 0, 0);
+    this.mainCtx.drawImage(this.draftCanvas, 0, 0);
 };
-
-
-
-
 
 
 function lerp(a, b, ratio) {
@@ -641,12 +382,5 @@ function getRandom(min, max) {
     return Math.random() * (max - min) + min;
 }
 
-Object.size = function (obj) {
-    var size = 0, key;
-    for (key in obj) {
-        if (obj.hasOwnProperty(key)) size++;
-    }
-    return size;
-};
 
 module.exports = Client;

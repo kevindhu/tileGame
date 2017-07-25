@@ -124,8 +124,8 @@ PacketHandler.prototype.addHomeAnimationPackets = function (home) {
             type: "addShard",
             id: home.id,
             name: null,
-            x: null,
-            y: null
+            x: home.x,
+            y: home.y
         });
 };
 

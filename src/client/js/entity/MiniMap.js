@@ -75,3 +75,5 @@ MiniMap.prototype.scaleImageData = function (imageData, scale, mainCtx) {
 
     return scaled;
 };
+
+module.exports = MiniMap;

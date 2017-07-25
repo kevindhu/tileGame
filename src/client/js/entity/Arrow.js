@@ -9,4 +9,6 @@ function Arrow(x, y) {
     this.deltaY = function () {
         return this.postY - mainCanvas.height / 2;
     }
-};
+}
+
+module.exports = Arrow;

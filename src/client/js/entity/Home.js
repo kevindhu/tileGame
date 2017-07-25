@@ -1,4 +1,4 @@
-function Home(homeInfo) {
+function Home(homeInfo, client) {
     this.id = homeInfo.id;
     this.x = homeInfo.x;
     this.y = homeInfo.y;
@@ -17,6 +17,8 @@ function Home(homeInfo) {
     this.unitArmor = homeInfo.unitArmor;
     this.queue = homeInfo.queue;
     this.bots = homeInfo.bots;
+
+    this.client = client;
 }
 
 
@@ -34,3 +36,40 @@ Home.prototype.update = function (homeInfo) {
     this.queue = homeInfo.queue;
     this.bots = homeInfo.bots;
 };
+
+module.exports = Home;
+
+
+Home.prototype.show = function () {
+    var ctx = this.client.draftCtx;
+    ctx.beginPath();
+    if (this.neighbors.length >= 4) {
+        ctx.fillStyle = "#4169e1";
+    } else {
+        ctx.fillStyle = "#396a6d";
+    }
+
+    ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
+    ctx.fill();
+
+    var selfPlayer = this.client.CONTROLLER_LIST[this.client.SELFID];
+
+    if (inBoundsClose(selfPlayer, this.x, this.y)) {
+        if (this.faction)
+            ctx.strokeStyle = "rgba(12, 255, 218, 0.7)";
+        ctx.lineWidth = 10;
+        ctx.stroke();
+    }
+
+    if (this.owner !== null) {
+        ctx.fillText(this.shards.length, this.x, this.y + 40);
+    }
+    ctx.closePath();
+};
+
+
+function inBoundsClose(player, x, y) {
+    var range = 150;
+    return x < (player.x + range) && x > (player.x - 5 / 4 * range)
+        && y < (player.y + range) && y > (player.y - 5 / 4 * range);
+}

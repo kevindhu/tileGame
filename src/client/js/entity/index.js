@@ -1,4 +1,5 @@
 module.exports = {
+    Animation: require('./Animation'),
     Arrow: require('./Arrow'),
     Bracket: require('./Bracket'),
     Controller: require('./Controller'),
