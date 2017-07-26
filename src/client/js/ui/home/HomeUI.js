@@ -7,24 +7,21 @@ function HomeUI(client, socket) {
     this.socket = socket;
     this.template = document.getElementById('home_ui');
     this.home = null;
-
-    this.upgradesPage = null;
-    this.botsPage = null;
-    this.buildPage = null;
 }
 
 HomeUI.prototype.open = function (home) {
     this.template.style.display = 'block';
     this.home = home;
 
-    if (this.upgradesPage === null) {
+    if (!this.upgradesPage) {
         this.upgradesPage = new UpgradesPage(this);
         this.botsPage = new BotsPage(this);
         this.buildPage = new BuildPage(this);
+
+        this.addTabListeners();
+        this.addCloseListener();
     }
 
-
-    this.addTabListeners();
     this.openHomeInfo();
     this.upgradesPage.open();
     //this.openColorPicker(home);
@@ -87,6 +84,8 @@ HomeUI.prototype.addTabListeners = function () {
         this.upgradesPage.open();
         this.buildPage.close();
         this.botsPage.close();
+
+        console.log(this.botsPage);
     }.bind(this));
 
     createTab.addEventListener('click', function (evt) {
@@ -99,6 +98,13 @@ HomeUI.prototype.addTabListeners = function () {
         this.upgradesPage.close();
         this.buildPage.close();
         this.botsPage.open();
+    }.bind(this));
+};
+
+HomeUI.prototype.addCloseListener = function () {
+    var closeButton = document.getElementById("close_home_ui");
+    closeButton.addEventListener("click", function () {
+        this.client.mainUI.close("home info");
     }.bind(this));
 };
 

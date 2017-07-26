@@ -2,11 +2,9 @@ var Client = require('./Client.js');
 var MainUI = require('./ui/MainUI');
 
 var client = new Client();
-var mainUI = new MainUI(client, client.socket);
 
 
-mainUI.playerNamerUI.open();
-mainUI.gameUI.open();
+
 
 
 document.onkeydown = function (event) {

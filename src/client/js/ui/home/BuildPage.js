@@ -5,6 +5,7 @@ function BuildPage(homeUI) {
     this.template = document.getElementById("create_page");
     this.createBot = document.getElementById("create_bot_container");
     this.makeBotsBtn = document.getElementById('make_bots_btn');
+    this.socket = homeUI.socket;
 
     this.SELECTED_SHARDS = {};
 
@@ -27,7 +28,7 @@ BuildPage.prototype.open = function () {
     }.bind(this);
 
     if (this.homeUI.home.type === "Barracks") {
-        this.homeUI.resetButton(makeBotsBtn, makeBots);
+        this.homeUI.resetButton(this.makeBotsBtn, makeBots);
         this.createBot.style.display = "flex";
         this.buildQueueUI.addQueue(this.homeUI.home);
     } else {

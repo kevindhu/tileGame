@@ -44,49 +44,43 @@ Client.prototype.initCanvases = function () {
         if (event.button === 2) {
             this.rightClick = true;
         } else if (this.CONTROLLER_LIST[this.SELFID]) {
-            this.ARROW = new Arrow(event.x / mainCanvas.offsetWidth * 1000,
-                event.y / mainCanvas.offsetHeight * 500);
+            this.ARROW = new Entity.Arrow(event.x / this.mainCanvas.offsetWidth * 1000,
+                event.y / this.mainCanvas.offsetHeight * 500, this);
         }
-    });
+    }.bind(this));
 
     this.mainCanvas.addEventListener("mouseup", function (event) {
-        if (!rightClick) {
-            this.ARROW.postX = event.x / mainCanvas.offsetWidth * 1000;
-            this.ARROW.postY = event.y / mainCanvas.offsetHeight * 500;
+        if (!this.rightClick) {
+            this.ARROW.postX = event.x / this.mainCanvas.offsetWidth * 1000;
+            this.ARROW.postY = event.y / this.mainCanvas.offsetHeight * 500;
 
-            var minX = (this.ARROW.preX - draftCanvas.width / 2) / scaleFactor;
-            var minY = (this.ARROW.preY - draftCanvas.height / 2) / scaleFactor;
-            var maxX = (this.ARROW.postX - draftCanvas.width / 2) / scaleFactor;
-            var maxY = (this.ARROW.postY - draftCanvas.height / 2) / scaleFactor;
             this.socket.emit("selectBots", {
-                minX: minX,
-                minY: minY,
-                maxX: maxX,
-                maxY: maxY
+                minX: (this.ARROW.preX - this.draftCanvas.width / 2) / this.scaleFactor,
+                minY: (this.ARROW.preY - this.draftCanvas.height / 2) / this.scaleFactor,
+                maxX: (this.ARROW.postX - this.draftCanvas.width / 2) / this.scaleFactor,
+                maxY: (this.ARROW.postY - this.draftCanvas.height / 2) / this.scaleFactor
             });
         }
         else {
-            var x = event.x / mainCanvas.offsetWidth * 1000;
-            var y = event.y / mainCanvas.offsetHeight * 500;
-            maxX = (x - draftCanvas.width / 2) / scaleFactor;
-            maxY = (y - draftCanvas.height / 2) / scaleFactor;
+            var x = event.x / this.mainCanvas.offsetWidth * 1000;
+            var y = event.y / this.mainCanvas.offsetHeight * 500;
 
             this.socket.emit("botCommand", {
-                x: maxX,
-                y: maxY
+                x: (x - this.draftCanvas.width / 2) / this.scaleFactor,
+                y: (y - this.draftCanvas.height / 2) / this.scaleFactor
             });
         }
 
         this.rightClick = false;
         this.ARROW = null;
-    });
+    }.bind(this));
 
     this.mainCanvas.addEventListener("mousemove", function (event) {
         if (this.ARROW) {
-            this.ARROW.postX = event.x / mainCanvas.offsetWidth * 1000;
-            this.ARROW.postY = event.y / mainCanvas.offsetHeight * 500;
+            this.ARROW.postX = event.x / this.mainCanvas.offsetWidth * 1000;
+            this.ARROW.postY = event.y / this.mainCanvas.offsetHeight * 500;
         }
-    });
+    }.bind(this));
 
 };
 
@@ -115,7 +109,11 @@ Client.prototype.initViewers = function () {
     this.keys = [];
     this.scaleFactor = 1;
     this.mainScaleFactor = 1;
+    console.log("MAKING NEW VIEWER");
     this.mainUI = new MainUI(this, this.socket);
+
+    this.mainUI.playerNamerUI.open();
+    this.mainUI.gameUI.open();
 };
 
 
@@ -270,7 +268,6 @@ Client.prototype.addEntities = function (packet) {
             //this.drawLeaderBoard();
             break;
         case "animationInfo":
-            console.log(packet.type);
             addEntity(packet, this.ANIMATION_LIST, Entity.Animation);
             break;
         case "bracketInfo":
@@ -330,6 +327,9 @@ Client.prototype.drawScene = function (data) {
 
     if (this.BRACKET) {
         this.BRACKET.show();
+    }
+    if (this.ARROW) {
+        this.ARROW.show();
     }
 
     var drawConnectors = function () {
