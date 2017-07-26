@@ -24,6 +24,9 @@ HomeUI.prototype.open = function (home) {
 
     this.openHomeInfo();
     this.upgradesPage.open();
+    this.buildPage.close();
+    this.botsPage.close();
+
     //this.openColorPicker(home);
 };
 
@@ -84,8 +87,6 @@ HomeUI.prototype.addTabListeners = function () {
         this.upgradesPage.open();
         this.buildPage.close();
         this.botsPage.close();
-
-        console.log(this.botsPage);
     }.bind(this));
 
     createTab.addEventListener('click', function (evt) {
@@ -118,7 +119,6 @@ HomeUI.prototype.resetButton = function (button, callback) {
             }
             return null;
         };
-
         var canvas = findChildCanvas(button.parentNode);
         canvas.width = 260;
         canvas.height = 100;
@@ -142,8 +142,10 @@ HomeUI.prototype.resetButton = function (button, callback) {
 
         }
         ctx.fillRect(0, 0, magnitude * 10, 200);
-    };
+    }.bind(this);
     var newButton = button.cloneNode(true);
+    newButton.upgType = button.upgType;
+
     button.parentNode.replaceChild(newButton, button);
     button = newButton;
     button.addEventListener('click', callback);

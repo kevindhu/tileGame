@@ -9,7 +9,6 @@ function MainUI(client, socket) {
     this.client = client;
     this.socket = socket;
 
-    console.log(this.socket);
 
 
     this.playerNamerUI = new PlayerNamerUI(this.client, this.socket);
@@ -60,13 +59,12 @@ MainUI.prototype.updateLeaderBoard = function () {
 
 
 /** DEPRECATED METHODS **/
-MainUI.prototype.updateUI = function (info) {
+MainUI.prototype.update = function (info) {
     var action = info.action;
-    var home;
     if (action === "update queue") {
-        var buildQueue = document.getElementById('build_queue');
-        home = this.client.HOME_LIST[info.homeId];
-        addQueueInfo(buildQueue, home);
+        this.homeUI.buildPage.update();
+        this.homeUI.botsPage.update();
+        //this.homeUI.upgradesPage.update();
     }
 };
 

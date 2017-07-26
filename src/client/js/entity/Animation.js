@@ -74,4 +74,8 @@ function getRandom(min, max) {
     return Math.random() * (max - min) + min;
 }
 
+function lerp(a, b, ratio) {
+    return a + ratio * (b - a);
+}
+
 module.exports = Animation;

@@ -8,7 +8,6 @@ function BuildPage(homeUI) {
     this.socket = homeUI.socket;
 
     this.SELECTED_SHARDS = {};
-
     this.buildQueueUI = new ListUI(document.getElementById('build_queue'), homeUI);
     this.shardsUI = new ListUI(document.getElementById('build_shards_list'), homeUI, this);
     this.homeUI = homeUI;
@@ -17,18 +16,18 @@ function BuildPage(homeUI) {
 
 BuildPage.prototype.open = function () {
     this.template.style.display = "block";
-
     this.SELECTED_SHARDS = {};
 
     var makeBots = function () {
+        console.log("MAKING BOTS");
         this.socket.emit('makeBots', {
-            home: this.home.id,
+            home: this.homeUI.home.id,
             shards: this.SELECTED_SHARDS
         });
     }.bind(this);
 
     if (this.homeUI.home.type === "Barracks") {
-        this.homeUI.resetButton(this.makeBotsBtn, makeBots);
+        this.makeBotsBtn = this.homeUI.resetButton(this.makeBotsBtn, makeBots);
         this.createBot.style.display = "flex";
         this.buildQueueUI.addQueue(this.homeUI.home);
     } else {
@@ -41,6 +40,10 @@ BuildPage.prototype.close = function () {
     this.template.style.display = "none";
 };
 
+
+BuildPage.prototype.update = function () {
+    this.buildQueueUI.addQueue();
+};
 
 module.exports = BuildPage;
 

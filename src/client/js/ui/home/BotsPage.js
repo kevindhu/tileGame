@@ -17,6 +17,11 @@ BotsPage.prototype.close = function () {
     this.template.style.display = "none";
 };
 
+BotsPage.prototype.update = function () {
+    if (this.homeUI.home.type === "Barracks") {
+        this.botsListUI.addBots();
+    }
+};
 
 module.exports = BotsPage;
 

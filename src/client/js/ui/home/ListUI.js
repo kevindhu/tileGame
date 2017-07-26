@@ -72,6 +72,7 @@ ListUI.prototype.addBots = function () {
 
 ListUI.prototype.addShards = function () {
     var home = this.homeUI.home;
+    var SELECTED_SHARDS = this.parent.SELECTED_SHARDS;
     var checkSelection = function () {
         var bldBaseHealthBtn = document.getElementById('bld_home_btn');
         var makeBotsBtn = document.getElementById('make_bots_btn');
@@ -79,7 +80,7 @@ ListUI.prototype.addShards = function () {
         var bldSpeedBtn = document.getElementById('bld_speed');
         var bldDmgBtn = document.getElementById('bld_damage');
 
-        if (Object.size(this.parent.SELECTED_SHARDS) > 0) {
+        if (Object.size(SELECTED_SHARDS) > 0) {
             bldBaseHealthBtn.disabled = false;
             bldArmorBtn.disabled = false;
             bldSpeedBtn.disabled = false;
@@ -100,21 +101,22 @@ ListUI.prototype.addShards = function () {
         var shard = this.client.SHARD_LIST[home.shards[j]];
         entry.id = shard.id;
 
-        entry.addEventListener("click", function () {
-            if (!entry.clicked) {
-                entry.clicked = true;
-                entry.style.background = "#fffb22";
-                this.parent.SELECTED_SHARDS[entry.id] = entry.id;
-                checkSelection();
-            }
-            else {
-                entry.clicked = false;
-                entry.style.background = "#542fce";
-                delete this.parent.SELECTED_SHARDS[entry.id];
-                checkSelection();
-            }
-        }.bind(this));
-
+        (function (_id) {
+            entry.addEventListener("click", function () {
+                if (!this.clicked) {
+                    this.clicked = true;
+                    this.style.background = "#fffb22";
+                    SELECTED_SHARDS[_id] = _id;
+                    checkSelection();
+                }
+                else {
+                    this.clicked = false;
+                    this.style.background = "#542fce";
+                    delete SELECTED_SHARDS[entry.id];
+                    checkSelection();
+                }
+            });
+        })(entry.id);
 
         entry.appendChild(document.createTextNode(shard.name));
         this.list.appendChild(entry);

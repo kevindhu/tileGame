@@ -182,7 +182,7 @@ Client.prototype.updateEntities = function (packet) {
             break;
         case "UIInfo":
             if (this.SELFID === packet.playerId) {
-                updateUI(packet);
+                this.mainUI.update(packet);
             }
             break;
     }

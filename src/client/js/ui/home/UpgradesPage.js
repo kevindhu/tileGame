@@ -10,10 +10,9 @@ function UpgradesPage(homeUI) {
 
     this.SELECTED_SHARDS = {};
 
-    this.shardsUI = new ListUI(document.getElementById("upgrades_shards_list"),homeUI, this);
+    this.shardsUI = new ListUI(document.getElementById("upgrades_shards_list"), homeUI, this);
     this.homeUI = homeUI;
-
-    this.shardsUI.addShards();
+    this.socket = this.homeUI.socket;
 }
 
 UpgradesPage.prototype.open = function () {
@@ -23,21 +22,23 @@ UpgradesPage.prototype.open = function () {
     this.bldSpeedBtn.upgType = "speed";
     this.bldDmgBtn.upgType = "dmg";
 
+    this.shardsUI.addShards();
+
     var bldHome = function () {
         this.socket.emit('buildHome', {
             home: this.homeUI.home.id,
             shards: this.SELECTED_SHARDS
         })
     }.bind(this);
-    var upgUnit = function () {
+    var upgUnit = function () { //TODO: fix upgrading units
         this.socket.emit('upgradeUnit', {
             home: this.homeUI.home.id,
             type: this.upgType,
-            shards: SELECTED_SHARDS
+            shards: this.SELECTED_SHARDS
         });
     }.bind(this);
 
-
+    console.log("RESETTING BUTTON");
     this.bldBaseHealthBtn = this.homeUI.resetButton(this.bldBaseHealthBtn, bldHome);
 
     if (this.homeUI.home.type === "Barracks") {
@@ -54,6 +55,10 @@ UpgradesPage.prototype.open = function () {
 
 UpgradesPage.prototype.close = function () {
     this.template.style.display = "none";
+};
+
+UpgradesPage.prototype.update = function () {
+    this.shardsUI.addShards()
 };
 
 
