@@ -8,18 +8,3 @@ $(document).keydown(function(event) {
     // 173 Min Key  hyphen/underscor Hey
     // 61 Plus key  +/= key
 });
-
-$(window).bind('mousewheel DOMMouseScroll', function (event) {
-    if (event.ctrlKey === true) {
-        event.preventDefault();
-    }
-    if (LIST_SCROLL) {
-        return;
-    }
-    if(event.originalEvent.wheelDelta /120 > 0 && mainScaleFactor < 2) {
-        mainScaleFactor += 0.2;
-    }
-    else if (mainScaleFactor > 0.7) {
-        mainScaleFactor -= 0.2;
-    }
-});

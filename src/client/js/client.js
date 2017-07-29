@@ -16,7 +16,6 @@ Client.prototype.init = function () {
     this.initViewers();
 };
 
-
 Client.prototype.initCanvases = function () {
     this.mainCanvas = document.getElementById("main_canvas");
     this.draftCanvas = document.createElement("canvas");
@@ -81,7 +80,6 @@ Client.prototype.initCanvases = function () {
             this.ARROW.postY = event.y / this.mainCanvas.offsetHeight * 500;
         }
     }.bind(this));
-
 };
 
 Client.prototype.initLists = function () {
@@ -116,7 +114,6 @@ Client.prototype.initViewers = function () {
     this.mainUI.gameUI.open();
 };
 
-
 Client.prototype.addFactionstoUI = function (data) {
     if (!this.socket.verified) {
         console.log("VERIFIED");
@@ -132,7 +129,7 @@ Client.prototype.addFactionstoUI = function (data) {
         option.value = name;
         factions.appendChild(option);
     }
-};
+}; //change method name and location
 
 Client.prototype.handlePacket = function (data) {
     var packet, i;

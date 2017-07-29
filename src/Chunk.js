@@ -13,6 +13,4 @@ function Chunk(id, gameServer) {
 }
 
 
-
-
 module.exports = Chunk;
