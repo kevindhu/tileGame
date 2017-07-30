@@ -175,7 +175,9 @@ Client.prototype.updateEntities = function (packet) {
             updateEntity(packet, this.HOME_LIST);
             break;
         case "factionInfo":
+            console.log("UPDATING FACTION " + packet.size);
             updateEntity(packet, this.FACTION_LIST);
+            this.mainUI.updateLeaderBoard();
             break;
         case "UIInfo":
             if (this.SELFID === packet.playerId) {
@@ -191,7 +193,7 @@ Client.prototype.deleteEntities = function (packet) {
             return;
         }
         if (array) {
-            var index = findWithAttr(array, "id", packet.id);
+            var index = array.indexOf(packet.id);
             array.splice(index, 1);
         }
         delete list[packet.id];
@@ -212,7 +214,7 @@ Client.prototype.deleteEntities = function (packet) {
             break;
         case "factionInfo":
             deleteEntity(packet, this.FACTION_LIST, this.FACTION_ARRAY);
-            //this.drawLeaderBoard();
+            this.mainUI.updateLeaderBoard();
             break;
         case "animationInfo":
             deleteEntity(packet, this.ANIMATION_LIST);
@@ -239,8 +241,8 @@ Client.prototype.addEntities = function (packet) {
             return;
         }
         list[packet.id] = new entity(packet, this);
-        if (array && findWithAttr(array, "id", packet.id) === -1) {
-            array.push(list[packet.id]);
+        if (array && array.indexOf(packet.id) === -1) {
+            array.push(packet.id);
         }
     }.bind(this);
 
@@ -261,8 +263,9 @@ Client.prototype.addEntities = function (packet) {
             addEntity(packet, this.HOME_LIST, Entity.Home);
             break;
         case "factionInfo":
+            console.log("ADDING FACTION");
             addEntity(packet, this.FACTION_LIST, Entity.Faction, this.FACTION_ARRAY);
-            //this.drawLeaderBoard();
+            this.mainUI.updateLeaderBoard();
             break;
         case "animationInfo":
             addEntity(packet, this.ANIMATION_LIST, Entity.Animation);
@@ -281,13 +284,6 @@ Client.prototype.addEntities = function (packet) {
             this.SELFID = packet.selfId;
             break;
     }
-};
-
-Client.prototype.updateFactionsList = function () {
-    var factionSort = function (a, b) {
-        return a.size - b.size;
-    };
-
 };
 
 Client.prototype.drawScene = function (data) {
@@ -360,6 +356,7 @@ Client.prototype.drawScene = function (data) {
     translateScene();
     this.mainCtx.drawImage(this.draftCanvas, 0, 0);
 };
+
 
 
 function lerp(a, b, ratio) {

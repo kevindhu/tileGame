@@ -13,9 +13,6 @@ Faction.prototype.update = function (factionInfo) {
     this.y = factionInfo.y;
     this.size = factionInfo.size;
 
-
-    //FACTION_ARRAY.sort(factionSort);
-    //drawLeaderBoard(); //change this
 };
 
 Faction.prototype.show = function () {

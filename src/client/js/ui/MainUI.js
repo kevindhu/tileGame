@@ -45,12 +45,24 @@ MainUI.prototype.close = function (action) {
 
 MainUI.prototype.updateLeaderBoard = function () {
     var leaderboard = document.getElementById("leaderboard");
+    var FACTION_ARRAY = this.client.FACTION_ARRAY;
+
+
+    var factionSort = function (a, b) {
+        console.log(a,b);
+        var factionA = this.client.FACTION_LIST[a];
+        var factionB = this.client.FACTION_LIST[b];
+        return factionA.size - factionB.size;
+    }.bind(this);
+
+    FACTION_ARRAY.sort(factionSort);
     leaderboard.innerHTML = "";
+
     for (var i = FACTION_ARRAY.length - 1; i >= 0; i--) {
-        var faction = FACTION_ARRAY[i];
+        var faction = this.client.FACTION_LIST[FACTION_ARRAY[i]];
 
         var entry = document.createElement('li');
-        entry.appendChild(document.createTextNode(faction.name));
+        entry.appendChild(document.createTextNode(faction.name + " - " + faction.size));
         leaderboard.appendChild(entry);
     }
 };
