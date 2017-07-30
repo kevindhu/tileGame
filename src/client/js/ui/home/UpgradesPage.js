@@ -53,6 +53,26 @@ UpgradesPage.prototype.open = function () {
 };
 
 
+UpgradesPage.prototype.checkSelection = function (input) {
+    var bldBaseHealthBtn = document.getElementById('bld_home_btn');
+    var bldArmorBtn = document.getElementById('bld_armor');
+    var bldSpeedBtn = document.getElementById('bld_speed');
+    var bldDmgBtn = document.getElementById('bld_damage');
+
+    if (input > 0) {
+        bldBaseHealthBtn.disabled = false;
+        bldArmorBtn.disabled = false;
+        bldSpeedBtn.disabled = false;
+        bldDmgBtn.disabled = false;
+    } else {
+        bldBaseHealthBtn.disabled = "disabled";
+        bldArmorBtn.disabled = "disabled";
+        bldSpeedBtn.disabled = "disabled";
+        bldDmgBtn.disabled = "disabled";
+    }
+};
+
+
 UpgradesPage.prototype.close = function () {
     this.template.style.display = "none";
 };

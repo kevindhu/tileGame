@@ -10,6 +10,8 @@ function Controller(controllerInfo, client) {
     this.theta = controllerInfo.theta;
     this.type = controllerInfo.type;
     this.level = controllerInfo.level;
+    this.radius = controllerInfo.radius;
+    this.stealth = controllerInfo.stealth;
 
     this.client = client;
 }
@@ -22,9 +24,14 @@ Controller.prototype.update = function (controllerInfo) {
     this.selected = controllerInfo.selected;
     this.theta = controllerInfo.theta;
     this.level = controllerInfo.level;
+    this.stealth = controllerInfo.stealth;
 };
 
 Controller.prototype.show = function () {
+    var selfId = this.client.SELFID;
+    if (this.stealth && this.id !== selfId && this.owner !== selfId) {
+        return;
+    }
     this.client.draftCtx.font = "20px Arial";
     this.client.draftCtx.strokeStyle = "#ff9d60";
 
@@ -45,10 +52,11 @@ Controller.prototype.show = function () {
         this.client.draftCtx.lineTo(this.x + radius, this.y + 3);
         this.client.draftCtx.stroke();
         this.client.draftCtx.fill();
-    } else { //bot
+    }
+    else { //bot
         var x, y, theta, startX, startY;
         var smallRadius = 12;
-        var bigRadius = 20;
+        var bigRadius = this.radius;
 
         theta = this.theta;
         startX = bigRadius * Math.cos(theta);

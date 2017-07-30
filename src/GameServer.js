@@ -8,21 +8,25 @@ const PORT = process.env.PORT || 2000;
 
 function GameServer() {
     this.packetHandler = new PacketHandler(this);
-    this.INIT_SOCKET_LIST = {};
-    this.SOCKET_LIST = {};
     this.CHUNKS = {};
 
-    this.FACTION_LIST = {};
-    this.TILE_LIST = {};
+    this.SOCKET_LIST = {};
+    this.INIT_SOCKET_LIST = {};
+
     this.CONTROLLER_LIST = {};
-    this.HOME_LIST = {};
-    this.LASER_LIST = {};
-    this.QUEUE_LIST = {};
 
     this.STATIC_SHARD_LIST = {};
     this.SHOOTING_SHARD_LIST = {};
     this.PLAYER_SHARD_LIST = {};
     this.HOME_SHARD_LIST = {};
+
+    this.FACTION_LIST = {};
+    this.TILE_LIST = {};
+    this.HOME_LIST = {};
+    this.LASER_LIST = {};
+
+    //these are all updaters (updated every tick of server loop until deleted)
+    this.QUEUE_LIST = {};
 
     this.controllerTree = null;
     this.shardTree = null;
@@ -235,13 +239,6 @@ GameServer.prototype.checkControllerCollision = function (controller) {
                     home.addShard(shard);
                 }
                 if (controller.pressingSpace) {
-                    if (controller.timer > 0) {
-                        controller.timer -= 1;
-                        return;
-                    }
-                    else {
-                        controller.timer = 15;
-                    }
                     home.addViewer(controller);
                 }
             }
@@ -294,6 +291,7 @@ GameServer.prototype.updateQueues = function () {
         home.updateQueue();
     }
 };
+
 
 GameServer.prototype.updateShards = function () {
     var id, shard;
@@ -425,27 +423,36 @@ GameServer.prototype.start = function () {
                 case 32:
                     player.pressingSpace = data.state;
                     break;
-                case 90:
+                case 90: //z
                     if (data.state) {
                         faction.addSentinel(player);
                     }
                     break;
-                case 88:
+                case 88: //x
                     if (data.state) {
                         faction.addTower(player);
                     }
                     break;
-                case 78:
+                case 78: //n
                     if (data.state) {
                         faction.addBarracks(player);
                     }
                     break;
-                case 86:
+                case 86: //v
                     if (data.state) {
-                        {
-                            player.groupBots();
-                        }
+                        player.groupBots();
                     }
+                    break;
+                case 66: //b
+                    if (data.state) {
+                        player.attemptBoost();
+                    }
+                    break;
+                case 80: //p
+                    if (data.state) {
+                        player.attemptStealth();
+                    }
+                    break;
 
 
             }
@@ -489,7 +496,7 @@ GameServer.prototype.start = function () {
             for (var id in data.shards) {
                 shard = this.HOME_SHARD_LIST[id];
                 if (shard) {
-                    barracks.startBot(player, shard);
+                    barracks.startBot(data.botType, player, shard);
                 }
             }
         }.bind(this));

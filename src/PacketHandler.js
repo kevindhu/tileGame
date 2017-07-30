@@ -43,11 +43,7 @@ PacketHandler.prototype.createChunkPacket = function (chunk, id) {
     };
 
     populate(this.gameServer.CHUNKS[chunk].CONTROLLER_LIST, this.addControllerPackets);
-
-    populate(this.gameServer.CHUNKS[chunk].HOME_SHARD_LIST, this.addShardPackets);
-    populate(this.gameServer.CHUNKS[chunk].PLAYER_SHARD_LIST, this.addShardPackets);
-    populate(this.gameServer.CHUNKS[chunk].STATIC_SHARD_LIST, this.addShardPackets);
-
+    populate(this.gameServer.CHUNKS[chunk].SHARD_LIST, this.addShardPackets);
     populate(this.gameServer.CHUNKS[chunk].TILE_LIST, this.addTilePackets);
     populate(this.gameServer.CHUNKS[chunk].HOME_LIST, this.addHomePackets);
     populate(this.gameServer.FACTION_LIST, this.addFactionPackets);
@@ -77,9 +73,7 @@ PacketHandler.prototype.deleteChunkPacket = function (chunk) {
 
     populate(this.gameServer.CHUNKS[chunk].CONTROLLER_LIST, this.deleteControllerPackets);
 
-    populate(this.gameServer.CHUNKS[chunk].HOME_SHARD_LIST, this.deleteShardPackets);
-    populate(this.gameServer.CHUNKS[chunk].PLAYER_SHARD_LIST, this.deleteShardPackets);
-    populate(this.gameServer.CHUNKS[chunk].STATIC_SHARD_LIST, this.deleteShardPackets);
+    populate(this.gameServer.CHUNKS[chunk].SHARD_LIST, this.deleteShardPackets);
 
     populate(this.gameServer.CHUNKS[chunk].TILE_LIST, this.deleteTilePackets);
     populate(this.gameServer.CHUNKS[chunk].HOME_LIST, this.deleteHomePackets);
@@ -172,7 +166,9 @@ PacketHandler.prototype.addControllerPackets = function (controller, ifInit) {
         maxHealth: controller.maxHealth,
         selected: controller.selected,
         theta: controller.theta,
-        level: controller.level
+        level: controller.level,
+        radius: controller.radius,
+        stealth: controller.stealth
     };
     if (ifInit) {
         return info;
@@ -346,7 +342,8 @@ PacketHandler.prototype.updateControllersPackets = function (controller) {
         maxHealth: controller.maxHealth,
         theta: controller.theta,
         level: controller.level,
-        selected: controller.selected
+        selected: controller.selected,
+        stealth: controller.stealth
     });
 };
 

@@ -125,7 +125,7 @@ p {
 }
 
 
-#make_bots_btn {
+.make_bots_btn {
     display: block;
     font-family: openSansBold;
     font-size: 2.5vh;

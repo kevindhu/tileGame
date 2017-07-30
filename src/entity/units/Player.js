@@ -11,9 +11,13 @@ function Player(id, name, faction, gameServer) {
     this.radius = 10;
     this.maxSpeed = 10;
     this.selectedCount = 0;
+
     this.bots = [];
+    this.boosterBots = [];
+    this.stealthBots = [];
+
     this.shards = [];
-    this.shardNamer = "unnamed";
+    this.shardNamer = "unnamed bot";
     this.viewing = null;
     this.init();
 }
@@ -41,6 +45,26 @@ Player.prototype.onDelete = function () {
 Player.prototype.shootShard = function (controller) {
 };
 
+
+Player.prototype.addBoosterBot = function (bot) {
+    this.boosterBots.push(bot.id);
+    this.addBot(bot);
+};
+
+Player.prototype.addStealthBot = function (bot) {
+    this.stealthBots.push(bot.id);
+    this.addBot(bot);
+};
+
+Player.prototype.removeStealthBot = function (bot) {
+    var index = this.stealthBots.indexOf(bot.id);
+    this.stealthBots.splice(index, 1);
+};
+
+Player.prototype.removeBoosterBot = function (bot) {
+    var index = this.boosterBots.indexOf(bot.id);
+    this.boosterBots.splice(index, 1);
+};
 
 Player.prototype.addBot = function (bot) {
     this.bots.push(bot.id);
@@ -130,6 +154,27 @@ Player.prototype.groupBots = function () { //get all bots back to player
     }
 };
 
+Player.prototype.attemptBoost = function () {
+    var bot;
+    for (var i = 0; i<this.boosterBots.length; i++) {
+        bot = this.gameServer.CONTROLLER_LIST[this.boosterBots[i]];
+        if (bot) {
+            bot.addBoost();
+        }
+    }
+};
+
+Player.prototype.attemptStealth = function () {
+    var bot;
+
+    for (var i = 0; i < this.stealthBots.length; i++) {
+        bot = this.gameServer.CONTROLLER_LIST[this.stealthBots[i]];
+        if (bot) {
+            bot.addStealth();
+        }
+    }
+};
+
 Player.prototype.createBoundary = function (boundary) {
     var playerBoundary = {};
     playerBoundary.minx = this.x + boundary.minX;
@@ -149,12 +194,13 @@ Player.prototype.update = function () {
             this.packetHandler.addBracketPackets(this, tile);
         }
     }
+
+
     Player.super_.prototype.update.apply(this);
 };
 
 
-Player.prototype.updateMaxSpeed = function () {
-    this.maxSpeed = 10 * Math.pow(0.9, this.shards.length);
+Player.prototype.updateMaxSpeed = function () { //resets to 10, change this
     this.maxXSpeed = this.maxSpeed;
     this.maxYSpeed = this.maxSpeed;
 };

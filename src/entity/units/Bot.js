@@ -7,24 +7,28 @@ var Shard = require('../projectiles/Shard');
 var Laser = require('../projectiles/Laser');
 
 function Bot(name, player, home, faction, gameServer) {
-    this.id = Math.random();
     Bot.super_.call(this, this.id, faction, gameServer);
+
+    this.id = Math.random();
+    this.level = 0;
     this.name = getName(name);
     this.owner = player.id;
     this.radius = 40;
     this.type = "Bot";
     this.x = home.x;
     this.y = home.y;
+
     this.damage = home.unitDmg;
     this.health = 5 + home.unitArmor;
     this.maxSpeed = 5 + home.unitSpeed;
     this.timer = 0;
     this.theta = 0;
+
     this.laserTimer = 0;
+    this.shootTimer = 0;
+
     this.manual = false;
-    this.manualCoord = null;
     this.enemy = null;
-    this.level = 0;
     this.setOwnerTarget();
     this.init();
 }
@@ -32,8 +36,51 @@ function Bot(name, player, home, faction, gameServer) {
 EntityFunctions.inherits(Bot, Controller);
 
 Bot.prototype.update = function () {
+    if (this.laserTimer > 0) {
+        this.laserTimer -= 1;
+    }
+    if (this.shootTimer > 0) {
+        this.shootTimer -= 1;
+    }
+    this.findEnemies();
+    this.findFriendlies();
+
     Bot.super_.prototype.update.apply(this);
 };
+
+
+Bot.prototype.findEnemies = function () {
+    var shootRange = {
+        minx: this.x - 100,
+        miny: this.y - 100,
+        maxx: this.x + 100,
+        maxy: this.y + 100
+    };
+    this.gameServer.controllerTree.find(shootRange, function (controller) {
+        if (controller.faction !== this.faction) {
+            this.shootShard(controller);
+            this.shootLaser(controller);
+        }
+    }.bind(this));
+
+    this.gameServer.homeTree.find(shootRange, function (home) {
+        if (home.faction !== this.faction) {
+            this.shootShard(home);
+            this.shootLaser(home);
+        }
+    }.bind(this))
+
+};
+
+Bot.prototype.findFriendlies = function () {
+    this.gameServer.controllerTree.find(this.quadItem.bound, function (controller) {
+        if (controller.faction && controller.id !== this.id && this.xSpeed < 5 && this.ySpeed < 5) {
+            this.ricochet(controller);
+        }
+    }.bind(this))
+
+};
+
 
 Bot.prototype.setManual = function (x, y) {
     this.target.object = {
@@ -104,23 +151,26 @@ Bot.prototype.updateControls = function () {
         switch (this.target.type) {
             case "owner":
             case "manual":
-                this.theta = 0;
+                //this.theta = 0;
                 break;
             case "enemy":
-            //this.theta = Math.random();
+                //this.theta = Math.random();
+                break;
             case "friend":
                 if (this.target.object.storeBot) {
                     this.target.object.storeBot(this);
                 }
         }
         this.canShoot = true;
-        return;
+        this.maxXSpeed = 0;
+        this.maxYSpeed = 0;
+    } else {
+        this.getTheta(this.target.object);
+        this.target.object.isSet = true;
+
+        this.maxXSpeed = Math.abs(this.maxSpeed * Math.cos(this.theta));
+        this.maxYSpeed = Math.abs(this.maxSpeed * Math.sin(this.theta));
     }
-
-    this.getTheta(this.target.object);
-
-    this.maxXSpeed = Math.abs(this.maxSpeed * Math.cos(this.theta));
-    this.maxYSpeed = Math.abs(this.maxSpeed * Math.sin(this.theta));
 
     (this.target.object.x < this.x) ? this.pressingLeft = true : this.pressingRight = true;
     (this.target.object.y < this.y) ? this.pressingUp = true : this.pressingDown = true;
@@ -140,10 +190,12 @@ Bot.prototype.limbo = function () {
 
 
 Bot.prototype.getTheta = function (target) {
-    this.theta = Math.atan((this.y - target.y) / (this.x - target.x));
+    var newTheta = Math.atan((this.y - target.y) / (this.x - target.x));
     if (this.y - target.y > 0 && this.x - target.x > 0 || this.y - target.y < 0 && this.x - target.x > 0) {
-        this.theta += Math.PI;
+        newTheta += Math.PI;
     }
+
+    this.theta = lerp(this.theta, newTheta, 0.8);
 };
 
 Bot.prototype.updatePosition = function () {
@@ -193,11 +245,10 @@ Bot.prototype.shootShard = function (player) {
     if (!this.canShoot) {
         return;
     }
-    if (this.timer !== 0) {
-        this.timer--;
+    if (this.shootTimer !== 0) {
         return;
     }
-    this.timer = 20;
+    this.shootTimer = 20;
     this.getTheta(player);
     this.recoil(2);
 
@@ -219,7 +270,7 @@ Bot.prototype.recoil = function (magnitude) {
 Bot.prototype.inRange = function (target) {
     var object = target.object;
     if (target.type === "manual") {
-        return Math.abs(object.x - this.x) < 10 && Math.abs(object.y - this.y) < 10;
+        return Math.abs(object.x - this.x) < 100 && Math.abs(object.y - this.y) < 100;
     } else {
         return Math.abs(object.x - this.x) < 100 && Math.abs(object.y - this.y) < 100;
     }

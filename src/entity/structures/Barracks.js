@@ -65,7 +65,7 @@ Barracks.prototype.addBigQuadItem = function () {
 
 
 
-Barracks.prototype.startBot = function (player, shard) {
+Barracks.prototype.startBot = function (botType, player, shard) {
     if (this.getSupply() > 0) {
         shard.useSupply();
         if (shard.supply === 0) {
@@ -74,6 +74,7 @@ Barracks.prototype.startBot = function (player, shard) {
             this.updateUIs();
         }
         var botBuilder = {
+            botType: botType,
             shardName: shard.name,
             player:  player.id,
             startTime: this.gameServer.timeStamp,
@@ -125,8 +126,23 @@ Barracks.prototype.createBot = function (botBuilder) {
     var player = this.gameServer.CONTROLLER_LIST[botBuilder.player];
     var shardName = botBuilder.shardName;
     var faction = this.gameServer.FACTION_LIST[this.faction];
-    faction.addBot(this, player, shardName);
+
+    switch(botBuilder.botType) {
+        case "soldier":
+            faction.addSoldierBot(this, player, shardName);
+            break;
+        case "booster":
+            faction.addBoosterBot(this, player);
+            break;
+        case "stealth": //not yet implemented
+            faction.addStealthBot(this, player);
+            break;
+    }
 };
+
+
+
+
 
 
 Barracks.prototype.storeBot = function (bot) {

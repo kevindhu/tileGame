@@ -73,32 +73,16 @@ ListUI.prototype.addBots = function () {
 ListUI.prototype.addShards = function () {
     var home = this.homeUI.home;
     var SELECTED_SHARDS = this.parent.SELECTED_SHARDS;
-    var checkSelection = function () {
-        var bldBaseHealthBtn = document.getElementById('bld_home_btn');
-        var makeBotsBtn = document.getElementById('make_bots_btn');
-        var bldArmorBtn = document.getElementById('bld_armor');
-        var bldSpeedBtn = document.getElementById('bld_speed');
-        var bldDmgBtn = document.getElementById('bld_damage');
-
-        if (Object.size(SELECTED_SHARDS) > 0) {
-            bldBaseHealthBtn.disabled = false;
-            bldArmorBtn.disabled = false;
-            bldSpeedBtn.disabled = false;
-            bldDmgBtn.disabled = false;
-            makeBotsBtn.disabled = false;
-        } else {
-            bldBaseHealthBtn.disabled = "disabled";
-            bldArmorBtn.disabled = "disabled";
-            bldSpeedBtn.disabled = "disabled";
-            bldDmgBtn.disabled = "disabled";
-            makeBotsBtn.disabled = "disabled";
-        }
-    }.bind(this);
-    checkSelection();
     this.list.innerHTML = "";
     for (var j = 0; j < home.shards.length; j++) {
         var entry = document.createElement('li');
         var shard = this.client.SHARD_LIST[home.shards[j]];
+
+        var checkSelection = function () {
+            this.parent.checkSelection(Object.size(SELECTED_SHARDS));
+        }.bind(this);
+
+
         entry.id = shard.id;
 
         (function (_id) {

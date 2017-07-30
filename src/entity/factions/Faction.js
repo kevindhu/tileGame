@@ -2,8 +2,9 @@ const entityConfig = require('../entityConfig');
 const Arithmetic = require('../../modules/Arithmetic');
 var EntityFunctions = require('../EntityFunctions');
 var Player = require('../units/Player');
-var Bot = require('../units/Bot');
-var SuperBot = require("../units/SuperBot");
+var Bot = require('../units/Bot'); //this is soldierbot
+var BoosterBot = require("../units/BoosterBot");
+var StealthBot = require("../units/StealthBot");
 var Headquarter = require('../structures/Headquarter');
 var Tower = require('../structures/Tower');
 var Sentinel = require('../structures/Sentinel');
@@ -61,19 +62,28 @@ Faction.prototype.addPlayer = function (id, playerName) {
 };
 
 
-Faction.prototype.addBot = function (barracks, player, shardName) {
+Faction.prototype.addSoldierBot = function (barracks, player, shardName) {
     var bot = new Bot(shardName, player, barracks, this, this.gameServer);
     player.addBot(bot);
     this.controllers.push(bot.id);
     return bot;
 };
 
-Faction.prototype.addSuperBot = function (player) {
-    var bot = new SuperBot(Math.random(), "SUPAHBot", this, this.gameServer, player);
-    player.addBot(bot);
+Faction.prototype.addStealthBot = function (barracks, player) {
+    var bot = new StealthBot(player, barracks, this, this.gameServer);
+    player.addStealthBot(bot);
     this.controllers.push(bot.id);
     return bot;
 };
+
+
+Faction.prototype.addBoosterBot = function (barracks, player) {
+    var bot = new BoosterBot(player, barracks, this, this.gameServer);
+    player.addBoosterBot(bot);
+    this.controllers.push(bot.id);
+    return bot;
+};
+
 
 Faction.prototype.addHeadquarter = function () {
     if (!this.headquarter) {

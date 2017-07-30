@@ -24,7 +24,6 @@ function Controller(id, faction, gameServer) {
     this.xSpeed = 0;
     this.ySpeed = 0;
     this.theta = 0;
-    this.stasis = false;
 
     this.selected = false;
     this.pressingRight = false;
@@ -54,14 +53,6 @@ Controller.prototype.onDelete = function () {
 
 Controller.prototype.update = function () {
     var tile = this.gameServer.getEntityTile(this);
-    if (this.timer > 0) {
-        this.timer -= 1;
-    }
-    if (this.laserTimer && this.laserTimer > 0) {
-        this.laserTimer -= 1;
-    }
-    this.findEnemies();
-    this.findFriendlies();
     this.updatePosition();
     this.updateQuadItem();
     this.updateChunk();
@@ -89,41 +80,27 @@ Controller.prototype.updateChunk = function () {
     }
 };
 
-Controller.prototype.findEnemies = function () {
-    if (this.type === "Bot") {
-        var shootRange = {
-            minx: this.x - 100,
-            miny: this.y - 100,
-            maxx: this.x + 100,
-            maxy: this.y + 100
-        };
-        this.gameServer.controllerTree.find(shootRange, function (controller) {
-            if (controller.faction !== this.faction) {
-                this.shootShard(controller);
-                this.shootLaser(controller);
-            }
-        }.bind(this))
 
-        this.gameServer.homeTree.find(shootRange, function (home) {
-            if (home.faction !== this.faction) {
-                this.shootShard(home);
-                this.shootLaser(home);
-            }
-        }.bind(this))
-    }
+
+
+Controller.prototype.addSpeedBoost = function () {
+    this.maxSpeed *= 2;
+};
+
+Controller.prototype.removeSpeedBoost = function () {
+    this.maxSpeed /= 2;
+};
+
+Controller.prototype.addStealthPowerup = function () {
+    this.stealth = true;
+    this.packetHandler.updateControllersPackets(this);
 };
 
 
-Controller.prototype.findFriendlies = function () {
-    if (this.type === "Bot") {
-        this.gameServer.controllerTree.find(this.quadItem.bound, function (controller) {
-            if (controller.faction && controller.id !== this.id && this.xSpeed < 5 && this.ySpeed < 5) {
-                this.ricochet(controller);
-            }
-        }.bind(this))
-    }
+Controller.prototype.removeStealthPowerup = function () {
+    this.stealth = false;
+    this.packetHandler.updateControllersPackets(this);
 };
-
 
 Controller.prototype.ricochet = function (controller) {
     var xAdd = Math.abs(controller.x - this.x) / 20;
@@ -145,7 +122,6 @@ Controller.prototype.ricochet = function (controller) {
 Controller.prototype.shootLaser = function () {
 };
 
-
 Controller.prototype.addQuadItem = function () {
     this.quadItem = {
         cell: this,
@@ -158,7 +134,6 @@ Controller.prototype.addQuadItem = function () {
     };
     this.gameServer.controllerTree.insert(this.quadItem);
 };
-
 
 Controller.prototype.updateQuadItem = function () {
     if (!this.stationary) { //also maybe add a timer so it doesn't update every frame
@@ -173,16 +148,16 @@ Controller.prototype.updateQuadItem = function () {
     }
 };
 
+Controller.prototype.increaseHealth = function (amount) {
+    if (this.health <= 10) {
+        this.health += amount;
+    }
+};
+
 Controller.prototype.decreaseHealth = function (amount) {
     this.health -= amount;
     if (this.health <= 0) {
         this.onDeath();
-    }
-};
-
-Controller.prototype.increaseHealth = function (amount) {
-    if (this.health <= 10) {
-        this.health += amount;
     }
 };
 
