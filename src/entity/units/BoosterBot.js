@@ -26,7 +26,7 @@ BoosterBot.prototype.update = function () {
 
 BoosterBot.prototype.onDeath = function () {
     var owner = this.gameServer.CONTROLLER_LIST[this.owner];
-    owner.removeStealthBot(this);
+    owner.removeBoosterBot(this);
     this.onDelete();
 };
 

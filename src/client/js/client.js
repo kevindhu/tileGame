@@ -26,25 +26,15 @@ Client.prototype.initSocket = function () {
 Client.prototype.initCanvases = function () {
     this.mainCanvas = document.getElementById("main_canvas");
     this.draftCanvas = document.createElement("canvas");
-    this.mMap = document.createElement("canvas");
-    this.mMapRot = document.createElement("canvas");
 
     this.mainCanvas.style.visibility = "hidden";
     this.draftCanvas.style.display = "none";
-    this.mMap.style.display = "none";
-    this.mMapRot.style.display = "none";
 
     this.draftCanvas.height = this.mainCanvas.height;
     this.draftCanvas.width = this.mainCanvas.width;
-    this.mMap.height = 500;
-    this.mMap.width = 500;
-    this.mMapRot.height = 500;
-    this.mMapRot.width = 500;
 
     this.mainCtx = this.mainCanvas.getContext("2d");
     this.draftCtx = this.draftCanvas.getContext("2d");
-    this.mMapCtx = this.mMap.getContext("2d");
-    this.mMapCtxRot = this.mMapRot.getContext("2d");
 
     this.mainCanvas.addEventListener("mousedown", function (event) {
         if (event.button === 2) {
@@ -103,7 +93,6 @@ Client.prototype.initViewers = function () {
     this.keys = [];
     this.scaleFactor = 1;
     this.mainScaleFactor = 1;
-    console.log("MAKING NEW VIEWER");
     this.mainUI = new MainUI(this, this.socket);
 
     this.mainUI.playerNamerUI.open();
@@ -112,7 +101,7 @@ Client.prototype.initViewers = function () {
 
 Client.prototype.addFactionstoUI = function (data) {
     if (!this.socket.verified) {
-        console.log("VERIFIED");
+        console.log("VERIFIED CLIENT");
         this.socket.emit("verify", {});
         this.socket.verified = true;
     }
@@ -173,7 +162,6 @@ Client.prototype.addEntities = function (packet) {
             addEntity(packet, this.HOME_LIST, Entity.Home);
             break;
         case "factionInfo":
-            console.log("ADDING FACTION");
             addEntity(packet, this.FACTION_LIST, Entity.Faction, this.FACTION_ARRAY);
             this.mainUI.updateLeaderBoard();
             break;
@@ -222,7 +210,6 @@ Client.prototype.updateEntities = function (packet) {
             updateEntity(packet, this.HOME_LIST);
             break;
         case "factionInfo":
-            console.log("UPDATING FACTION " + packet.size);
             updateEntity(packet, this.FACTION_LIST);
             this.mainUI.updateLeaderBoard();
             break;
@@ -285,14 +272,6 @@ Client.prototype.deleteEntities = function (packet) {
 Client.prototype.drawScene = function (data) {
     var id;
     var selfPlayer = this.CONTROLLER_LIST[this.SELFID];
-    if (!selfPlayer) {
-        return;
-    }
-
-    this.mainCtx.clearRect(0, 0, 11000, 11000);
-    this.draftCtx.clearRect(0, 0, 11000, 11000);
-    this.mMapCtx.clearRect(0, 0, 500, 500);
-
     var entityList = [this.TILE_LIST, this.CONTROLLER_LIST,
         this.SHARD_LIST, this.LASER_LIST, this.HOME_LIST,
         this.FACTION_LIST, this.ANIMATION_LIST];
@@ -302,27 +281,9 @@ Client.prototype.drawScene = function (data) {
         return x < (player.x + range) && x > (player.x - 5 / 4 * range)
             && y < (player.y + range) && y > (player.y - 5 / 4 * range);
     }.bind(this);
-
-    for (var i = 0; i < entityList.length; i++) {
-        var list = entityList[i];
-        for (id in list) {
-            var entity = list[id];
-            if (inBounds(selfPlayer, entity.x, entity.y)) {
-                entity.show();
-            }
-        }
-    }
-
-
-    if (this.BRACKET) {
-        this.BRACKET.show();
-    }
-    if (this.ARROW) {
-        this.ARROW.show();
-    }
-
     var drawConnectors = function () {
         for (var id in this.HOME_LIST) {
+            this.draftCtx.beginPath();
             var home = this.HOME_LIST[id];
             if (home.neighbors) {
                 for (var i = 0; i < home.neighbors.length; i++) {
@@ -337,8 +298,6 @@ Client.prototype.drawScene = function (data) {
             }
         }
     }.bind(this);
-
-
     var translateScene = function () {
         this.draftCtx.setTransform(1, 0, 0, 1, 0, 0);
         this.scaleFactor = lerp(this.scaleFactor, this.mainScaleFactor, 0.3);
@@ -348,7 +307,33 @@ Client.prototype.drawScene = function (data) {
         this.draftCtx.translate(-selfPlayer.x, -selfPlayer.y);
     }.bind(this);
 
+    if (!selfPlayer) {
+        return;
+    }
+
+    this.mainCtx.clearRect(0, 0, 11000, 11000);
+    this.draftCtx.clearRect(0, 0, 11000, 11000);
+
+
     drawConnectors();
+
+    for (var i = 0; i < entityList.length; i++) {
+        var list = entityList[i];
+        for (id in list) {
+            var entity = list[id];
+            if (inBounds(selfPlayer, entity.x, entity.y)) {
+                entity.show();
+            }
+        }
+    }
+
+    if (this.BRACKET) {
+        this.BRACKET.show();
+    }
+    if (this.ARROW) {
+        this.ARROW.show();
+    }
+
     translateScene();
     this.mainCtx.drawImage(this.draftCanvas, 0, 0);
 };

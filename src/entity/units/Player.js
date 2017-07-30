@@ -124,7 +124,9 @@ Player.prototype.moveBots = function (x, y) {
                 if (target.faction === this.faction && target.type === "Barracks") {
                     bot.setFriendly(target);
                 }
-                bot.setEnemy(target);
+                else {
+                    bot.setEnemy(target);
+                }
             } else {
                 rIndex = index % row;
                 cIndex = Math.floor(index / row);
@@ -156,7 +158,7 @@ Player.prototype.groupBots = function () { //get all bots back to player
 
 Player.prototype.attemptBoost = function () {
     var bot;
-    for (var i = 0; i<this.boosterBots.length; i++) {
+    for (var i = 0; i < this.boosterBots.length; i++) {
         bot = this.gameServer.CONTROLLER_LIST[this.boosterBots[i]];
         if (bot) {
             bot.addBoost();

@@ -1,4 +1,4 @@
-function MiniMap() {
+function MiniMap() { //deprecated, please update
 }
 
 MiniMap.prototype.draw = function () {
