@@ -1,47 +1,40 @@
-var ui = require('./ShardNamerUI');
-
 function ShardNamerUI(client, socket) {
+    this.template = document.getElementById('shard_namer_ui');
+    this.textInput = document.getElementById("text_input");
+    this.nameShardBtn = document.getElementById("name_shard_btn");
+
     this.client = client;
     this.socket = socket;
 
-    this.shardNamer = document.getElementById('shard_namer_ui');
-    this.textInput = document.getElementById("textInput");
-    this.nameShardBtn = document.getElementById("nameShardBtn");
+    this.textInput.addEventListener("keyup", function (event) {
+        if (event.keyCode === 13) {
+            this.submit();
+        }
+    }.bind(this));
+    this.nameShardBtn.addEventListener("click", function (event) {
+        this.submit();
+    }.bind(this));
 }
 
 ShardNamerUI.prototype.open = function () {
-    var shardNamer = document.getElementById('shard_namer_ui');
-    var textInput = document.getElementById("textInput");
-    var nameShardBtn = document.getElementById("nameShardBtn");
+    this.template.style.display = 'block';
+    this.textInput.focus();
+};
 
-    shardNamer.style.display = 'block';
 
-    document.addEventListener("keyup", this.focusTextInput);
-
-    textInput.addEventListener("keyup", function (event) {
-        event.preventDefault();
-        if (event.keyCode === 13) {
-            var text = document.getElementById("textInput").value;
-            if (text !== null && text !== "") {
-                this.socket.emit('textInput',
-                    {
-                        id: selfId,
-                        word: text
-                    }
-                )
+ShardNamerUI.prototype.submit = function () {
+    var text = document.getElementById("text_input").value;
+    if (text !== null && text !== "") {
+        this.socket.emit('textInput',
+            {
+                id: this.client.SELFID,
+                word: text
             }
-            ui.closeUI("name shard");
-        }
-    });
+        )
+    }
+    this.close();
 };
 
-ShardNamerUI.prototype.focusTextInput = function (event) {
-    event.preventDefault();
-    if (event.keyCode === 13) {
-        textInput.focus();
-        document.removeEventListener("keyup", focusTextInput);
-    }
-};
 
 ShardNamerUI.prototype.close = function () {
     this.textInput.value = "";

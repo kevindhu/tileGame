@@ -9,10 +9,9 @@ function MainUI(client, socket) {
     this.client = client;
     this.socket = socket;
 
-
+    this.gameUI = new GameUI(this.client, this.socket, this);
 
     this.playerNamerUI = new PlayerNamerUI(this.client, this.socket);
-    this.gameUI = new GameUI(this.client, this.socket);
     this.shardNamerUI = new ShardNamerUI(this.client, this.socket);
     this.homeUI = new HomeUI(this.client, this.socket);
 }

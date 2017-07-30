@@ -15,7 +15,14 @@ Client.prototype.init = function () {
     this.initLists();
     this.initViewers();
 };
+Client.prototype.initSocket = function () {
+    this.socket = io();
+    this.socket.verified = false;
 
+    this.socket.on('addFactionsUI', this.addFactionstoUI.bind(this));
+    this.socket.on('updateEntities', this.handlePacket.bind(this));
+    this.socket.on('drawScene', this.drawScene.bind(this));
+};
 Client.prototype.initCanvases = function () {
     this.mainCanvas = document.getElementById("main_canvas");
     this.draftCanvas = document.createElement("canvas");
@@ -81,7 +88,6 @@ Client.prototype.initCanvases = function () {
         }
     }.bind(this));
 };
-
 Client.prototype.initLists = function () {
     this.FACTION_LIST = {};
     this.FACTION_ARRAY = [];
@@ -93,16 +99,6 @@ Client.prototype.initLists = function () {
     this.HOME_LIST = {};
     this.ANIMATION_LIST = {};
 };
-
-Client.prototype.initSocket = function () {
-    this.socket = io();
-    this.socket.verified = false;
-
-    this.socket.on('addFactionsUI', this.addFactionstoUI.bind(this));
-    this.socket.on('updateEntities', this.handlePacket.bind(this));
-    this.socket.on('drawScene', this.drawScene.bind(this));
-};
-
 Client.prototype.initViewers = function () {
     this.keys = [];
     this.scaleFactor = 1;
@@ -146,6 +142,57 @@ Client.prototype.handlePacket = function (data) {
                 this.updateEntities(packet);
                 break;
         }
+    }
+};
+
+Client.prototype.addEntities = function (packet) {
+    var addEntity = function (packet, list, entity, array) {
+        if (!packet) {
+            return;
+        }
+        list[packet.id] = new entity(packet, this);
+        if (array && array.indexOf(packet.id) === -1) {
+            array.push(packet.id);
+        }
+    }.bind(this);
+
+    switch (packet.class) {
+        case "tileInfo":
+            addEntity(packet, this.TILE_LIST, Entity.Tile);
+            break;
+        case "controllerInfo":
+            addEntity(packet, this.CONTROLLER_LIST, Entity.Controller);
+            break;
+        case "shardInfo":
+            addEntity(packet, this.SHARD_LIST, Entity.Shard);
+            break;
+        case "laserInfo":
+            addEntity(packet, this.LASER_LIST, Entity.Laser);
+            break;
+        case "homeInfo":
+            addEntity(packet, this.HOME_LIST, Entity.Home);
+            break;
+        case "factionInfo":
+            console.log("ADDING FACTION");
+            addEntity(packet, this.FACTION_LIST, Entity.Faction, this.FACTION_ARRAY);
+            this.mainUI.updateLeaderBoard();
+            break;
+        case "animationInfo":
+            addEntity(packet, this.ANIMATION_LIST, Entity.Animation);
+            break;
+        case "bracketInfo":
+            if (this.SELFID === packet.playerId) {
+                this.BRACKET = new Entity.Bracket(packet, this);
+            }
+            break;
+        case "UIInfo":
+            if (this.SELFID === packet.playerId) {
+                this.mainUI.open(packet);
+            }
+            break;
+        case "selfId":
+            this.SELFID = packet.selfId;
+            break;
     }
 };
 
@@ -235,57 +282,6 @@ Client.prototype.deleteEntities = function (packet) {
     }
 };
 
-Client.prototype.addEntities = function (packet) {
-    var addEntity = function (packet, list, entity, array) {
-        if (!packet) {
-            return;
-        }
-        list[packet.id] = new entity(packet, this);
-        if (array && array.indexOf(packet.id) === -1) {
-            array.push(packet.id);
-        }
-    }.bind(this);
-
-    switch (packet.class) {
-        case "tileInfo":
-            addEntity(packet, this.TILE_LIST, Entity.Tile);
-            break;
-        case "controllerInfo":
-            addEntity(packet, this.CONTROLLER_LIST, Entity.Controller);
-            break;
-        case "shardInfo":
-            addEntity(packet, this.SHARD_LIST, Entity.Shard);
-            break;
-        case "laserInfo":
-            addEntity(packet, this.LASER_LIST, Entity.Laser);
-            break;
-        case "homeInfo":
-            addEntity(packet, this.HOME_LIST, Entity.Home);
-            break;
-        case "factionInfo":
-            console.log("ADDING FACTION");
-            addEntity(packet, this.FACTION_LIST, Entity.Faction, this.FACTION_ARRAY);
-            this.mainUI.updateLeaderBoard();
-            break;
-        case "animationInfo":
-            addEntity(packet, this.ANIMATION_LIST, Entity.Animation);
-            break;
-        case "bracketInfo":
-            if (this.SELFID === packet.playerId) {
-                this.BRACKET = new Entity.Bracket(packet, this);
-            }
-            break;
-        case "UIInfo":
-            if (this.SELFID === packet.playerId) {
-                this.mainUI.open(packet);
-            }
-            break;
-        case "selfId":
-            this.SELFID = packet.selfId;
-            break;
-    }
-};
-
 Client.prototype.drawScene = function (data) {
     var id;
     var selfPlayer = this.CONTROLLER_LIST[this.SELFID];
@@ -361,19 +357,6 @@ Client.prototype.drawScene = function (data) {
 
 function lerp(a, b, ratio) {
     return a + ratio * (b - a);
-}
-
-function findWithAttr(array, attr, value) {
-    for (var i = 0; i < array.length; i += 1) {
-        if (array[i][attr] === value) {
-            return i;
-        }
-    }
-    return -1;
-}
-
-function getRandom(min, max) {
-    return Math.random() * (max - min) + min;
 }
 
 
