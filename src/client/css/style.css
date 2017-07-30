@@ -137,6 +137,10 @@ p {
     margin-bottom: 3.5vh;
 }
 
+.make_bots_btn:disabled {
+    color: grey;
+}
+
 .page {
     align-items: center;
     float: left;
@@ -190,6 +194,7 @@ p {
     margin-top: 5vh;
     background: rgba(250, 250, 255, 0.5);
     text-align: center;
+    font-size: 3vh;
 }
 
 #shard_namer_ui {

@@ -74,13 +74,16 @@ ListUI.prototype.addShards = function () {
     var home = this.homeUI.home;
     var SELECTED_SHARDS = this.parent.SELECTED_SHARDS;
     this.list.innerHTML = "";
+
+    var checkSelection = function () {
+        this.parent.checkSelection(Object.size(SELECTED_SHARDS));
+        console.log(Object.size(SELECTED_SHARDS));
+    }.bind(this);
+
+    checkSelection();
     for (var j = 0; j < home.shards.length; j++) {
         var entry = document.createElement('li');
         var shard = this.client.SHARD_LIST[home.shards[j]];
-
-        var checkSelection = function () {
-            this.parent.checkSelection(Object.size(SELECTED_SHARDS));
-        }.bind(this);
 
 
         entry.id = shard.id;
@@ -96,7 +99,7 @@ ListUI.prototype.addShards = function () {
                 else {
                     this.clicked = false;
                     this.style.background = "#542fce";
-                    delete SELECTED_SHARDS[entry.id];
+                    delete SELECTED_SHARDS[_id];
                     checkSelection();
                 }
             });
