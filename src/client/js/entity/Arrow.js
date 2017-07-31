@@ -34,6 +34,7 @@ Arrow.prototype.show = function () {
 
         ctx.arc(postX, postY, 3, 0, 2 * Math.PI, true);
         ctx.stroke();
+        ctx.closePath();
     }
 
 };

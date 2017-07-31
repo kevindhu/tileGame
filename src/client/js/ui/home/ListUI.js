@@ -77,7 +77,6 @@ ListUI.prototype.addShards = function () {
 
     var checkSelection = function () {
         this.parent.checkSelection(Object.size(SELECTED_SHARDS));
-        console.log(Object.size(SELECTED_SHARDS));
     }.bind(this);
 
     checkSelection();

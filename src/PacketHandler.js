@@ -384,11 +384,12 @@ PacketHandler.prototype.deleteUIPackets = function (player, action) {
     });
 };
 
-PacketHandler.prototype.deletePromptMsgPackets = function (player) {
+PacketHandler.prototype.deletePromptMsgPackets = function (player, type) {
     this.CHUNK_PACKETS[player.chunk].push(
         {
             master: "delete",
             class: "UIInfo",
+            type: type,
             id: player.id,
             action: "gameMsgPrompt"
         });
@@ -477,7 +478,6 @@ PacketHandler.prototype.deleteShardPackets = function (shard, chunk) {
     }
     this.CHUNK_PACKETS[shard.chunk].push(info);
 };
-
 
 PacketHandler.prototype.sendPackets = function () {
     var id;

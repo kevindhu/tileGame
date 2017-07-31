@@ -26,6 +26,7 @@ Client.prototype.initSocket = function () {
 Client.prototype.initCanvases = function () {
     this.mainCanvas = document.getElementById("main_canvas");
     this.draftCanvas = document.createElement("canvas");
+    this.draftCanvas.style.border = '1px solid #000000';
 
     this.mainCanvas.style.visibility = "hidden";
     this.draftCanvas.style.display = "none";
@@ -35,6 +36,7 @@ Client.prototype.initCanvases = function () {
 
     this.mainCtx = this.mainCanvas.getContext("2d");
     this.draftCtx = this.draftCanvas.getContext("2d");
+
 
     document.addEventListener("mousedown", function (event) {
         if (event.button === 2) {
@@ -185,6 +187,7 @@ Client.prototype.addEntities = function (packet) {
             break;
         case "selfId":
             this.SELFID = packet.selfId;
+            this.mainUI.gameUI.open();
             break;
     }
 };
@@ -277,17 +280,19 @@ Client.prototype.deleteEntities = function (packet) {
 Client.prototype.drawScene = function (data) {
     var id;
     var selfPlayer = this.CONTROLLER_LIST[this.SELFID];
-    var entityList = [this.TILE_LIST,
+    var entityList = [
+        this.TILE_LIST,
         this.CONTROLLER_LIST,
         this.SHARD_LIST,
         this.LASER_LIST,
         this.HOME_LIST,
         this.FACTION_LIST,
-        this.ANIMATION_LIST];
+        this.ANIMATION_LIST
+    ];
     var inBounds = function (player, x, y) {
-        var range = this.mainCanvas.width / (1.2 * this.scaleFactor);
-        return x < (player.x + range) && x > (player.x - 5 / 4 * range)
-            && y < (player.y + range) && y > (player.y - 5 / 4 * range);
+        var range = this.mainCanvas.width / (0.7 * this.scaleFactor);
+        return x < (player.x + range) && x > (player.x - range)
+            && y < (player.y + range) && y > (player.y - range);
     }.bind(this);
     var drawConnectors = function () {
         for (var id in this.HOME_LIST) {
@@ -324,7 +329,10 @@ Client.prototype.drawScene = function (data) {
     this.mainCtx.clearRect(0, 0, 11000, 11000);
     this.draftCtx.clearRect(0, 0, 11000, 11000);
 
-    drawConnectors();
+    this.draftCtx.fillStyle = "#000000";
+    this.draftCtx.fillRect(0, 0, 10000, 10000);
+
+    drawConnectors(); //fix this, as right now buildings are drawn first
 
     for (var i = 0; i < entityList.length; i++) {
         var list = entityList[i];
@@ -335,8 +343,6 @@ Client.prototype.drawScene = function (data) {
             }
         }
     }
-
-
     if (this.BRACKET) {
         this.BRACKET.show();
     }
@@ -347,7 +353,6 @@ Client.prototype.drawScene = function (data) {
 
     this.mainCtx.drawImage(this.draftCanvas, 0, 0);
 };
-
 
 
 function lerp(a, b, ratio) {

@@ -11,8 +11,10 @@ function Bracket(bracketInfo, client) {
 Bracket.prototype.show = function () {
     var ctx = this.client.draftCtx;
 
+    ctx.beginPath();
     ctx.fillStyle = "rgba(100,211,211,0.6)";
     ctx.fillRect(this.x, this.y, this.length, this.length);
+    ctx.closePath();
 };
 
 module.exports = Bracket;

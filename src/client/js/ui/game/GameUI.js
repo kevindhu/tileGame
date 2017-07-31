@@ -1,17 +1,17 @@
 var GameMsgPrompt = require('./GameMsgPrompt');
+var ShardNamerPrompt = require('./ShardNamerPrompt');
 
 function GameUI(client, socket, parent) {
     this.client = client;
     this.socket = socket;
     this.parent = parent;
     this.gameMsgPrompt = new GameMsgPrompt(this);
+    this.shardNamerPrompt = new ShardNamerPrompt(this);
 }
 
 GameUI.prototype.open = function () {
-    var shardNamerPrompt = document.getElementById('shard_namer_prompt');
-    shardNamerPrompt.addEventListener("click", function () {
-        this.parent.shardNamerUI.open();
-    }.bind(this));
+    this.shardNamerPrompt.open();
+
 };
 
 module.exports =  GameUI;

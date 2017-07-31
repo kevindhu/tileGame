@@ -38,7 +38,6 @@ UpgradesPage.prototype.open = function () {
         });
     }.bind(this);
 
-    console.log("RESETTING BUTTON");
     this.bldBaseHealthBtn = this.homeUI.resetButton(this.bldBaseHealthBtn, bldHome);
 
     if (this.homeUI.home.type === "Barracks") {

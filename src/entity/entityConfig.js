@@ -7,10 +7,10 @@ var BORDER_WIDTH = 0;
 
 var small = function () {
     CHUNKS = 1;
-    WIDTH = 2000;
+    WIDTH = 5000;
     TILES_INPUT = 60;
     SHARDS = 35;
-    BORDER_WIDTH = 100;
+    BORDER_WIDTH = 1000;
 };
 
 

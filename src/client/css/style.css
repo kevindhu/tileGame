@@ -184,6 +184,7 @@ p {
     margin-left: 10vh;
     margin-top: 50vh;
     background: rgba(255, 25, 255, 0.5);
+    display: none;
 }
 
 #prompt_container {
@@ -194,6 +195,8 @@ p {
     background: none;
     text-align: center;
     font-size: 7vh;
+    color: white;
+    display: none;
 }
 
 #leaderboard_container {

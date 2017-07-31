@@ -9,7 +9,7 @@ function StealthBot(player, barracks, faction, gameServer) {
     this.maxSpeed = 20;
     this.boosted = false;
     this.stealthTimer = 0;
-    this.radius = 100;
+    this.radius = 30;
     this.init();
 }
 

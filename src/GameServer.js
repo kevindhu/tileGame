@@ -230,19 +230,27 @@ GameServer.prototype.checkControllerCollision = function (controller) {
             }
         }.bind(this));
 
-        //player + home collision
-        this.homeTree.find(controllerBound, function (home) {
-            if (controller.type === "Player" && controller.faction === home.faction) {
-                for (var i = controller.shards.length - 1; i >= 0; i--) {
-                    var shard = this.PLAYER_SHARD_LIST[controller.shards[i]];
-                    controller.removeShard(shard);
-                    home.addShard(shard);
+
+        if (controller.type === "Player") {
+            var homeCheck = null;
+            this.homeTree.find(controllerBound, function (home) {
+                homeCheck = home;
+                if (controller.faction === home.faction) {
+                    for (var i = controller.shards.length - 1; i >= 0; i--) {
+                        var shard = this.PLAYER_SHARD_LIST[controller.shards[i]];
+                        controller.removeShard(shard);
+                        home.addShard(shard);
+                    }
+                    if (controller.pressingSpace) {
+                        home.addViewer(controller);
+                    }
+                    controller.addHomePrompt();
                 }
-                if (controller.pressingSpace) {
-                    home.addViewer(controller);
-                }
+            }.bind(this));
+            if (!homeCheck) {
+                controller.removeHomePrompt();
             }
-        }.bind(this));
+        }
     }
 
     //controller + shooting shard collision
@@ -295,7 +303,7 @@ GameServer.prototype.updateQueues = function () {
 
 GameServer.prototype.updateShards = function () {
     var id, shard;
-    this.spawnShards();
+    //this.spawnShards();
     this.checkCollisions();
 
     for (id in this.PLAYER_SHARD_LIST) {

@@ -90,7 +90,7 @@ Player.prototype.isTarget = function (x, y) {
         maxy: y + 20
     };
     this.gameServer.controllerTree.find(bound, function (controller) {
-        if (controller.faction !== this.faction) {
+        if (this.faction !== this.faction) {
             target = controller;
         }
     }.bind(this));
@@ -194,11 +194,10 @@ Player.prototype.update = function () {
     if (tile) {
         if (this.shards.length > 1 && faction.isNeighboringFaction(tile, 2) && !tile.faction) {
             this.packetHandler.addBracketPackets(this, tile);
-            this.packetHandler.addPromptMsgPackets(this, "press Z to place Sentinel");
+            this.addSentinelPrompt();
         }
         else {
-            //this.packetHandler.deletePromptMsgPackets(this);
-            //this.packetHandler.deleteBracketPackets(this);
+            this.removeSentinelPrompt();
         }
     }
 
@@ -358,15 +357,29 @@ function getName(name) {
     return name;
 }
 
+Player.prototype.addHomePrompt = function () {
+    this.homePrompt = true;
+    this.packetHandler.addPromptMsgPackets(this, "press Space for Home Info");
+};
+Player.prototype.removeHomePrompt = function () {
+    if (this.homePrompt) {
+        this.packetHandler.deletePromptMsgPackets(this, "home prompt");
+        this.homePrompt = false;
+    }
+};
 
-function onBoundary(coord) {
-    return coord <= entityConfig.BORDER_WIDTH ||
-        coord >= entityConfig.WIDTH - entityConfig.BORDER_WIDTH;
-}
 
-function overBoundary(coord) {
-    return coord < entityConfig.BORDER_WIDTH - 1 ||
-        coord > entityConfig.WIDTH - entityConfig.BORDER_WIDTH + 1;
-}
+Player.prototype.addSentinelPrompt = function () {
+    this.sentinelPrompt = true;
+    this.packetHandler.addPromptMsgPackets(this, "press N to place Barracks");
+};
+Player.prototype.removeSentinelPrompt = function () {
+    if (this.sentinelPrompt) {
+        this.sentinelPrompt = false;
+        this.packetHandler.deletePromptMsgPackets(this, "sentinel prompt");
+        this.packetHandler.deleteBracketPackets(this);
+    }
+};
+
 
 module.exports = Player;

@@ -34,7 +34,6 @@ MainUI.prototype.open = function (info) {
 
 
 MainUI.prototype.close = function (action) {
-    console.log(action);
     if (action === "name shard") {
         this.shardNamerUI.close();
     }
@@ -55,7 +54,6 @@ MainUI.prototype.updateLeaderBoard = function () {
 
 
     var factionSort = function (a, b) {
-        console.log(a,b);
         var factionA = this.client.FACTION_LIST[a];
         var factionB = this.client.FACTION_LIST[b];
         return factionA.size - factionB.size;
