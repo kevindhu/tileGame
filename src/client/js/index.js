@@ -8,6 +8,10 @@ document.onkeydown = function (event) {
     if (client.CHAT_OPEN) {
         return;
     }
+
+    if (event.keyCode === 84) {
+        client.mainUI.gameUI.chatUI.textInput.click();
+    }
     client.keys[event.keyCode] = true;
     client.socket.emit('keyEvent', {id: event.keyCode, state: true});
 };
