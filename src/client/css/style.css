@@ -176,7 +176,7 @@ p {
     position: absolute;
     height: 20vh;
     width: 20vh;
-    margin-left: 176vh;
+    margin-left: 182vh;
     margin-top: 77vh;
     background: rgba(255, 25, 255, 0.5);
     display: none;
@@ -207,11 +207,54 @@ p {
     position: absolute;
     height: 70vh;
     width: 30vh;
-    margin-left: 170vh;
-    margin-top: 5vh;
-    background: rgba(250, 250, 255, 0.5);
+    margin-left: 177vh;
+    margin-top: 2vh;
     text-align: center;
     font-size: 3vh;
+    color: #92b2e5;
+}
+
+#chat_container {
+    position: absolute;
+    height: 40vh;
+    width: 50vh;
+    margin-left: 5vh;
+    margin-top: 55vh;
+    background: none;
+    text-align: center;
+    font-size: 3vh;
+    display: none;
+}
+
+#chat_list {
+    background: rgba(182, 193, 211, 0.02);
+    width: 100%;
+    height: 80%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: absolute;
+    bottom: 20%;
+    left: 0;
+}
+
+#chat_list li {
+    font-family: "Arial Narrow", Arial, sans-serif;
+    display: block;
+    text-align: left;
+    color: grey;
+}
+
+#chat_input {
+    width: 100%;
+    height: 20%;
+    background: rgba(182, 193, 211, 0.02);
+    text-align: left;
+    font-size: 3vh;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    border: none;
+    color: white;
 }
 
 #shard_namer_ui {

@@ -5,6 +5,9 @@ var client = new Client();
 
 
 document.onkeydown = function (event) {
+    if (client.CHAT_OPEN) {
+        return;
+    }
     client.keys[event.keyCode] = true;
     client.socket.emit('keyEvent', {id: event.keyCode, state: true});
 };
@@ -18,6 +21,10 @@ document.onkeyup = function (event) {
 $(window).bind('mousewheel DOMMouseScroll', function (event) {
     if (event.ctrlKey === true) {
         event.preventDefault();
+    }
+    if (client.CHAT_SCROLL) {
+        client.CHAT_SCROLL = false;
+        return;
     }
 
     if(event.originalEvent.wheelDelta /120 > 0 && client.mainScaleFactor < 2) {

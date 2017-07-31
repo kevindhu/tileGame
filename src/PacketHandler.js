@@ -249,6 +249,15 @@ PacketHandler.prototype.addLaserPackets = function (laser, ifInit) {
     });
 };
 
+PacketHandler.prototype.addChatPackets = function (name, message) {
+    this.masterPacket.push({
+        master: "add",
+        class: "chatInfo",
+        name: name,
+        chatMessage: message
+    });
+};
+
 
 PacketHandler.prototype.addHomePackets = function (home, ifInit) {
     var info = {

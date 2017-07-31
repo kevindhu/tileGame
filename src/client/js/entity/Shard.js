@@ -27,7 +27,7 @@ Shard.prototype.show = function () {
             ctx.fillText(this.name, this.x, this.y);
         }
         ctx.fillStyle = "rgba(100, 255, 227, 0.1)";
-        ctx.arc(this.x, this.y, 20, 0, 2 * Math.PI, false);
+        ctx.arc(this.x, this.y, getRandom(20, 40), 0, 2 * Math.PI, false);
         ctx.fill();
         ctx.closePath();
 

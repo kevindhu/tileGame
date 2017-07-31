@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Red → green</title>
+</head>
+<body>
+<canvas id="myPrettyCanvas" width="300" height="300"></canvas>
+<script type="text/javascript">
+    var canvasId = 'myPrettyCanvas',
+        canvas = document.getElementById(canvasId),
+        ctx = canvas.getContext('2d'),
+        grd;
+
+    // Create gradient
+    grd = ctx.createLinearGradient(0, 0, 150, 150);
+
+    // Add colors
+    grd.addColorStop(0.000, 'rgba(225, 0, 25, 1.000)');
+    grd.addColorStop(1.000, 'rgba(0, 96, 27, 1.000)');
+
+    // Fill with gradient
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, 300.000, 300.000);
+</script>
+</body>
+</html>

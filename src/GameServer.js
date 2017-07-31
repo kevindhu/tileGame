@@ -391,7 +391,15 @@ GameServer.prototype.start = function () {
         socket.on('newPlayer', function (data) {
             player = this.createPlayer(socket, data);
             socket.player = player;
-            console.log("PLAYER CHUNK IS: " + socket.player.chunk);
+            this.packetHandler.addChatPackets("SERVER", player.name + " has connected!");
+        }.bind(this));
+
+        socket.on('chatMessage', function (data) {
+            var player = this.CONTROLLER_LIST[data.id];
+
+            if (player) {
+                this.packetHandler.addChatPackets(player.name, data.message);
+            }
         }.bind(this));
 
         socket.on('newColor', function (data) {

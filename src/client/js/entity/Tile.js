@@ -23,9 +23,9 @@ Tile.prototype.show = function () {
         this.color.g + "," +
         this.color.b +
         ")";
+    ctx.strokeStyle = "#000000";
 
-    ctx.lineWidth = 15;
-    ctx.strokeStyle = "#1e2a2b";
+    ctx.lineWidth = 100;
 
     ctx.rect(this.x, this.y, this.length, this.length);
     ctx.stroke();

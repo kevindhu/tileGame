@@ -22,6 +22,7 @@ Client.prototype.initSocket = function () {
     this.socket.on('addFactionsUI', this.addFactionstoUI.bind(this));
     this.socket.on('updateEntities', this.handlePacket.bind(this));
     this.socket.on('drawScene', this.drawScene.bind(this));
+    this.socket.on('chatMessage', this.mainUI)
 };
 Client.prototype.initCanvases = function () {
     this.mainCanvas = document.getElementById("main_canvas");
@@ -48,6 +49,9 @@ Client.prototype.initCanvases = function () {
     }.bind(this));
 
     document.addEventListener("mouseup", function (event) {
+        if (!this.CHAT_CLICK) {
+            this.mainUI.gameUI.chatUI.close();
+        }
         if (!this.rightClick) {
             this.ARROW.postX = event.x / this.mainCanvas.offsetWidth * 1000;
             this.ARROW.postY = event.y / this.mainCanvas.offsetHeight * 500;
@@ -76,6 +80,7 @@ Client.prototype.initCanvases = function () {
 
         this.rightClick = false;
         this.ARROW = null;
+        this.CHAT_CLICK = false;
     }.bind(this));
 
     document.addEventListener("mousemove", function (event) {
@@ -103,7 +108,6 @@ Client.prototype.initViewers = function () {
     this.mainUI = new MainUI(this, this.socket);
 
     this.mainUI.playerNamerUI.open();
-    this.mainUI.gameUI.open();
 };
 
 Client.prototype.addFactionstoUI = function (data) {
@@ -188,6 +192,9 @@ Client.prototype.addEntities = function (packet) {
         case "selfId":
             this.SELFID = packet.selfId;
             this.mainUI.gameUI.open();
+            break;
+        case "chatInfo":
+            this.mainUI.gameUI.chatUI.addMessage(packet);
             break;
     }
 };
@@ -332,7 +339,6 @@ Client.prototype.drawScene = function (data) {
     this.draftCtx.fillStyle = "#000000";
     this.draftCtx.fillRect(0, 0, 10000, 10000);
 
-    drawConnectors(); //fix this, as right now buildings are drawn first
 
     for (var i = 0; i < entityList.length; i++) {
         var list = entityList[i];
@@ -349,6 +355,7 @@ Client.prototype.drawScene = function (data) {
     if (this.ARROW) {
         this.ARROW.show();
     }
+    drawConnectors(); //fix this, as right now buildings are drawn first
     translateScene();
 
     this.mainCtx.drawImage(this.draftCanvas, 0, 0);
