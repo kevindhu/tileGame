@@ -7,9 +7,7 @@ function ChatUI(parent) {
 
     this.textInput.addEventListener('click', function () {
         this.textInput.focus();
-
         this.justOpened = true;
-
 
         this.parent.client.CHAT_OPEN = true;
         this.chatList.style.height = "80%";
@@ -17,7 +15,6 @@ function ChatUI(parent) {
 
         this.textInput.style.background = "rgba(34, 48, 71, 1)";
     }.bind(this));
-
     this.textInput.addEventListener('keydown', function (e) {
         if (e.keyCode === 13) {
             this.sendMessage();
@@ -79,9 +76,7 @@ ChatUI.prototype.sendMessage = function () {
         });
         this.textInput.value = "";
     }
-    else {
-        this.close();
-    }
+    this.close();
 };
 
 module.exports = ChatUI;
