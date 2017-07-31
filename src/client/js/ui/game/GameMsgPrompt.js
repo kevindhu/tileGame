@@ -5,7 +5,6 @@ function GameMsgPrompt(parent) {
 }
 
 GameMsgPrompt.prototype.open = function (message) {
-    console.log(message);
     this.template.style.display = "block";
     this.message.innerHTML = message;
 };

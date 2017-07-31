@@ -49,8 +49,6 @@ Home.prototype.show = function () {
         ctx.fillStyle = "#396a6d";
     }
 
-    console.log(ctx.fillStyle);
-
     ctx.arc(this.x, this.y, this.radius, 0, 2 * Math.PI, false);
     ctx.fill();
 

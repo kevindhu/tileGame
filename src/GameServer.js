@@ -235,7 +235,7 @@ GameServer.prototype.checkControllerCollision = function (controller) {
             var homeCheck = null;
             this.homeTree.find(controllerBound, function (home) {
                 homeCheck = home;
-                if (controller.faction === home.faction) {
+                if (controller.faction === home.faction && !controller.viewing) {
                     for (var i = controller.shards.length - 1; i >= 0; i--) {
                         var shard = this.PLAYER_SHARD_LIST[controller.shards[i]];
                         controller.removeShard(shard);
@@ -243,8 +243,10 @@ GameServer.prototype.checkControllerCollision = function (controller) {
                     }
                     if (controller.pressingSpace) {
                         home.addViewer(controller);
+                        controller.removeHomePrompt();
+                    } else {
+                        controller.addHomePrompt();
                     }
-                    controller.addHomePrompt();
                 }
             }.bind(this));
             if (!homeCheck) {
