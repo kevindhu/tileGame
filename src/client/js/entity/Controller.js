@@ -28,7 +28,7 @@ Controller.prototype.update = function (controllerInfo) {
 };
 
 Controller.prototype.show = function () {
-    var ctx = this.client.draftCtx;
+    var ctx = this.client.mainCtx;
     var selfId = this.client.SELFID;
     var fillAlpha;
     var strokeAlpha;

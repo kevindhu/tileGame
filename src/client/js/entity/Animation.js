@@ -18,7 +18,7 @@ function Animation(animationInfo, client) {
 
 Animation.prototype.show = function () {
     var home;
-    var ctx = this.client.draftCtx;
+    var ctx = this.client.mainCtx;
     if (this.type === "addShard") {
         console.log("DRAWING ADD SHARD ANIMATION");
         home = this.client.HOME_LIST[this.id];

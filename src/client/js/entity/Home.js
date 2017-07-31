@@ -41,7 +41,7 @@ module.exports = Home;
 
 
 Home.prototype.show = function () {
-    var ctx = this.client.draftCtx;
+    var ctx = this.client.mainCtx;
     ctx.beginPath();
     if (this.neighbors.length >= 4) {
         ctx.fillStyle = "#4169e1";

@@ -17,7 +17,7 @@ Shard.prototype.update = function (thisInfo) {
 
 
 Shard.prototype.show = function () {
-    var ctx = this.client.draftCtx;
+    var ctx = this.client.mainCtx;
     ctx.lineWidth = 2;
 
     if (this.visible) {

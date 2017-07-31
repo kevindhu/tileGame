@@ -9,11 +9,11 @@ function Bracket(bracketInfo, client) {
 }
 
 Bracket.prototype.show = function () {
-    var ctx = this.client.draftCtx;
+    var ctx = this.client.mainCtx;
 
     ctx.beginPath();
-    ctx.fillStyle = "rgba(100,211,211,0.6)";
-    ctx.fillRect(this.x, this.y, this.length, this.length);
+    ctx.fillStyle = "rgba(100,211,211,0.4)";
+    ctx.fillRect(this.x + 30, this.y + 30, this.length - 30, this.length - 30);
     ctx.closePath();
 };
 

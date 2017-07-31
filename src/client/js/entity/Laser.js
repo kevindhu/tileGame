@@ -7,7 +7,7 @@ function Laser(laserInfo, client) {
 }
 
 Laser.prototype.show = function () {
-    var ctx = this.client.draftCtx;
+    var ctx = this.client.mainCtx;
     var target = this.client.CONTROLLER_LIST[this.target];
     var owner = this.client.CONTROLLER_LIST[this.owner];
 

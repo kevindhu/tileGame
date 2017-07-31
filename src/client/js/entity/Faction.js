@@ -16,7 +16,7 @@ Faction.prototype.update = function (factionInfo) {
 };
 
 Faction.prototype.show = function () {
-    var ctx = this.client.draftCtx;
+    var ctx = this.client.mainCtx;
     ctx.beginPath();
     ctx.strokeStyle = "#2d3542";
     ctx.lineWidth = 2;

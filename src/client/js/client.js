@@ -26,17 +26,10 @@ Client.prototype.initSocket = function () {
 };
 Client.prototype.initCanvases = function () {
     this.mainCanvas = document.getElementById("main_canvas");
-    this.draftCanvas = document.createElement("canvas");
-    this.draftCanvas.style.border = '1px solid #000000';
-
+    this.mainCanvas.style.border = '1px solid #000000';
     this.mainCanvas.style.visibility = "hidden";
-    this.draftCanvas.style.display = "none";
-
-    this.draftCanvas.height = this.mainCanvas.height;
-    this.draftCanvas.width = this.mainCanvas.width;
 
     this.mainCtx = this.mainCanvas.getContext("2d");
-    this.draftCtx = this.draftCanvas.getContext("2d");
 
 
     document.addEventListener("mousedown", function (event) {
@@ -56,10 +49,10 @@ Client.prototype.initCanvases = function () {
             this.ARROW.postX = event.x / this.mainCanvas.offsetWidth * 1000;
             this.ARROW.postY = event.y / this.mainCanvas.offsetHeight * 500;
 
-            var minx = (this.ARROW.preX - this.draftCanvas.width / 2) / this.scaleFactor;
-            var miny = (this.ARROW.preY - this.draftCanvas.height / 2) / this.scaleFactor;
-            var maxx = (this.ARROW.postX - this.draftCanvas.width / 2) / this.scaleFactor;
-            var maxy = (this.ARROW.postY - this.draftCanvas.height / 2) / this.scaleFactor;
+            var minx = (this.ARROW.preX - this.mainCanvas.width / 2) / this.scaleFactor;
+            var miny = (this.ARROW.preY - this.mainCanvas.height / 2) / this.scaleFactor;
+            var maxx = (this.ARROW.postX - this.mainCanvas.width / 2) / this.scaleFactor;
+            var maxy = (this.ARROW.postY - this.mainCanvas.height / 2) / this.scaleFactor;
 
             this.socket.emit("selectBots", {
                 minX: Math.min(minx, maxx),
@@ -73,8 +66,8 @@ Client.prototype.initCanvases = function () {
             var y = event.y / this.mainCanvas.offsetHeight * 500;
 
             this.socket.emit("botCommand", {
-                x: (x - this.draftCanvas.width / 2) / this.scaleFactor,
-                y: (y - this.draftCanvas.height / 2) / this.scaleFactor
+                x: (x - this.mainCanvas.width / 2) / this.scaleFactor,
+                y: (y - this.mainCanvas.height / 2) / this.scaleFactor
             });
         }
 
@@ -303,29 +296,29 @@ Client.prototype.drawScene = function (data) {
     }.bind(this);
     var drawConnectors = function () {
         for (var id in this.HOME_LIST) {
-            this.draftCtx.beginPath();
+            this.mainCtx.beginPath();
             var home = this.HOME_LIST[id];
             if (home.neighbors) {
                 for (var i = 0; i < home.neighbors.length; i++) {
                     var neighbor = this.HOME_LIST[home.neighbors[i]];
-                    this.draftCtx.moveTo(home.x, home.y);
+                    this.mainCtx.moveTo(home.x, home.y);
 
-                    this.draftCtx.strokeStyle = "#912381";
-                    this.draftCtx.lineWidth = 10;
+                    this.mainCtx.strokeStyle = "#912381";
+                    this.mainCtx.lineWidth = 10;
 
-                    this.draftCtx.lineTo(neighbor.x, neighbor.y);
-                    this.draftCtx.stroke();
+                    this.mainCtx.lineTo(neighbor.x, neighbor.y);
+                    this.mainCtx.stroke();
                 }
             }
         }
     }.bind(this);
     var translateScene = function () {
-        this.draftCtx.setTransform(1, 0, 0, 1, 0, 0);
+        this.mainCtx.setTransform(1, 0, 0, 1, 0, 0);
         this.scaleFactor = lerp(this.scaleFactor, this.mainScaleFactor, 0.3);
 
-        this.draftCtx.translate(this.mainCanvas.width / 2, this.mainCanvas.height / 2);
-        this.draftCtx.scale(this.scaleFactor, this.scaleFactor);
-        this.draftCtx.translate(-selfPlayer.x, -selfPlayer.y);
+        this.mainCtx.translate(this.mainCanvas.width / 2, this.mainCanvas.height / 2);
+        this.mainCtx.scale(this.scaleFactor, this.scaleFactor);
+        this.mainCtx.translate(-selfPlayer.x, -selfPlayer.y);
     }.bind(this);
 
 
@@ -334,10 +327,9 @@ Client.prototype.drawScene = function (data) {
     }
 
     this.mainCtx.clearRect(0, 0, 11000, 11000);
-    this.draftCtx.clearRect(0, 0, 11000, 11000);
 
-    this.draftCtx.fillStyle = "#000000";
-    this.draftCtx.fillRect(0, 0, 10000, 10000);
+    this.mainCtx.fillStyle = "#1d1f21";
+    this.mainCtx.fillRect(0, 0, 10000, 10000);
 
 
     for (var i = 0; i < entityList.length; i++) {
@@ -357,8 +349,6 @@ Client.prototype.drawScene = function (data) {
     }
     drawConnectors(); //fix this, as right now buildings are drawn first
     translateScene();
-
-    this.mainCtx.drawImage(this.draftCanvas, 0, 0);
 };
 
 
