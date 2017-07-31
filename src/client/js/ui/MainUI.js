@@ -27,10 +27,14 @@ MainUI.prototype.open = function (info) {
         home = this.client.HOME_LIST[info.homeId];
         this.homeUI.open(home);
     }
+    if (action === "gameMsgPrompt") {
+        this.gameUI.gameMsgPrompt.open(info.message);
+    }
 };
 
 
 MainUI.prototype.close = function (action) {
+    console.log(action);
     if (action === "name shard") {
         this.shardNamerUI.close();
     }
@@ -38,6 +42,9 @@ MainUI.prototype.close = function (action) {
         this.LIST_SCROLL = false;
         this.homeUI.close();
         this.socket.emit("removeViewer", {});
+    }
+    if (action === "gameMsgPrompt") {
+        this.gameUI.gameMsgPrompt.close();
     }
 };
 

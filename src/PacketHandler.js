@@ -132,6 +132,18 @@ PacketHandler.prototype.addBracketPackets = function (player, tile) {
     })
 };
 
+PacketHandler.prototype.addPromptMsgPackets = function (player, message) {
+    this.CHUNK_PACKETS[player.chunk].push(
+        {
+            master: "add",
+            class: "UIInfo",
+            playerId: player.id,
+            action: "gameMsgPrompt",
+            message: message
+        });
+};
+
+
 PacketHandler.prototype.addUIPackets = function (player, home, action) {
     var homeId;
     if (home === null) {
@@ -370,6 +382,16 @@ PacketHandler.prototype.deleteUIPackets = function (player, action) {
         id: player.id,
         action: action
     });
+};
+
+PacketHandler.prototype.deletePromptMsgPackets = function (player) {
+    this.CHUNK_PACKETS[player.chunk].push(
+        {
+            master: "delete",
+            class: "UIInfo",
+            id: player.id,
+            action: "gameMsgPrompt"
+        });
 };
 
 PacketHandler.prototype.deleteBracketPackets = function (player) {

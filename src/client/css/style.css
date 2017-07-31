@@ -179,11 +179,21 @@ p {
 
 #shard_namer_prompt {
     position: absolute;
-    height: 12vh;
-    width: 5vh;
-    margin-left: 100vh;
-    margin-top: 80vh;
+    height: 20vh;
+    width: 20vh;
+    margin-left: 10vh;
+    margin-top: 50vh;
     background: rgba(255, 25, 255, 0.5);
+}
+
+#prompt_container {
+    position: absolute;
+    height: 10vh;
+    width: 100%;
+    margin-top: 80vh;
+    background: none;
+    text-align: center;
+    font-size: 7vh;
 }
 
 #leaderboard_container {

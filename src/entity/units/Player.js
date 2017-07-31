@@ -194,6 +194,11 @@ Player.prototype.update = function () {
     if (tile) {
         if (this.shards.length > 1 && faction.isNeighboringFaction(tile, 2) && !tile.faction) {
             this.packetHandler.addBracketPackets(this, tile);
+            this.packetHandler.addPromptMsgPackets(this, "press Z to place Sentinel");
+        }
+        else {
+            //this.packetHandler.deletePromptMsgPackets(this);
+            //this.packetHandler.deleteBracketPackets(this);
         }
     }
 

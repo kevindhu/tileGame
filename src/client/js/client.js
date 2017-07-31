@@ -36,7 +36,7 @@ Client.prototype.initCanvases = function () {
     this.mainCtx = this.mainCanvas.getContext("2d");
     this.draftCtx = this.draftCanvas.getContext("2d");
 
-    this.mainCanvas.addEventListener("mousedown", function (event) {
+    document.addEventListener("mousedown", function (event) {
         if (event.button === 2) {
             this.rightClick = true;
         } else if (this.CONTROLLER_LIST[this.SELFID]) {
@@ -45,16 +45,21 @@ Client.prototype.initCanvases = function () {
         }
     }.bind(this));
 
-    this.mainCanvas.addEventListener("mouseup", function (event) {
+    document.addEventListener("mouseup", function (event) {
         if (!this.rightClick) {
             this.ARROW.postX = event.x / this.mainCanvas.offsetWidth * 1000;
             this.ARROW.postY = event.y / this.mainCanvas.offsetHeight * 500;
 
+            var minx = (this.ARROW.preX - this.draftCanvas.width / 2) / this.scaleFactor;
+            var miny = (this.ARROW.preY - this.draftCanvas.height / 2) / this.scaleFactor;
+            var maxx = (this.ARROW.postX - this.draftCanvas.width / 2) / this.scaleFactor;
+            var maxy = (this.ARROW.postY - this.draftCanvas.height / 2) / this.scaleFactor;
+
             this.socket.emit("selectBots", {
-                minX: (this.ARROW.preX - this.draftCanvas.width / 2) / this.scaleFactor,
-                minY: (this.ARROW.preY - this.draftCanvas.height / 2) / this.scaleFactor,
-                maxX: (this.ARROW.postX - this.draftCanvas.width / 2) / this.scaleFactor,
-                maxY: (this.ARROW.postY - this.draftCanvas.height / 2) / this.scaleFactor
+                minX: Math.min(minx, maxx),
+                minY: Math.min(miny, maxy),
+                maxX: Math.max(minx, maxx),
+                maxY: Math.max(miny, maxy)
             });
         }
         else {
@@ -71,7 +76,7 @@ Client.prototype.initCanvases = function () {
         this.ARROW = null;
     }.bind(this));
 
-    this.mainCanvas.addEventListener("mousemove", function (event) {
+    document.addEventListener("mousemove", function (event) {
         if (this.ARROW) {
             this.ARROW.postX = event.x / this.mainCanvas.offsetWidth * 1000;
             this.ARROW.postY = event.y / this.mainCanvas.offsetHeight * 500;
@@ -272,10 +277,13 @@ Client.prototype.deleteEntities = function (packet) {
 Client.prototype.drawScene = function (data) {
     var id;
     var selfPlayer = this.CONTROLLER_LIST[this.SELFID];
-    var entityList = [this.TILE_LIST, this.CONTROLLER_LIST,
-        this.SHARD_LIST, this.LASER_LIST, this.HOME_LIST,
-        this.FACTION_LIST, this.ANIMATION_LIST];
-
+    var entityList = [this.TILE_LIST,
+        this.CONTROLLER_LIST,
+        this.SHARD_LIST,
+        this.LASER_LIST,
+        this.HOME_LIST,
+        this.FACTION_LIST,
+        this.ANIMATION_LIST];
     var inBounds = function (player, x, y) {
         var range = this.mainCanvas.width / (1.2 * this.scaleFactor);
         return x < (player.x + range) && x > (player.x - 5 / 4 * range)
@@ -289,9 +297,10 @@ Client.prototype.drawScene = function (data) {
                 for (var i = 0; i < home.neighbors.length; i++) {
                     var neighbor = this.HOME_LIST[home.neighbors[i]];
                     this.draftCtx.moveTo(home.x, home.y);
-                    this.draftCtx.strokeStyle = "#912381";
 
+                    this.draftCtx.strokeStyle = "#912381";
                     this.draftCtx.lineWidth = 10;
+
                     this.draftCtx.lineTo(neighbor.x, neighbor.y);
                     this.draftCtx.stroke();
                 }
@@ -307,13 +316,13 @@ Client.prototype.drawScene = function (data) {
         this.draftCtx.translate(-selfPlayer.x, -selfPlayer.y);
     }.bind(this);
 
+
     if (!selfPlayer) {
         return;
     }
 
     this.mainCtx.clearRect(0, 0, 11000, 11000);
     this.draftCtx.clearRect(0, 0, 11000, 11000);
-
 
     drawConnectors();
 
@@ -327,14 +336,15 @@ Client.prototype.drawScene = function (data) {
         }
     }
 
+
     if (this.BRACKET) {
         this.BRACKET.show();
     }
     if (this.ARROW) {
         this.ARROW.show();
     }
-
     translateScene();
+
     this.mainCtx.drawImage(this.draftCanvas, 0, 0);
 };
 

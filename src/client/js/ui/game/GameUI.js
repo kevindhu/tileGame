@@ -1,7 +1,10 @@
+var GameMsgPrompt = require('./GameMsgPrompt');
+
 function GameUI(client, socket, parent) {
     this.client = client;
     this.socket = socket;
     this.parent = parent;
+    this.gameMsgPrompt = new GameMsgPrompt(this);
 }
 
 GameUI.prototype.open = function () {

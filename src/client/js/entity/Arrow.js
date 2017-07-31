@@ -22,6 +22,7 @@ Arrow.prototype.show = function () {
     if (this.postX) {
         ctx.beginPath();
         ctx.strokeStyle = "#521522";
+        ctx.fillStyle = "rgba(52, 175, 216, 0.3)";
 
         var preX = selfPlayer.x + (this.preX - canvas.width / 2) / scaleFactor;
         var preY = selfPlayer.y + (this.preY - canvas.height / 2) / scaleFactor;
