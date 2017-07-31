@@ -7,7 +7,6 @@ function ChatUI(parent) {
 
     this.textInput.addEventListener('click', function () {
         this.textInput.focus();
-        this.justOpened = true;
 
         this.parent.client.CHAT_OPEN = true;
         this.chatList.style.height = "80%";
@@ -21,13 +20,6 @@ function ChatUI(parent) {
         }
     }.bind(this));
 
-    this.textInput.addEventListener('keyup', function (e) {
-        if (e.keyCode === 84 && this.justOpened) {
-            this.justOpened = false;
-            var value = this.textInput.value;
-            this.textInput.value = value.substr(0, value.length - 1);
-        }
-    }.bind(this));
 
     this.template.addEventListener('mousewheel', function () {
         this.parent.client.CHAT_SCROLL = true;
